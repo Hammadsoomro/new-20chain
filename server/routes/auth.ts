@@ -40,45 +40,45 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     const validated = schema.parse(body);
 
+    const collections = getCollections();
+
     // Check if user exists
-    const existing = Array.from(users.values()).find(
-      (u) => u.email === validated.email
-    );
+    const existing = await collections.users.findOne({
+      email: validated.email,
+    });
+
     if (existing) {
       res.status(400).json({ error: "User already exists" });
       return;
     }
 
     // Create admin user with new team
-    const teamId = crypto.randomBytes(8).toString("hex");
-    const userId = crypto.randomBytes(8).toString("hex");
+    const teamId = new ObjectId().toHexString();
     const hashedPassword = hashPassword(validated.password);
 
-    const newUser: User & { password: string; teamId: string } = {
-      _id: userId,
+    const result = await collections.users.insertOne({
       email: validated.email,
       name: validated.name,
       role: "admin",
       teamId,
       password: hashedPassword,
+      profilePicture: undefined,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    const newUser: User = {
+      _id: result.insertedId.toString(),
+      email: validated.email,
+      name: validated.name,
+      role: "admin",
+      teamId,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    users.set(userId, newUser);
-
-    const user: User = {
-      _id: newUser._id,
-      email: newUser.email,
-      name: newUser.name,
-      role: newUser.role,
-      teamId: newUser.teamId,
-      createdAt: newUser.createdAt,
-      updatedAt: newUser.updatedAt,
-    };
-
-    const token = createToken(user);
-    const response: AuthResponse = { token, user };
+    const token = createToken(newUser);
+    const response: AuthResponse = { token, user: newUser };
 
     res.status(201).json(response);
   } catch (error) {
