@@ -22,7 +22,7 @@ export default function TeamChat() {
 
       try {
         const [membersRes, groupRes] = await Promise.all([
-          fetch("/api/chat/members", {
+          fetch("/api/members", {
             headers: { Authorization: `Bearer ${token}` },
           }),
           fetch("/api/chat/group", {
