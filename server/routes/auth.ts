@@ -1,25 +1,30 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import type { LoginRequest, SignupRequest, AuthResponse, User } from "@shared/api";
-import jwt from "jsonwebtoken";
 import crypto from "crypto";
 
 // Demo users storage (in production, use MongoDB)
 const users: Map<string, User & { password: string; teamId: string }> = new Map();
-const jwtSecret = process.env.JWT_SECRET || "demo-secret-key-change-in-production";
 
 // Helper: Hash password (demo - use bcrypt in production)
 const hashPassword = (password: string): string => {
   return crypto.createHash("sha256").update(password).digest("hex");
 };
 
-// Helper: Create JWT token
+// Helper: Create simple token (base64 encoded JSON with hash)
 const createToken = (user: User): string => {
-  return jwt.sign(
-    { id: user._id, email: user.email, role: user.role },
-    jwtSecret,
-    { expiresIn: "7d" }
-  );
+  const payload = {
+    id: user._id,
+    email: user.email,
+    role: user.role,
+    iat: Date.now(),
+    exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+  const signature = crypto
+    .createHash("sha256")
+    .update(JSON.stringify(payload) + process.env.JWT_SECRET || "demo-secret")
+    .digest("hex");
+  return `${Buffer.from(JSON.stringify(payload)).toString("base64")}.${signature}`;
 };
 
 // Signup - Creates admin account
