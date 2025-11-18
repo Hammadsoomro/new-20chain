@@ -55,6 +55,7 @@ export async function createServer() {
   app.use("/api/queued", authMiddleware);
   app.use("/api/history", authMiddleware);
   app.use("/api/chat", authMiddleware);
+  app.use("/api/members", authMiddleware);
 
   // Queued list routes
   app.post("/api/queued/add", addToQueue);
