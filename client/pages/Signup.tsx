@@ -4,7 +4,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { UserPlus, AlertCircle } from "lucide-react";
 
 export default function Signup() {
@@ -44,7 +50,9 @@ export default function Signup() {
       await signup(formData.email, formData.password, formData.name);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Signup failed. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Signup failed. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +78,9 @@ export default function Signup() {
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl">Get Started</CardTitle>
-            <CardDescription>Create your admin account to begin</CardDescription>
+            <CardDescription>
+              Create your admin account to begin
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -133,7 +143,10 @@ export default function Signup() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
                   Confirm Password
                 </Label>
                 <Input
@@ -161,7 +174,10 @@ export default function Signup() {
             <div className="mt-6 pt-6 border-t border-border/50">
               <p className="text-sm text-muted-foreground text-center">
                 Already have an account?{" "}
-                <Link to="/login" className="text-primary font-semibold hover:underline">
+                <Link
+                  to="/login"
+                  className="text-primary font-semibold hover:underline"
+                >
                   Sign in
                 </Link>
               </p>
@@ -171,7 +187,8 @@ export default function Signup() {
 
         {/* Footer Info */}
         <p className="text-xs text-muted-foreground text-center">
-          By creating an account, you agree to our Terms of Service and Privacy Policy
+          By creating an account, you agree to our Terms of Service and Privacy
+          Policy
         </p>
       </div>
     </div>

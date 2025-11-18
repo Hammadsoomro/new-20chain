@@ -1,11 +1,11 @@
 export async function apiFetch(
   endpoint: string,
-  options: RequestInit & { token?: string } = {}
+  options: RequestInit & { token?: string } = {},
 ) {
   const { token, ...fetchOptions } = options;
 
   const headers = new Headers(fetchOptions.headers || {});
-  
+
   if (token) {
     headers.set("Authorization", `Bearer ${token}`);
   }

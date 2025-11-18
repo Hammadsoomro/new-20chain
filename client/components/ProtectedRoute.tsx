@@ -6,7 +6,10 @@ interface ProtectedRouteProps {
   adminOnly?: boolean;
 }
 
-export const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
+export const ProtectedRoute = ({
+  children,
+  adminOnly = false,
+}: ProtectedRouteProps) => {
   const { isAuthenticated, isAdmin, isLoading } = useAuth();
 
   if (isLoading) {

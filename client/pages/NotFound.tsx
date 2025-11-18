@@ -24,9 +24,7 @@ const NotFound = () => {
 
         <div className="space-y-2">
           <h1 className="text-5xl font-bold text-foreground">404</h1>
-          <p className="text-xl text-muted-foreground">
-            Page not found
-          </p>
+          <p className="text-xl text-muted-foreground">Page not found</p>
           <p className="text-sm text-muted-foreground">
             The page you're looking for doesn't exist or has been moved.
           </p>

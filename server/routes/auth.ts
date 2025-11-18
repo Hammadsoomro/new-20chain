@@ -1,6 +1,11 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
-import type { LoginRequest, SignupRequest, AuthResponse, User } from "@shared/api";
+import type {
+  LoginRequest,
+  SignupRequest,
+  AuthResponse,
+  User,
+} from "@shared/api";
 import crypto from "crypto";
 import { getCollections } from "../db";
 import { ObjectId } from "mongodb";
@@ -134,12 +139,16 @@ export const handleLogin: RequestHandler = async (req, res) => {
 };
 
 // Verify token middleware
-export const verifyToken = (token: string): { id: string; email: string; role: string } | null => {
+export const verifyToken = (
+  token: string,
+): { id: string; email: string; role: string } | null => {
   try {
     const [encodedPayload, signature] = token.split(".");
     if (!encodedPayload || !signature) return null;
 
-    const payload = JSON.parse(Buffer.from(encodedPayload, "base64").toString());
+    const payload = JSON.parse(
+      Buffer.from(encodedPayload, "base64").toString(),
+    );
 
     // Check expiration
     if (payload.exp < Date.now()) return null;

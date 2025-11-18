@@ -1,5 +1,11 @@
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
@@ -67,7 +73,7 @@ export default function NumbersSorter() {
       setInputNumbers("");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to add to queue"
+        error instanceof Error ? error.message : "Failed to add to queue",
       );
     } finally {
       setIsLoading(false);
@@ -109,7 +115,9 @@ export default function NumbersSorter() {
             <Card className="border-border/50 lg:row-span-2">
               <CardHeader>
                 <CardTitle>Input Numbers</CardTitle>
-                <CardDescription>Paste your numbers here, one per line</CardDescription>
+                <CardDescription>
+                  Paste your numbers here, one per line
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
@@ -216,8 +224,8 @@ export default function NumbersSorter() {
                     <span className="font-semibold text-foreground">
                       {Math.max(
                         0,
-                        inputNumbers.split("\n").filter((l) => l.trim()).length -
-                          deduplicated.length
+                        inputNumbers.split("\n").filter((l) => l.trim())
+                          .length - deduplicated.length,
                       )}
                     </span>
                   </div>

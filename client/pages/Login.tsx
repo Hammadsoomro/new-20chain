@@ -4,7 +4,13 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { LogIn, AlertCircle } from "lucide-react";
 
 export default function Login() {
@@ -24,7 +30,9 @@ export default function Login() {
       await login(email, password);
       navigate("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed. Please try again.");
+      setError(
+        err instanceof Error ? err.message : "Login failed. Please try again.",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -50,7 +58,9 @@ export default function Login() {
         <Card className="border-border/50 shadow-lg">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl">Login</CardTitle>
-            <CardDescription>Enter your credentials to continue</CardDescription>
+            <CardDescription>
+              Enter your credentials to continue
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -105,7 +115,10 @@ export default function Login() {
             <div className="mt-6 pt-6 border-t border-border/50">
               <p className="text-sm text-muted-foreground text-center">
                 Don't have an account?{" "}
-                <Link to="/signup" className="text-primary font-semibold hover:underline">
+                <Link
+                  to="/signup"
+                  className="text-primary font-semibold hover:underline"
+                >
                   Create one
                 </Link>
               </p>

@@ -71,32 +71,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const signup = useCallback(async (email: string, password: string, name: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
-      });
+  const signup = useCallback(
+    async (email: string, password: string, name: string) => {
+      setIsLoading(true);
+      try {
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password, name }),
+        });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Signup failed");
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || "Signup failed");
+        }
+
+        const data: AuthResponse = await response.json();
+        setToken(data.token);
+        setUser(data.user);
+
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      } catch (error) {
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
-
-      const data: AuthResponse = await response.json();
-      setToken(data.token);
-      setUser(data.user);
-
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", JSON.stringify(data.user));
-    } catch (error) {
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    [],
+  );
 
   const logout = useCallback(() => {
     setUser(null);

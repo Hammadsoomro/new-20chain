@@ -1,7 +1,20 @@
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { BarChart3, Clock, Users, List, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  BarChart3,
+  Clock,
+  Users,
+  List,
+  TrendingUp,
+  ArrowRight,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 

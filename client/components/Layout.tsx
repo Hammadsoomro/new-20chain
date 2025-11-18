@@ -86,10 +86,7 @@ export const Layout = ({ children }: LayoutProps) => {
       >
         <div className="flex flex-col h-full p-6">
           {/* Logo */}
-          <Link
-            to="/dashboard"
-            className="flex items-center gap-2 mb-8 group"
-          >
+          <Link to="/dashboard" className="flex items-center gap-2 mb-8 group">
             <div className="h-10 w-10 rounded-lg bg-sidebar-primary flex items-center justify-center group-hover:shadow-lg transition-shadow">
               <div className="text-sidebar-primary-foreground font-bold text-lg">
                 ◆
@@ -227,7 +224,9 @@ export const Layout = ({ children }: LayoutProps) => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <div className="px-4 py-2 text-sm">
-                    <p className="font-semibold text-foreground">{user?.name}</p>
+                    <p className="font-semibold text-foreground">
+                      {user?.name}
+                    </p>
                     <p className="text-muted-foreground">{user?.email}</p>
                   </div>
                   <DropdownMenuSeparator />
@@ -252,9 +251,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">
-          {children}
-        </main>
+        <main className="flex-1 overflow-auto">{children}</main>
       </div>
 
       {/* Mobile Overlay */}
