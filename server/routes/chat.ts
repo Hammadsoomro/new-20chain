@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { AuthRequest } from "../middleware/auth";
 import { getCollections } from "../db";
 import { ObjectId } from "mongodb";
+import { setTypingIndicator, getTypingIndicators, clearTypingIndicator } from "../websocket";
 import type { ChatMessage, ChatGroup } from "@shared/api";
 
 // Get or create team group chat
