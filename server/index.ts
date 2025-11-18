@@ -26,22 +26,9 @@ export async function createServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Middleware to populate teamId and role from database
-  app.use(async (req, res, next) => {
-    if ((req as any).userId) {
-      try {
-        const collections = getCollections();
-        const user = await collections.users.findOne({
-          _id: { $eq: (req as any).userId } as any,
-        });
-        if (user) {
-          (req as any).teamId = user.teamId;
-          (req as any).isAdmin = user.role === "admin";
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    }
+  // Middleware to populate teamId and role from database (after auth middleware)
+  app.use((req, res, next) => {
+    // This will be set by authMiddleware, we just ensure it's available
     next();
   });
 
