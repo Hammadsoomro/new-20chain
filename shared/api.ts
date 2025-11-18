@@ -80,6 +80,10 @@ export interface ChatMessage {
   groupId?: string;
   content: string;
   createdAt: string;
+  editedAt?: string;
+  deleted?: boolean;
+  deletedAt?: string;
+  readBy?: string[];
 }
 
 export interface ChatGroup {
