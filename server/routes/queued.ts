@@ -1,10 +1,8 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import type { QueuedLine } from "@shared/api";
-import crypto from "crypto";
-
-// Demo storage
-const queuedLines: Map<string, QueuedLine> = new Map();
+import { getCollections } from "../db";
+import { ObjectId } from "mongodb";
 
 export const addToQueue: RequestHandler = async (req, res) => {
   try {
@@ -16,20 +14,21 @@ export const addToQueue: RequestHandler = async (req, res) => {
     const teamId = (req as any).teamId || "default-team";
     const userId = (req as any).userId || "admin";
 
-    const addedLines: QueuedLine[] = [];
+    const collections = getCollections();
 
-    for (const content of validated.lines) {
-      const id = crypto.randomBytes(8).toString("hex");
-      const line: QueuedLine = {
-        _id: id,
-        content,
-        addedBy: userId,
-        addedAt: new Date().toISOString(),
-        teamId,
-      };
-      queuedLines.set(id, line);
-      addedLines.push(line);
-    }
+    const linesToInsert = validated.lines.map((content) => ({
+      content,
+      addedBy: userId,
+      addedAt: new Date().toISOString(),
+      teamId,
+    }));
+
+    const result = await collections.queuedLines.insertMany(linesToInsert);
+
+    const addedLines: QueuedLine[] = linesToInsert.map((line, idx) => ({
+      _id: result.insertedIds[idx].toString(),
+      ...line,
+    }));
 
     res.json({ success: true, lines: addedLines });
   } catch (error) {
@@ -41,10 +40,22 @@ export const addToQueue: RequestHandler = async (req, res) => {
 export const getQueuedLines: RequestHandler = async (req, res) => {
   try {
     const teamId = (req as any).teamId || "default-team";
-    const lines = Array.from(queuedLines.values()).filter(
-      (line) => line.teamId === teamId
-    );
-    res.json({ lines });
+    const collections = getCollections();
+
+    const lines = await collections.queuedLines
+      .find({ teamId })
+      .sort({ addedAt: -1 })
+      .toArray();
+
+    const formattedLines: QueuedLine[] = lines.map((line) => ({
+      _id: line._id.toString(),
+      content: line.content,
+      addedBy: line.addedBy,
+      addedAt: line.addedAt,
+      teamId: line.teamId,
+    }));
+
+    res.json({ lines: formattedLines });
   } catch (error) {
     console.error("Get queued lines error:", error);
     res.status(400).json({ error: "Failed to fetch queued lines" });
@@ -54,20 +65,19 @@ export const getQueuedLines: RequestHandler = async (req, res) => {
 export const clearQueuedLine: RequestHandler = async (req, res) => {
   try {
     const { lineId } = req.params;
-    const line = queuedLines.get(lineId);
-
-    if (!line) {
-      res.status(404).json({ error: "Line not found" });
-      return;
-    }
-
     const teamId = (req as any).teamId || "default-team";
-    if (line.teamId !== teamId) {
-      res.status(403).json({ error: "Unauthorized" });
+    const collections = getCollections();
+
+    const result = await collections.queuedLines.deleteOne({
+      _id: new ObjectId(lineId),
+      teamId,
+    });
+
+    if (result.deletedCount === 0) {
+      res.status(404).json({ error: "Line not found or unauthorized" });
       return;
     }
 
-    queuedLines.delete(lineId);
     res.json({ success: true });
   } catch (error) {
     console.error("Clear queued line error:", error);
