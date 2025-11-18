@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { Trash2, Plus, Copy, ArrowRight } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function NumbersSorter() {
   const [inputNumbers, setInputNumbers] = useState<string>("");
