@@ -7,11 +7,11 @@ import { addToQueue, getQueuedLines, clearQueuedLine } from "./routes/queued";
 import { addToHistory, getHistory, searchHistory } from "./routes/history";
 import {
   getOrCreateGroupChat,
-  getTeamMembers,
   sendMessage,
   getMessages,
   addMemberToGroup,
 } from "./routes/chat";
+import { createTeamMember, getTeamMembers } from "./routes/members";
 import { connectDB } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { getCollections } from "./db";
