@@ -44,7 +44,13 @@ export const addToQueue: RequestHandler = async (req, res) => {
 
 export const getQueuedLines: RequestHandler = async (req, res) => {
   try {
-    const teamId = (req as any).teamId || "default-team";
+    const teamId = (req as any).teamId;
+
+    if (!teamId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
     const collections = getCollections();
 
     const lines = await collections.queuedLines
