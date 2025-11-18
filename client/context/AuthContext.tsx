@@ -54,7 +54,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!response.ok) {
-        throw new Error("Login failed");
+        const error = await response.json();
+        throw new Error(error.error || "Login failed");
       }
 
       const data: AuthResponse = await response.json();
@@ -63,6 +64,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+    } catch (error) {
+      throw error;
     } finally {
       setIsLoading(false);
     }
