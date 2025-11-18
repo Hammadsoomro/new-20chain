@@ -232,7 +232,7 @@ export default function NumbersInbox() {
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col items-end gap-2">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getStatusColor(item.status)}`}
                       >
@@ -242,11 +242,13 @@ export default function NumbersInbox() {
                             ? "Available"
                             : "Claimed"}
                       </span>
-                      {item.status === "available" && (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700">
-                          Claim
-                        </Button>
-                      )}
+                      <Button
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        disabled={item.status === "cooldown"}
+                      >
+                        {item.status === "cooldown" ? "On Cooldown" : "Claim"}
+                      </Button>
                     </div>
                   </div>
                 </Card>
