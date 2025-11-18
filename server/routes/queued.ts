@@ -11,8 +11,13 @@ export const addToQueue: RequestHandler = async (req, res) => {
     });
 
     const validated = schema.parse(req.body);
-    const teamId = (req as any).teamId || "default-team";
-    const userId = (req as any).userId || "admin";
+    const teamId = (req as any).teamId;
+    const userId = (req as any).userId;
+
+    if (!teamId || !userId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
 
     const collections = getCollections();
 
