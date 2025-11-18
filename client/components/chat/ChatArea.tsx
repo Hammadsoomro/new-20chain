@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
 import type { ChatMessage } from "@shared/api";
+import { io, Socket } from "socket.io-client";
 
 interface ChatAreaProps {
   selectedChat: {
@@ -32,9 +33,7 @@ interface ChatAreaProps {
 interface TypingIndicator {
   userId: string;
   senderName: string;
-  chatId: string;
-  chatType: "group" | "direct";
-  timestamp: number;
+  isTyping: boolean;
 }
 
 const getInitials = (name: string) => {
@@ -54,80 +53,159 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   const [sending, setSending] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
-  const [typingUsers, setTypingUsers] = useState<TypingIndicator[]>([]);
+  const [typingUsers, setTypingUsers] = useState<Map<string, TypingIndicator>>(
+    new Map()
+  );
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Fetch messages
+  // Initialize WebSocket connection
   useEffect(() => {
-    const fetchMessages = async () => {
-      if (!token) return;
+    if (!token || !user?._id) return;
 
-      try {
-        setLoading(true);
-        const params = new URLSearchParams();
+    // Create socket connection
+    const socket = io(window.location.origin, {
+      auth: { token },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+    });
 
-        if (selectedChat.type === "group") {
-          params.append("groupId", selectedChat.id);
-        } else {
-          params.append("recipient", selectedChat.id);
-        }
+    socketRef.current = socket;
 
-        const response = await fetch(
-          `/api/chat/messages?${params.toString()}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+    // Socket event listeners
+    socket.on("connect", () => {
+      console.log("Connected to WebSocket server");
+      // Join the chat room
+      socket.emit("join-chat", {
+        chatId: selectedChat.id,
+        userId: user._id,
+      });
+      // Fetch initial messages
+      fetchInitialMessages();
+    });
 
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data.filter((msg: ChatMessage) => !msg.deleted));
-        }
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      } finally {
-        setLoading(false);
+    socket.on("new-message", (data: any) => {
+      const newMsg: ChatMessage = {
+        _id: data.messageId || data._id,
+        sender: data.sender,
+        senderName: data.senderName,
+        senderPicture: data.senderPicture,
+        content: data.content,
+        createdAt: data.timestamp || data.createdAt,
+        groupId: data.groupId,
+        recipient: data.recipient,
+        readBy: data.readBy || [],
+      };
+      setMessages((prev) => [...prev, newMsg]);
+    });
+
+    socket.on("message-edited", (data: any) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === data.messageId
+            ? { ...msg, content: data.content, editedAt: new Date().toISOString() }
+            : msg
+        )
+      );
+    });
+
+    socket.on("message-deleted", (data: any) => {
+      setMessages((prev) => prev.filter((msg) => msg._id !== data.messageId));
+    });
+
+    socket.on("message-read", (data: any) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === data.messageId
+            ? {
+                ...msg,
+                readBy: [...(msg.readBy || []), data.userId],
+              }
+            : msg
+        )
+      );
+    });
+
+    socket.on("user-typing", (data: any) => {
+      if (data.isTyping) {
+        setTypingUsers((prev) => {
+          const updated = new Map(prev);
+          updated.set(data.userId, {
+            userId: data.userId,
+            senderName: data.senderName,
+            isTyping: true,
+          });
+          return updated;
+        });
+
+        // Auto-remove typing indicator after 3 seconds
+        setTimeout(() => {
+          setTypingUsers((prev) => {
+            const updated = new Map(prev);
+            updated.delete(data.userId);
+            return updated;
+          });
+        }, 3000);
+      } else {
+        setTypingUsers((prev) => {
+          const updated = new Map(prev);
+          updated.delete(data.userId);
+          return updated;
+        });
+      }
+    });
+
+    socket.on("disconnect", () => {
+      console.log("Disconnected from WebSocket server");
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("WebSocket connection error:", error);
+    });
+
+    return () => {
+      if (socket) {
+        socket.emit("leave-chat", { chatId: selectedChat.id });
+        socket.disconnect();
       }
     };
+  }, [selectedChat.id, token, user?._id]);
 
-    fetchMessages();
+  // Fetch initial messages
+  const fetchInitialMessages = async () => {
+    if (!token) return;
 
-    // Poll for new messages every 1 second for near real-time feel
-    const interval = setInterval(fetchMessages, 1000);
+    try {
+      setLoading(true);
+      const params = new URLSearchParams();
 
-    return () => clearInterval(interval);
-  }, [selectedChat, token]);
-
-  // Fetch typing indicators
-  useEffect(() => {
-    const fetchTyping = async () => {
-      if (!token) return;
-
-      try {
-        const response = await fetch(
-          `/api/chat/typing?chatId=${selectedChat.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
-
-        if (response.ok) {
-          const data = await response.json();
-          setTypingUsers(
-            data.filter((t: TypingIndicator) => t.userId !== user?._id),
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching typing status:", error);
+      if (selectedChat.type === "group") {
+        params.append("groupId", selectedChat.id);
+      } else {
+        params.append("recipient", selectedChat.id);
       }
-    };
 
-    const interval = setInterval(fetchTyping, 500);
+      const response = await fetch(
+        `/api/chat/messages?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
-    return () => clearInterval(interval);
-  }, [selectedChat, token, user?._id]);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.filter((msg: ChatMessage) => !msg.deleted));
+      }
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -135,21 +213,15 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   }, [messages, typingUsers]);
 
   const handleTyping = () => {
-    if (!token || !isTyping) {
-      // Send typing indicator
-      fetch("/api/chat/typing", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chatId: selectedChat.id,
-          chatType: selectedChat.type,
-          isTyping: true,
-        }),
-      }).catch(console.error);
+    if (!socketRef.current) return;
 
+    if (!isTyping) {
+      socketRef.current.emit("typing", {
+        chatId: selectedChat.id,
+        userId: user?._id,
+        senderName: user?.name || "Unknown",
+        isTyping: true,
+      });
       setIsTyping(true);
     }
 
@@ -160,19 +232,14 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
 
     // Set new timeout to stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
-      fetch("/api/chat/typing", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      if (socketRef.current) {
+        socketRef.current.emit("typing", {
           chatId: selectedChat.id,
-          chatType: selectedChat.type,
+          userId: user?._id,
+          senderName: user?.name || "Unknown",
           isTyping: false,
-        }),
-      }).catch(console.error);
-
+        });
+      }
       setIsTyping(false);
     }, 2000);
   };
@@ -180,7 +247,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newMessage.trim() || !token) return;
+    if (!newMessage.trim() || !token || !socketRef.current) return;
 
     try {
       setSending(true);
@@ -205,22 +272,27 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
 
       if (response.ok) {
         const sentMessage = await response.json();
-        setMessages([...messages, sentMessage]);
+        const messageId = sentMessage._id || sentMessage.insertedId;
+
+        // Emit the message through WebSocket so all users see it in real-time
+        socketRef.current.emit("send-message", {
+          messageId,
+          sender: user?._id,
+          senderName: user?.name || "Unknown",
+          chatId: selectedChat.id,
+          content: newMessage,
+          timestamp: new Date().toISOString(),
+        });
+
         setNewMessage("");
 
         // Clear typing indicator
-        fetch("/api/chat/typing", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            chatId: selectedChat.id,
-            chatType: selectedChat.type,
-            isTyping: false,
-          }),
-        }).catch(console.error);
+        socketRef.current.emit("typing", {
+          chatId: selectedChat.id,
+          userId: user?._id,
+          senderName: user?.name || "Unknown",
+          isTyping: false,
+        });
 
         setIsTyping(false);
       }
@@ -232,7 +304,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   };
 
   const handleEditMessage = async (messageId: string) => {
-    if (!editContent.trim() || !token) return;
+    if (!editContent.trim() || !token || !socketRef.current) return;
 
     try {
       const response = await fetch("/api/chat/edit", {
@@ -250,8 +322,16 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
       if (response.ok) {
         const updated = await response.json();
         setMessages(
-          messages.map((msg) => (msg._id === messageId ? updated : msg)),
+          messages.map((msg) => (msg._id === messageId ? updated : msg))
         );
+
+        // Emit edit through WebSocket
+        socketRef.current.emit("edit-message", {
+          messageId,
+          content: editContent,
+          chatId: selectedChat.id,
+        });
+
         setEditingId(null);
         setEditContent("");
       }
@@ -261,7 +341,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    if (!token) return;
+    if (!token || !socketRef.current) return;
 
     try {
       const response = await fetch("/api/chat/delete", {
@@ -275,6 +355,12 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
 
       if (response.ok) {
         setMessages(messages.filter((msg) => msg._id !== messageId));
+
+        // Emit delete through WebSocket
+        socketRef.current.emit("delete-message", {
+          messageId,
+          chatId: selectedChat.id,
+        });
       }
     } catch (error) {
       console.error("Error deleting message:", error);
@@ -282,7 +368,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   };
 
   const handleMarkAsRead = async (messageId: string) => {
-    if (!token) return;
+    if (!token || !socketRef.current) return;
 
     try {
       await fetch("/api/chat/mark-read", {
@@ -292,6 +378,12 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ messageId }),
+      });
+
+      // Emit read status through WebSocket
+      socketRef.current.emit("message-read", {
+        messageId,
+        userId: user?._id,
       });
     } catch (error) {
       console.error("Error marking message as read:", error);
@@ -312,14 +404,16 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
       <div className="p-4 border-b border-border">
         <h3 className="font-semibold text-lg">{selectedChat.name}</h3>
         {selectedChat.type === "group" && (
-          <p className="text-xs text-muted-foreground">Group Chat</p>
+          <p className="text-xs text-muted-foreground">
+            Group Chat {socketRef.current?.connected ? "● Online" : "● Offline"}
+          </p>
         )}
       </div>
 
       {/* Messages Area */}
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
-          {messages.length === 0 && typingUsers.length === 0 ? (
+          {messages.length === 0 && typingUsers.size === 0 ? (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               No messages yet. Start the conversation!
             </div>
@@ -442,7 +536,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
               ))}
 
               {/* Typing Indicators */}
-              {typingUsers.length > 0 && (
+              {typingUsers.size > 0 && (
                 <div className="flex gap-3 items-center text-sm text-muted-foreground">
                   <div className="flex gap-1">
                     {[0, 1, 2].map((i) => (
@@ -456,8 +550,10 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
                     ))}
                   </div>
                   <span>
-                    {typingUsers.map((t) => t.senderName).join(", ")}
-                    {typingUsers.length === 1 ? " is" : " are"} typing...
+                    {Array.from(typingUsers.values())
+                      .map((t) => t.senderName)
+                      .join(", ")}
+                    {typingUsers.size === 1 ? " is" : " are"} typing...
                   </span>
                 </div>
               )}
