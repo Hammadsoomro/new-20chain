@@ -65,45 +65,45 @@ export default function TeamChat() {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-muted-foreground">Loading chat...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-full gap-4">
-      {/* Contact List */}
-      <div className="w-80 border-r border-border">
-        <ChatContactList
-          members={teamMembers}
-          groupChat={groupChat}
-          selectedChat={selectedChat}
-          onSelectMember={handleSelectMember}
-          onSelectGroup={() => {
-            if (groupChat) {
-              setSelectedChat({
-                type: "group",
-                id: groupChat._id,
-                name: groupChat.name,
-              });
-            }
-          }}
-        />
-      </div>
-
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col">
-        {selectedChat ? (
-          <ChatArea selectedChat={selectedChat} token={token} />
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Select a chat to start messaging
+    <Layout>
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-muted-foreground">Loading chat...</div>
+        </div>
+      ) : (
+        <div className="flex h-full gap-4 p-6">
+          {/* Contact List */}
+          <div className="w-80 border-r border-border">
+            <ChatContactList
+              members={teamMembers}
+              groupChat={groupChat}
+              selectedChat={selectedChat}
+              onSelectMember={handleSelectMember}
+              onSelectGroup={() => {
+                if (groupChat) {
+                  setSelectedChat({
+                    type: "group",
+                    id: groupChat._id,
+                    name: groupChat.name,
+                  });
+                }
+              }}
+            />
           </div>
-        )}
-      </div>
-    </div>
+
+          {/* Chat Area */}
+          <div className="flex-1 flex flex-col">
+            {selectedChat ? (
+              <ChatArea selectedChat={selectedChat} token={token} />
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                Select a chat to start messaging
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </Layout>
   );
 }
