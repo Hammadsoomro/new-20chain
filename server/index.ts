@@ -88,5 +88,9 @@ export async function createServer() {
   app.get("/api/members", getTeamMembers);
   app.post("/api/members", createTeamMember);
 
+  // Profile routes
+  app.get("/api/profile", getProfile);
+  app.post("/api/profile/upload-picture", uploadProfilePicture);
+
   return app;
 }
