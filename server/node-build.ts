@@ -1,11 +1,12 @@
 import path from "path";
-import { createServer } from "./index";
+import { createServer, getHttpServer } from "./index";
 import { closeDB } from "./db";
 import * as express from "express";
 
 async function startServer() {
   try {
     const app = await createServer();
+    const httpServer = getHttpServer();
     const port = process.env.PORT || 3000;
 
     // In production, serve the built SPA files
@@ -25,10 +26,11 @@ async function startServer() {
       res.sendFile(path.join(distPath, "index.html"));
     });
 
-    app.listen(port, () => {
+    httpServer.listen(port, () => {
       console.log(`🚀 Fusion Starter server running on port ${port}`);
       console.log(`📱 Frontend: http://localhost:${port}`);
       console.log(`🔧 API: http://localhost:${port}/api`);
+      console.log(`🔗 WebSocket: ws://localhost:${port}`);
     });
 
     // Graceful shutdown
