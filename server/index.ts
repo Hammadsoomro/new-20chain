@@ -77,6 +77,11 @@ export async function createServer() {
   app.post("/api/chat/send", sendMessage);
   app.get("/api/chat/messages", getMessages);
   app.post("/api/chat/group/add-member", addMemberToGroup);
+  app.post("/api/chat/typing", setTyping);
+  app.get("/api/chat/typing", getTypingStatus);
+  app.post("/api/chat/mark-read", markMessageAsRead);
+  app.post("/api/chat/edit", editMessage);
+  app.post("/api/chat/delete", deleteMessage);
 
   // Member routes
   app.get("/api/members", getTeamMembers);
