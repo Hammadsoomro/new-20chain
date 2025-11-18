@@ -190,3 +190,164 @@ export const addMemberToGroup: RequestHandler = async (
     res.status(500).json({ error: "Failed to add member to group" });
   }
 };
+
+// Set typing indicator
+export const setTyping: RequestHandler = async (req: AuthRequest, res) => {
+  try {
+    const { chatId, chatType, isTyping } = req.body;
+
+    if (!chatId || !chatType) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
+
+    const collections = getCollections();
+    const sender = await collections.users.findOne({
+      _id: new ObjectId(req.userId),
+    });
+
+    if (isTyping) {
+      setTypingIndicator({
+        userId: req.userId,
+        senderName: sender?.name || "Unknown",
+        chatId,
+        chatType: chatType as "group" | "direct",
+        timestamp: Date.now(),
+      });
+    } else {
+      clearTypingIndicator(req.userId, chatId);
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error setting typing indicator:", error);
+    res.status(500).json({ error: "Failed to set typing indicator" });
+  }
+};
+
+// Get typing indicators for a chat
+export const getTypingStatus: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
+  try {
+    const { chatId } = req.query;
+
+    if (!chatId) {
+      res.status(400).json({ error: "Missing chatId" });
+      return;
+    }
+
+    const indicators = getTypingIndicators(chatId as string);
+    res.json(indicators);
+  } catch (error) {
+    console.error("Error getting typing status:", error);
+    res.status(500).json({ error: "Failed to get typing status" });
+  }
+};
+
+// Mark message as read
+export const markMessageAsRead: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
+  try {
+    const { messageId } = req.body;
+
+    if (!messageId) {
+      res.status(400).json({ error: "Missing messageId" });
+      return;
+    }
+
+    const collections = getCollections();
+    const result = await collections.chatMessages.findOneAndUpdate(
+      { _id: new ObjectId(messageId) },
+      {
+        $addToSet: { readBy: req.userId },
+      },
+      { returnDocument: "after" },
+    );
+
+    if (!result.value) {
+      res.status(404).json({ error: "Message not found" });
+      return;
+    }
+
+    res.json(result.value);
+  } catch (error) {
+    console.error("Error marking message as read:", error);
+    res.status(500).json({ error: "Failed to mark message as read" });
+  }
+};
+
+// Edit message
+export const editMessage: RequestHandler = async (req: AuthRequest, res) => {
+  try {
+    const { messageId, content } = req.body;
+
+    if (!messageId || !content) {
+      res.status(400).json({ error: "Missing required fields" });
+      return;
+    }
+
+    const collections = getCollections();
+    const result = await collections.chatMessages.findOneAndUpdate(
+      { _id: new ObjectId(messageId), sender: req.userId },
+      {
+        $set: {
+          content,
+          editedAt: new Date().toISOString(),
+        },
+      },
+      { returnDocument: "after" },
+    );
+
+    if (!result.value) {
+      res
+        .status(403)
+        .json({ error: "Message not found or you don't have permission" });
+      return;
+    }
+
+    res.json(result.value);
+  } catch (error) {
+    console.error("Error editing message:", error);
+    res.status(500).json({ error: "Failed to edit message" });
+  }
+};
+
+// Delete message
+export const deleteMessage: RequestHandler = async (req: AuthRequest, res) => {
+  try {
+    const { messageId } = req.body;
+
+    if (!messageId) {
+      res.status(400).json({ error: "Missing messageId" });
+      return;
+    }
+
+    const collections = getCollections();
+    const result = await collections.chatMessages.findOneAndUpdate(
+      { _id: new ObjectId(messageId), sender: req.userId },
+      {
+        $set: {
+          deleted: true,
+          deletedAt: new Date().toISOString(),
+        },
+      },
+      { returnDocument: "after" },
+    );
+
+    if (!result.value) {
+      res
+        .status(403)
+        .json({ error: "Message not found or you don't have permission" });
+      return;
+    }
+
+    res.json(result.value);
+  } catch (error) {
+    console.error("Error deleting message:", error);
+    res.status(500).json({ error: "Failed to delete message" });
+  }
+};
