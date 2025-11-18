@@ -31,7 +31,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch messages
   useEffect(() => {
