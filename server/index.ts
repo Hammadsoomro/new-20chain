@@ -5,8 +5,18 @@ import { handleDemo } from "./routes/demo";
 import { handleLogin, handleSignup } from "./routes/auth";
 import { addToQueue, getQueuedLines, clearQueuedLine } from "./routes/queued";
 import { addToHistory, getHistory, searchHistory } from "./routes/history";
+import { connectDB } from "./db";
 
-export function createServer() {
+export async function createServer() {
+  // Initialize MongoDB connection
+  try {
+    await connectDB();
+    console.log("Database initialized successfully");
+  } catch (error) {
+    console.error("Failed to initialize database:", error);
+    throw error;
+  }
+
   const app = express();
 
   // Middleware
