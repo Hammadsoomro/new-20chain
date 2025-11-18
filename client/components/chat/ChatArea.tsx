@@ -178,6 +178,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
               </div>
             ))
           )}
+          <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
 
