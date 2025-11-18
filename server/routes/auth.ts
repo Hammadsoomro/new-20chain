@@ -133,8 +133,23 @@ export const handleLogin: RequestHandler = async (req, res) => {
 // Verify token middleware
 export const verifyToken = (token: string): { id: string; email: string; role: string } | null => {
   try {
-    const decoded = jwt.verify(token, jwtSecret) as any;
-    return { id: decoded.id, email: decoded.email, role: decoded.role };
+    const [encodedPayload, signature] = token.split(".");
+    if (!encodedPayload || !signature) return null;
+
+    const payload = JSON.parse(Buffer.from(encodedPayload, "base64").toString());
+
+    // Check expiration
+    if (payload.exp < Date.now()) return null;
+
+    // Verify signature
+    const expectedSignature = crypto
+      .createHash("sha256")
+      .update(JSON.stringify(payload) + process.env.JWT_SECRET || "demo-secret")
+      .digest("hex");
+
+    if (signature !== expectedSignature) return null;
+
+    return { id: payload.id, email: payload.email, role: payload.role };
   } catch {
     return null;
   }
