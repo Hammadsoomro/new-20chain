@@ -1,10 +1,7 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import type { HistoryEntry } from "@shared/api";
-import crypto from "crypto";
-
-// Demo storage
-const historyEntries: Map<string, HistoryEntry> = new Map();
+import { getCollections } from "../db";
 
 export const addToHistory: RequestHandler = async (req, res) => {
   try {
@@ -16,16 +13,23 @@ export const addToHistory: RequestHandler = async (req, res) => {
     const validated = schema.parse(req.body);
     const teamId = (req as any).teamId || "default-team";
 
-    const id = crypto.randomBytes(8).toString("hex");
+    const collections = getCollections();
+
+    const result = await collections.history.insertOne({
+      content: validated.content,
+      claimedBy: validated.claimedBy,
+      claimedAt: new Date().toISOString(),
+      teamId,
+    });
+
     const entry: HistoryEntry = {
-      _id: id,
+      _id: result.insertedId.toString(),
       content: validated.content,
       claimedBy: validated.claimedBy,
       claimedAt: new Date().toISOString(),
       teamId,
     };
 
-    historyEntries.set(id, entry);
     res.json({ success: true, entry });
   } catch (error) {
     console.error("Add to history error:", error);
@@ -40,31 +44,47 @@ export const getHistory: RequestHandler = async (req, res) => {
     const isAdmin = (req as any).isAdmin || false;
     const { search, date } = req.query;
 
-    let entries = Array.from(historyEntries.values()).filter(
-      (entry) => entry.teamId === teamId
-    );
+    const collections = getCollections();
+
+    const filter: any = { teamId };
 
     // Filter by user if not admin
     if (!isAdmin) {
-      entries = entries.filter((entry) => entry.claimedBy === userId);
+      filter.claimedBy = userId;
     }
 
-    // Filter by search query
+    // Build query with search
     if (search && typeof search === "string") {
-      entries = entries.filter((entry) =>
-        entry.content.toLowerCase().includes(search.toLowerCase())
-      );
+      filter.content = { $regex: search, $options: "i" };
     }
 
-    // Filter by date
+    // Apply date filter
     if (date && typeof date === "string") {
-      const filterDate = new Date(date).toDateString();
-      entries = entries.filter(
-        (entry) => new Date(entry.claimedAt).toDateString() === filterDate
-      );
+      const startDate = new Date(date);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(date);
+      endDate.setHours(23, 59, 59, 999);
+
+      filter.claimedAt = {
+        $gte: startDate.toISOString(),
+        $lte: endDate.toISOString(),
+      };
     }
 
-    res.json({ entries });
+    const entries = await collections.history
+      .find(filter)
+      .sort({ claimedAt: -1 })
+      .toArray();
+
+    const formattedEntries: HistoryEntry[] = entries.map((entry) => ({
+      _id: entry._id.toString(),
+      content: entry.content,
+      claimedBy: entry.claimedBy,
+      claimedAt: entry.claimedAt,
+      teamId: entry.teamId,
+    }));
+
+    res.json({ entries: formattedEntries });
   } catch (error) {
     console.error("Get history error:", error);
     res.status(400).json({ error: "Failed to fetch history" });
@@ -81,13 +101,25 @@ export const searchHistory: RequestHandler = async (req, res) => {
       return;
     }
 
-    const entries = Array.from(historyEntries.values())
-      .filter((entry) => entry.teamId === teamId)
-      .filter((entry) =>
-        entry.content.toLowerCase().includes(query.toLowerCase())
-      );
+    const collections = getCollections();
 
-    res.json({ entries });
+    const entries = await collections.history
+      .find({
+        teamId,
+        content: { $regex: query, $options: "i" },
+      })
+      .sort({ claimedAt: -1 })
+      .toArray();
+
+    const formattedEntries: HistoryEntry[] = entries.map((entry) => ({
+      _id: entry._id.toString(),
+      content: entry.content,
+      claimedBy: entry.claimedBy,
+      claimedAt: entry.claimedAt,
+      teamId: entry.teamId,
+    }));
+
+    res.json({ entries: formattedEntries });
   } catch (error) {
     console.error("Search history error:", error);
     res.status(400).json({ error: "Search failed" });
