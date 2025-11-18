@@ -100,10 +100,13 @@ export const handleLogin: RequestHandler = async (req, res) => {
     const validated = schema.parse(body);
     const hashedPassword = hashPassword(validated.password);
 
+    const collections = getCollections();
+
     // Find user
-    const userRecord = Array.from(users.values()).find(
-      (u) => u.email === validated.email && u.password === hashedPassword
-    );
+    const userRecord = await collections.users.findOne({
+      email: validated.email,
+      password: hashedPassword,
+    });
 
     if (!userRecord) {
       res.status(401).json({ error: "Invalid credentials" });
@@ -111,7 +114,7 @@ export const handleLogin: RequestHandler = async (req, res) => {
     }
 
     const user: User = {
-      _id: userRecord._id,
+      _id: userRecord._id.toString(),
       email: userRecord.email,
       name: userRecord.name,
       role: userRecord.role,
