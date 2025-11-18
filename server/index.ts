@@ -6,6 +6,8 @@ import { handleLogin, handleSignup } from "./routes/auth";
 import { addToQueue, getQueuedLines, clearQueuedLine } from "./routes/queued";
 import { addToHistory, getHistory, searchHistory } from "./routes/history";
 import { connectDB } from "./db";
+import { authMiddleware } from "./middleware/auth";
+import { getCollections } from "./db";
 
 export async function createServer() {
   // Initialize MongoDB connection
@@ -24,6 +26,25 @@ export async function createServer() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
+  // Middleware to populate teamId and role from database
+  app.use(async (req, res, next) => {
+    if ((req as any).userId) {
+      try {
+        const collections = getCollections();
+        const user = await collections.users.findOne({
+          _id: { $eq: (req as any).userId } as any,
+        });
+        if (user) {
+          (req as any).teamId = user.teamId;
+          (req as any).isAdmin = user.role === "admin";
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    }
+    next();
+  });
+
   // Example API routes
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
@@ -35,6 +56,10 @@ export async function createServer() {
   // Authentication routes
   app.post("/api/auth/login", handleLogin);
   app.post("/api/auth/signup", handleSignup);
+
+  // Protected routes
+  app.use("/api/queued", authMiddleware);
+  app.use("/api/history", authMiddleware);
 
   // Queued list routes
   app.post("/api/queued/add", addToQueue);
