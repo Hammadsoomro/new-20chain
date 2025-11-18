@@ -16,6 +16,7 @@ export interface User {
   name: string;
   role: UserRole;
   profilePicture?: string;
+  profilePictureUrl?: string;
   createdBy?: string;
   teamId: string;
   createdAt: string;
