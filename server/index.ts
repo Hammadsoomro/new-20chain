@@ -54,6 +54,7 @@ export async function createServer() {
   // Protected routes
   app.use("/api/queued", authMiddleware);
   app.use("/api/history", authMiddleware);
+  app.use("/api/chat", authMiddleware);
 
   // Queued list routes
   app.post("/api/queued/add", addToQueue);
