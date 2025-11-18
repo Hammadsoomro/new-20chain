@@ -50,24 +50,27 @@ export default function NumbersSorter() {
 
   const addToQueue = async () => {
     if (deduplicated.length === 0) {
-      alert("Please deduplicate some lines first");
+      toast.error("Please deduplicate some lines first");
       return;
     }
 
+    setIsLoading(true);
     try {
-      const response = await fetch("/api/queued/add", {
+      await apiFetch("/api/queued/add", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lines: deduplicated }),
+        token,
       });
 
-      if (response.ok) {
-        alert("Added to queue successfully!");
-        setDeduplicated([]);
-        setInputNumbers("");
-      }
+      toast.success("Added to queue successfully!");
+      setDeduplicated([]);
+      setInputNumbers("");
     } catch (error) {
-      alert("Failed to add to queue");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add to queue"
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
