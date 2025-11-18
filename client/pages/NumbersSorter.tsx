@@ -9,8 +9,10 @@ import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function NumbersSorter() {
+  const { token } = useAuth();
   const [inputNumbers, setInputNumbers] = useState<string>("");
   const [deduplicated, setDeduplicated] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
