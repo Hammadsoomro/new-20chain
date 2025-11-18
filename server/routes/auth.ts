@@ -145,9 +145,10 @@ export const verifyToken = (token: string): { id: string; email: string; role: s
     if (payload.exp < Date.now()) return null;
 
     // Verify signature
+    const jwtSecret = process.env.JWT_SECRET || "demo-secret";
     const expectedSignature = crypto
       .createHash("sha256")
-      .update(JSON.stringify(payload) + process.env.JWT_SECRET || "demo-secret")
+      .update(JSON.stringify(payload) + jwtSecret)
       .digest("hex");
 
     if (signature !== expectedSignature) return null;
