@@ -76,7 +76,13 @@ export const getQueuedLines: RequestHandler = async (req, res) => {
 export const clearQueuedLine: RequestHandler = async (req, res) => {
   try {
     const { lineId } = req.params;
-    const teamId = (req as any).teamId || "default-team";
+    const teamId = (req as any).teamId;
+
+    if (!teamId) {
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
     const collections = getCollections();
 
     const result = await collections.queuedLines.deleteOne({
