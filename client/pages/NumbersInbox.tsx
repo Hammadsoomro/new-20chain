@@ -38,7 +38,7 @@ export default function NumbersInbox() {
           const inbox = userEntries.map((entry: any) => {
             const claimedTime = new Date(entry.claimedAt);
             const cooldownTime = new Date(
-              claimedTime.getTime() + cooldownMinutes * 60000
+              claimedTime.getTime() + cooldownMinutes * 60000,
             );
             const now = new Date();
             const status =
@@ -69,9 +69,7 @@ export default function NumbersInbox() {
     fetchInbox();
   }, [token]);
 
-  const getStatusColor = (
-    status: "claimed" | "cooldown" | "available"
-  ) => {
+  const getStatusColor = (status: "claimed" | "cooldown" | "available") => {
     switch (status) {
       case "available":
         return "text-green-600 bg-green-50 dark:bg-green-950";
@@ -84,9 +82,7 @@ export default function NumbersInbox() {
     }
   };
 
-  const getStatusIcon = (
-    status: "claimed" | "cooldown" | "available"
-  ) => {
+  const getStatusIcon = (status: "claimed" | "cooldown" | "available") => {
     switch (status) {
       case "available":
         return <CheckCircle className="h-5 w-5" />;
@@ -125,10 +121,10 @@ export default function NumbersInbox() {
 
   const claimedCount = inboxItems.filter((i) => i.status === "claimed").length;
   const cooldownCount = inboxItems.filter(
-    (i) => i.status === "cooldown"
+    (i) => i.status === "cooldown",
   ).length;
   const availableCount = inboxItems.filter(
-    (i) => i.status === "available"
+    (i) => i.status === "available",
   ).length;
 
   return (
@@ -210,7 +206,9 @@ export default function NumbersInbox() {
                 >
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className={`rounded-full p-2 ${getStatusColor(item.status)}`}>
+                      <div
+                        className={`rounded-full p-2 ${getStatusColor(item.status)}`}
+                      >
                         {getStatusIcon(item.status)}
                       </div>
                       <div className="flex-1">
@@ -222,7 +220,8 @@ export default function NumbersInbox() {
                         </p>
                         {item.status === "cooldown" && (
                           <p className="text-sm font-semibold text-yellow-600 mt-1">
-                            Cooldown: {getRemainingTime(item.cooldownUntil || "")}
+                            Cooldown:{" "}
+                            {getRemainingTime(item.cooldownUntil || "")}
                           </p>
                         )}
                         {item.status === "available" && (

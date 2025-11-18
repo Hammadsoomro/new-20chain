@@ -54,7 +54,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [typingUsers, setTypingUsers] = useState<Map<string, TypingIndicator>>(
-    new Map()
+    new Map(),
   );
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -107,9 +107,13 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
       setMessages((prev) =>
         prev.map((msg) =>
           msg._id === data.messageId
-            ? { ...msg, content: data.content, editedAt: new Date().toISOString() }
-            : msg
-        )
+            ? {
+                ...msg,
+                content: data.content,
+                editedAt: new Date().toISOString(),
+              }
+            : msg,
+        ),
       );
     });
 
@@ -125,8 +129,8 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
                 ...msg,
                 readBy: [...(msg.readBy || []), data.userId],
               }
-            : msg
-        )
+            : msg,
+        ),
       );
     });
 
@@ -189,12 +193,9 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         params.append("recipient", selectedChat.id);
       }
 
-      const response = await fetch(
-        `/api/chat/messages?${params.toString()}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`/api/chat/messages?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -322,7 +323,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
       if (response.ok) {
         const updated = await response.json();
         setMessages(
-          messages.map((msg) => (msg._id === messageId ? updated : msg))
+          messages.map((msg) => (msg._id === messageId ? updated : msg)),
         );
 
         // Emit edit through WebSocket

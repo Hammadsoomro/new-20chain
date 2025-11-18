@@ -113,9 +113,7 @@ export default function QueuedList() {
             <Card className="p-8">
               <div className="text-center">
                 <List className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  No items in queue
-                </p>
+                <p className="text-muted-foreground">No items in queue</p>
               </div>
             </Card>
           ) : (

@@ -138,7 +138,7 @@ export async function createServer() {
         timestamp: string;
       }) => {
         io.to(data.chatId).emit("new-message", data);
-      }
+      },
     );
 
     // User is typing
@@ -155,7 +155,7 @@ export async function createServer() {
           senderName: data.senderName,
           isTyping: data.isTyping,
         });
-      }
+      },
     );
 
     // User marks message as read
@@ -166,13 +166,9 @@ export async function createServer() {
     // User edits a message
     socket.on(
       "edit-message",
-      (data: {
-        messageId: string;
-        content: string;
-        chatId: string;
-      }) => {
+      (data: { messageId: string; content: string; chatId: string }) => {
         io.to(data.chatId).emit("message-edited", data);
-      }
+      },
     );
 
     // User deletes a message
@@ -180,7 +176,7 @@ export async function createServer() {
       "delete-message",
       (data: { messageId: string; chatId: string }) => {
         io.to(data.chatId).emit("message-deleted", data);
-      }
+      },
     );
 
     // User leaves a chat

@@ -45,7 +45,7 @@ export default function History() {
       setFilteredEntries(entries);
     } else {
       const filtered = entries.filter((entry) =>
-        entry.content.toLowerCase().includes(searchQuery.toLowerCase())
+        entry.content.toLowerCase().includes(searchQuery.toLowerCase()),
       );
       setFilteredEntries(filtered);
     }
@@ -93,9 +93,7 @@ export default function History() {
                   entries.filter((e) => {
                     const today = new Date();
                     const entryDate = new Date(e.claimedAt);
-                    return (
-                      entryDate.toDateString() === today.toDateString()
-                    );
+                    return entryDate.toDateString() === today.toDateString();
                   }).length
                 }
               </div>
