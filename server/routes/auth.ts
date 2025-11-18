@@ -2,9 +2,8 @@ import { RequestHandler } from "express";
 import { z } from "zod";
 import type { LoginRequest, SignupRequest, AuthResponse, User } from "@shared/api";
 import crypto from "crypto";
-
-// Demo users storage (in production, use MongoDB)
-const users: Map<string, User & { password: string; teamId: string }> = new Map();
+import { getCollections } from "../db";
+import { ObjectId } from "mongodb";
 
 // Helper: Hash password (demo - use bcrypt in production)
 const hashPassword = (password: string): string => {
@@ -20,9 +19,10 @@ const createToken = (user: User): string => {
     iat: Date.now(),
     exp: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
   };
+  const jwtSecret = process.env.JWT_SECRET || "demo-secret";
   const signature = crypto
     .createHash("sha256")
-    .update(JSON.stringify(payload) + process.env.JWT_SECRET || "demo-secret")
+    .update(JSON.stringify(payload) + jwtSecret)
     .digest("hex");
   return `${Buffer.from(JSON.stringify(payload)).toString("base64")}.${signature}`;
 };
