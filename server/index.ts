@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
 import { handleLogin, handleSignup } from "./routes/auth";
+import { addToQueue, getQueuedLines, clearQueuedLine } from "./routes/queued";
+import { addToHistory, getHistory, searchHistory } from "./routes/history";
 
 export function createServer() {
   const app = express();
@@ -24,10 +26,15 @@ export function createServer() {
   app.post("/api/auth/login", handleLogin);
   app.post("/api/auth/signup", handleSignup);
 
-  // Queued list routes (placeholder)
-  app.post("/api/queued/add", (_req, res) => {
-    res.json({ success: true, message: "Added to queue" });
-  });
+  // Queued list routes
+  app.post("/api/queued/add", addToQueue);
+  app.get("/api/queued", getQueuedLines);
+  app.delete("/api/queued/:lineId", clearQueuedLine);
+
+  // History routes
+  app.post("/api/history/add", addToHistory);
+  app.get("/api/history", getHistory);
+  app.get("/api/history/search", searchHistory);
 
   return app;
 }
