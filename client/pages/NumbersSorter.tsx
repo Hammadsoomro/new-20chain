@@ -175,11 +175,11 @@ export default function NumbersSorter() {
               <CardContent className="space-y-3">
                 <Button
                   onClick={addToQueue}
-                  disabled={deduplicated.length === 0}
+                  disabled={deduplicated.length === 0 || isLoading}
                   className="w-full bg-primary hover:bg-primary/90 h-10"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Add to Queued List
+                  {isLoading ? "Adding..." : "Add to Queued List"}
                 </Button>
                 <Button
                   onClick={copyToClipboard}
