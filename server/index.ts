@@ -21,6 +21,19 @@ import { uploadProfilePicture, getProfile } from "./routes/profile";
 import { connectDB } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { getCollections } from "./db";
+import { Server } from "socket.io";
+import http from "http";
+
+export let io: Server;
+let httpServer: http.Server;
+
+export function getIO() {
+  return io;
+}
+
+export function getHttpServer() {
+  return httpServer;
+}
 
 export async function createServer() {
   // Initialize MongoDB connection
@@ -33,6 +46,13 @@ export async function createServer() {
   }
 
   const app = express();
+  httpServer = http.createServer(app);
+  io = new Server(httpServer, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
   // Middleware
   app.use(cors());
