@@ -83,7 +83,7 @@ export function ChatContactList({
               }`}
             >
               <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage src={member.profilePicture} />
+                <AvatarImage src={member.profilePictureUrl || member.profilePicture} />
                 <AvatarFallback className="bg-primary/20 text-primary text-xs">
                   {getInitials(member.name)}
                 </AvatarFallback>
