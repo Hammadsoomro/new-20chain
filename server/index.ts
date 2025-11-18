@@ -10,6 +10,11 @@ import {
   sendMessage,
   getMessages,
   addMemberToGroup,
+  setTyping,
+  getTypingStatus,
+  markMessageAsRead,
+  editMessage,
+  deleteMessage,
 } from "./routes/chat";
 import { createTeamMember, getTeamMembers } from "./routes/members";
 import { connectDB } from "./db";
