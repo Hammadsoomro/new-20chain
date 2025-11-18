@@ -69,10 +69,13 @@ export async function createServer() {
 
   // Chat routes
   app.get("/api/chat/group", getOrCreateGroupChat);
-  app.get("/api/chat/members", getTeamMembers);
   app.post("/api/chat/send", sendMessage);
   app.get("/api/chat/messages", getMessages);
   app.post("/api/chat/group/add-member", addMemberToGroup);
+
+  // Member routes
+  app.get("/api/members", getTeamMembers);
+  app.post("/api/members", createTeamMember);
 
   return app;
 }
