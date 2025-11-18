@@ -22,15 +22,10 @@ setInterval(() => {
 }, 1000);
 
 export function setTypingIndicator(indicator: TypingIndicator) {
-  typingIndicators.set(
-    `${indicator.userId}-${indicator.chatId}`,
-    indicator,
-  );
+  typingIndicators.set(`${indicator.userId}-${indicator.chatId}`, indicator);
 }
 
-export function getTypingIndicators(
-  chatId: string,
-): TypingIndicator[] {
+export function getTypingIndicators(chatId: string): TypingIndicator[] {
   const indicators: TypingIndicator[] = [];
   typingIndicators.forEach((indicator) => {
     if (

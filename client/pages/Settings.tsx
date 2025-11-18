@@ -13,7 +13,14 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Upload, AlertCircle, Check, User, Users, Settings as SettingsIcon } from "lucide-react";
+import {
+  Upload,
+  AlertCircle,
+  Check,
+  User,
+  Users,
+  Settings as SettingsIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 
 export default function SettingsPage() {
@@ -227,9 +234,7 @@ export default function SettingsPage() {
               <Card>
                 <CardHeader>
                   <CardTitle>Account Information</CardTitle>
-                  <CardDescription>
-                    Your account details
-                  </CardDescription>
+                  <CardDescription>Your account details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">

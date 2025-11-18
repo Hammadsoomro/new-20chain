@@ -47,7 +47,8 @@ export function ChatContactList({
             <button
               onClick={onSelectGroup}
               className={`w-full p-3 rounded-lg transition-colors flex items-center gap-3 ${
-                selectedChat?.type === "group" && selectedChat?.id === groupChat._id
+                selectedChat?.type === "group" &&
+                selectedChat?.id === groupChat._id
                   ? "bg-primary/10"
                   : "hover:bg-muted"
               }`}
@@ -77,13 +78,16 @@ export function ChatContactList({
               key={member._id}
               onClick={() => onSelectMember(member)}
               className={`w-full p-3 rounded-lg transition-colors flex items-center gap-3 ${
-                selectedChat?.type === "direct" && selectedChat?.id === member._id
+                selectedChat?.type === "direct" &&
+                selectedChat?.id === member._id
                   ? "bg-primary/10"
                   : "hover:bg-muted"
               }`}
             >
               <Avatar className="h-10 w-10 flex-shrink-0">
-                <AvatarImage src={member.profilePictureUrl || member.profilePicture} />
+                <AvatarImage
+                  src={member.profilePictureUrl || member.profilePicture}
+                />
                 <AvatarFallback className="bg-primary/20 text-primary text-xs">
                   {getInitials(member.name)}
                 </AvatarFallback>

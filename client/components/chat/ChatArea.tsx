@@ -115,7 +115,9 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
 
         if (response.ok) {
           const data = await response.json();
-          setTypingUsers(data.filter((t: TypingIndicator) => t.userId !== user?._id));
+          setTypingUsers(
+            data.filter((t: TypingIndicator) => t.userId !== user?._id),
+          );
         }
       } catch (error) {
         console.error("Error fetching typing status:", error);
@@ -391,7 +393,11 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
                                   <MoreVertical className="h-4 w-4 text-muted-foreground" />
                                 </button>
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align={message.sender === user?._id ? "end" : "start"}>
+                              <DropdownMenuContent
+                                align={
+                                  message.sender === user?._id ? "end" : "start"
+                                }
+                              >
                                 <DropdownMenuItem
                                   onClick={() => {
                                     setEditingId(message._id);
