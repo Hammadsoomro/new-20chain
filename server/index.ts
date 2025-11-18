@@ -5,6 +5,19 @@ import { handleDemo } from "./routes/demo";
 import { handleLogin, handleSignup } from "./routes/auth";
 import { addToQueue, getQueuedLines, clearQueuedLine } from "./routes/queued";
 import { addToHistory, getHistory, searchHistory } from "./routes/history";
+import {
+  getOrCreateGroupChat,
+  sendMessage,
+  getMessages,
+  addMemberToGroup,
+  setTyping,
+  getTypingStatus,
+  markMessageAsRead,
+  editMessage,
+  deleteMessage,
+} from "./routes/chat";
+import { createTeamMember, getTeamMembers } from "./routes/members";
+import { uploadProfilePicture, getProfile } from "./routes/profile";
 import { connectDB } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { getCollections } from "./db";
@@ -47,6 +60,8 @@ export async function createServer() {
   // Protected routes
   app.use("/api/queued", authMiddleware);
   app.use("/api/history", authMiddleware);
+  app.use("/api/chat", authMiddleware);
+  app.use("/api/members", authMiddleware);
 
   // Queued list routes
   app.post("/api/queued/add", addToQueue);
@@ -57,6 +72,25 @@ export async function createServer() {
   app.post("/api/history/add", addToHistory);
   app.get("/api/history", getHistory);
   app.get("/api/history/search", searchHistory);
+
+  // Chat routes
+  app.get("/api/chat/group", getOrCreateGroupChat);
+  app.post("/api/chat/send", sendMessage);
+  app.get("/api/chat/messages", getMessages);
+  app.post("/api/chat/group/add-member", addMemberToGroup);
+  app.post("/api/chat/typing", setTyping);
+  app.get("/api/chat/typing", getTypingStatus);
+  app.post("/api/chat/mark-read", markMessageAsRead);
+  app.post("/api/chat/edit", editMessage);
+  app.post("/api/chat/delete", deleteMessage);
+
+  // Member routes
+  app.get("/api/members", getTeamMembers);
+  app.post("/api/members", createTeamMember);
+
+  // Profile routes
+  app.get("/api/profile", getProfile);
+  app.post("/api/profile/upload-picture", uploadProfilePicture);
 
   return app;
 }

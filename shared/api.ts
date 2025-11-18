@@ -16,6 +16,7 @@ export interface User {
   name: string;
   role: UserRole;
   profilePicture?: string;
+  profilePictureUrl?: string;
   createdBy?: string;
   teamId: string;
   createdAt: string;
@@ -80,6 +81,10 @@ export interface ChatMessage {
   groupId?: string;
   content: string;
   createdAt: string;
+  editedAt?: string;
+  deleted?: boolean;
+  deletedAt?: string;
+  readBy?: string[];
 }
 
 export interface ChatGroup {
