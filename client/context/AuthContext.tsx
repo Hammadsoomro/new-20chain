@@ -81,7 +81,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (!response.ok) {
-        throw new Error("Signup failed");
+        const error = await response.json();
+        throw new Error(error.error || "Signup failed");
       }
 
       const data: AuthResponse = await response.json();
@@ -90,6 +91,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
+    } catch (error) {
+      throw error;
     } finally {
       setIsLoading(false);
     }
