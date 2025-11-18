@@ -45,36 +45,6 @@ export const getOrCreateGroupChat: RequestHandler = async (
   }
 };
 
-// Get team members
-export const getTeamMembers: RequestHandler = async (req: AuthRequest, res) => {
-  try {
-    if (!req.teamId) {
-      res.status(401).json({ error: "Team not found" });
-      return;
-    }
-
-    const collections = getCollections();
-    const members = await collections.users
-      .find({ teamId: req.teamId })
-      .toArray();
-
-    const formattedMembers = members.map((member) => ({
-      _id: member._id.toString(),
-      email: member.email,
-      name: member.name,
-      role: member.role,
-      profilePicture: member.profilePicture,
-      createdAt: member.createdAt,
-      updatedAt: member.updatedAt,
-    }));
-
-    res.json(formattedMembers);
-  } catch (error) {
-    console.error("Error getting team members:", error);
-    res.status(500).json({ error: "Failed to get team members" });
-  }
-};
-
 // Send message (1-on-1 or group)
 export const sendMessage: RequestHandler = async (req: AuthRequest, res) => {
   try {
