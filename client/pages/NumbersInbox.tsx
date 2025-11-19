@@ -195,10 +195,10 @@ export default function NumbersInbox() {
             </Card>
             <Card className="p-6">
               <div className="text-sm text-muted-foreground mb-1">
-                Can Claim Again
+                Status
               </div>
-              <div className="text-3xl font-bold text-green-600">
-                {readyToClaim ? "Yes" : "No"}
+              <div className={`text-3xl font-bold ${canClaim ? "text-green-600" : "text-red-600"}`}>
+                {canClaim ? "Ready" : "Cooldown"}
               </div>
             </Card>
             <Card className="p-6">
