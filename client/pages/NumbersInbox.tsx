@@ -94,27 +94,28 @@ export default function NumbersInbox() {
     fetchData();
   }, [token]);
 
-  // Update remaining cooldown time
+  // Update remaining cooldown time for main button
   useEffect(() => {
     const interval = setInterval(() => {
-      const remaining: Record<string, string> = {};
+      if (claimedNumbers.length === 0) {
+        setCooldownTimer("");
+        return;
+      }
 
-      claimedNumbers.forEach((num) => {
-        const cooldownTime = new Date(num.cooldownUntil);
-        const now = new Date();
-        const diff = cooldownTime.getTime() - now.getTime();
+      // Get the first claimed number's cooldown time
+      const firstCooldown = claimedNumbers[0];
+      const cooldownTime = new Date(firstCooldown.cooldownUntil);
+      const now = new Date();
+      const diff = cooldownTime.getTime() - now.getTime();
 
-        if (diff <= 0) {
-          remaining[num._id] = "Ready";
-          setCanClaim(true);
-        } else {
-          const minutes = Math.floor(diff / 60000);
-          const seconds = Math.floor((diff % 60000) / 1000);
-          remaining[num._id] = `${minutes}m ${seconds}s`;
-        }
-      });
-
-      setTimeRemaining(remaining);
+      if (diff <= 0) {
+        setCooldownTimer("");
+        setCanClaim(true);
+      } else {
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setCooldownTimer(`${minutes}m ${seconds}s`);
+      }
     }, 1000);
 
     return () => clearInterval(interval);
