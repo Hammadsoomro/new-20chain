@@ -99,5 +99,13 @@ export async function createServer() {
   app.get("/api/profile", getProfile);
   app.post("/api/profile/upload-picture", uploadProfilePicture);
 
+  // Claim routes (protected)
+  app.use("/api/claim", authMiddleware);
+  app.get("/api/claim/settings", getClaimSettings);
+  app.put("/api/claim/settings", updateClaimSettings);
+  app.post("/api/claim", claimNumbers);
+  app.get("/api/claim/numbers", getClaimedNumbers);
+  app.post("/api/claim/release", releaseClaimedNumbers);
+
   return app;
 }
