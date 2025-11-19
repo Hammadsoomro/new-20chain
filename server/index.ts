@@ -18,6 +18,13 @@ import {
 } from "./routes/chat";
 import { createTeamMember, getTeamMembers } from "./routes/members";
 import { uploadProfilePicture, getProfile } from "./routes/profile";
+import {
+  getClaimSettings,
+  updateClaimSettings,
+  claimNumbers,
+  getClaimedNumbers,
+  releaseClaimedNumbers,
+} from "./routes/claim";
 import { connectDB } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { getCollections } from "./db";
