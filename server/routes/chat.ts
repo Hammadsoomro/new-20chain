@@ -43,7 +43,13 @@ export const getOrCreateGroupChat: RequestHandler = async (
       };
     }
 
-    res.json(group);
+    res.json({
+      _id: group._id.toString(),
+      name: group.name,
+      teamId: group.teamId,
+      members: group.members,
+      createdAt: group.createdAt,
+    });
   } catch (error) {
     console.error("Error getting group chat:", error);
     res.status(500).json({ error: "Failed to get group chat" });
