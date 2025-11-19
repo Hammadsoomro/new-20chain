@@ -188,7 +188,14 @@ export const addMemberToGroup: RequestHandler = async (
       return;
     }
 
-    res.json(result.value);
+    const group = result.value;
+    res.json({
+      _id: group._id.toString(),
+      name: group.name,
+      teamId: group.teamId,
+      members: group.members,
+      createdAt: group.createdAt,
+    });
   } catch (error) {
     console.error("Error adding member to group:", error);
     res.status(500).json({ error: "Failed to add member to group" });
