@@ -99,7 +99,9 @@ function SorterSettingsPanel() {
       if (response.ok) {
         toast.success("Settings updated successfully");
       } else {
-        toast.error("Failed to update settings");
+        const errorData = await response.json();
+        console.error("Settings save error:", errorData);
+        toast.error(errorData.error || "Failed to update settings");
       }
     } catch (error) {
       console.error("Error saving settings:", error);
