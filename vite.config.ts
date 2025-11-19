@@ -99,9 +99,18 @@ function expressPlugin(): Plugin {
           );
 
           // User marks message as read
-          socket.on("message-read", (data: { messageId: string; userId: string }) => {
-            io!.emit("message-read", data);
-          });
+          socket.on(
+            "message-read",
+            (data: {
+              messageId: string;
+              userId: string;
+              chatId?: string;
+            }) => {
+              // Broadcast to all users (they'll filter by messageId)
+              io!.emit("message-read", data);
+              console.log(`[Socket.IO] Message marked as read: ${data.messageId}`);
+            }
+          );
 
           // User edits a message
           socket.on(
