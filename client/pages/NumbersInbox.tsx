@@ -22,9 +22,6 @@ export default function NumbersInbox() {
     lineCount: 5,
     cooldownMinutes: 30,
   });
-  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>(
-    {},
-  );
   const [canClaim, setCanClaim] = useState(false);
   const [queuedLinesAvailable, setQueuedLinesAvailable] = useState(true);
   const [cooldownTimer, setCooldownTimer] = useState<string>("");
