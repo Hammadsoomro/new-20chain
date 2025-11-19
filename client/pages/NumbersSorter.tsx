@@ -141,7 +141,10 @@ export default function NumbersSorter() {
         },
         body: JSON.stringify({
           lineCount: Math.max(1, Math.min(100, settings.lineCount)),
-          cooldownMinutes: Math.max(1, Math.min(1440, settings.cooldownMinutes)),
+          cooldownMinutes: Math.max(
+            1,
+            Math.min(1440, settings.cooldownMinutes),
+          ),
         }),
       });
 
@@ -152,7 +155,7 @@ export default function NumbersSorter() {
       }
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to update settings"
+        error instanceof Error ? error.message : "Failed to update settings",
       );
     } finally {
       setSavingSettings(false);
@@ -304,7 +307,8 @@ export default function NumbersSorter() {
               <CardHeader>
                 <CardTitle>Claim Settings</CardTitle>
                 <CardDescription>
-                  Configure how many numbers users can claim at once and the cooldown time
+                  Configure how many numbers users can claim at once and the
+                  cooldown time
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -328,10 +332,13 @@ export default function NumbersSorter() {
                         }
                         className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
                       />
-                      <span className="text-sm text-muted-foreground">lines</span>
+                      <span className="text-sm text-muted-foreground">
+                        lines
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      How many numbers each team member can claim at once (1-100)
+                      How many numbers each team member can claim at once
+                      (1-100)
                     </p>
                   </div>
 
@@ -354,10 +361,13 @@ export default function NumbersSorter() {
                         }
                         className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
                       />
-                      <span className="text-sm text-muted-foreground">minutes</span>
+                      <span className="text-sm text-muted-foreground">
+                        minutes
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      How long users must wait before claiming again (1-1440 minutes)
+                      How long users must wait before claiming again (1-1440
+                      minutes)
                     </p>
                   </div>
                 </div>

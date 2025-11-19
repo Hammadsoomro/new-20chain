@@ -77,7 +77,7 @@ export const updateClaimSettings: RequestHandler = async (req, res) => {
           updatedAt: new Date().toISOString(),
         },
       },
-      { returnDocument: "after", upsert: true }
+      { returnDocument: "after", upsert: true },
     );
 
     res.json({
@@ -134,7 +134,7 @@ export const claimNumbers: RequestHandler = async (req, res) => {
     const claimedLineIds = availableLines.map((line) => line._id);
     const claimedAt = new Date().toISOString();
     const cooldownUntil = new Date(
-      Date.now() + cooldownMinutes * 60 * 1000
+      Date.now() + cooldownMinutes * 60 * 1000,
     ).toISOString();
 
     // Insert into claimedNumbers
@@ -147,9 +147,8 @@ export const claimNumbers: RequestHandler = async (req, res) => {
       teamId,
     }));
 
-    const claimResult = await collections.claimedNumbers.insertMany(
-      claimedRecords
-    );
+    const claimResult =
+      await collections.claimedNumbers.insertMany(claimedRecords);
 
     // Add to history
     const historyRecords = availableLines.map((line) => ({

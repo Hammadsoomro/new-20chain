@@ -52,13 +52,15 @@ export default function TeamChat() {
 
         if (convIndex !== -1) {
           const conversation = updated[convIndex];
-          
+
           // Only increment unread if this message is not from current user and chat is not selected
           if (data.sender !== user._id && selectedChat?.id !== data.chatId) {
             conversation.unreadCount = (conversation.unreadCount || 0) + 1;
-            console.log(`[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`);
+            console.log(
+              `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
+            );
           }
-          
+
           conversation.lastMessageTime = data.timestamp;
 
           // Move conversation to top
@@ -173,7 +175,7 @@ export default function TeamChat() {
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(
         0.01,
-        audioContext.currentTime + 0.2
+        audioContext.currentTime + 0.2,
       );
 
       oscillator.start(audioContext.currentTime);
@@ -187,7 +189,7 @@ export default function TeamChat() {
 
   const handleSelectChat = (conversation: ChatConversation) => {
     console.log("[TeamChat] Selected chat:", conversation.id);
-    
+
     setSelectedChat({
       type: conversation.type,
       id: conversation.id,
@@ -197,8 +199,8 @@ export default function TeamChat() {
     // Mark as read - reset unread count
     setConversations((prev) =>
       prev.map((conv) =>
-        conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv
-      )
+        conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv,
+      ),
     );
   };
 

@@ -22,7 +22,9 @@ export default function NumbersInbox() {
     lineCount: 5,
     cooldownMinutes: 30,
   });
-  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>({});
+  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>(
+    {},
+  );
   const [canClaim, setCanClaim] = useState(false);
 
   // Fetch claim settings
@@ -61,7 +63,7 @@ export default function NumbersInbox() {
         if (response.ok) {
           const data = await response.json();
           setClaimedNumbers(data);
-          
+
           // Check if user can claim (no active cooldown)
           const hasActiveCooldown = data.some((num: ClaimedNumber) => {
             return new Date(num.cooldownUntil) > new Date();
@@ -193,8 +195,8 @@ export default function NumbersInbox() {
                 Claim Settings
               </div>
               <div className="text-sm text-foreground">
-                {settings.lineCount} lines per claim • {settings.cooldownMinutes}{" "}
-                min cooldown
+                {settings.lineCount} lines per claim •{" "}
+                {settings.cooldownMinutes} min cooldown
               </div>
             </Card>
           </div>
@@ -258,11 +260,15 @@ export default function NumbersInbox() {
           ) : (
             <div>
               <h2 className="text-xl font-bold text-foreground mb-4">
-                Your Claimed Numbers ({claimedNumbers.length}/{settings.lineCount})
+                Your Claimed Numbers ({claimedNumbers.length}/
+                {settings.lineCount})
               </h2>
               <div className="space-y-3">
                 {claimedNumbers.map((number, index) => (
-                  <Card key={number._id} className="p-4 hover:shadow-md transition-shadow">
+                  <Card
+                    key={number._id}
+                    className="p-4 hover:shadow-md transition-shadow"
+                  >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex items-start gap-4 flex-1">
                         <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
