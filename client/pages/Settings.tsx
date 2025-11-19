@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,799 @@ import {
   User,
   Users,
   Settings as SettingsIcon,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
+
+interface ClaimSettings {
+  lineCount: number;
+  cooldownMinutes: number;
+}
+
+// Sorter Settings Panel Component
+function SorterSettingsPanel() {
+  const { token, isAdmin } = useAuth();
+  const [settings, setSettings] = useState<ClaimSettings>({
+    lineCount: 5,
+    cooldownMinutes: 30,
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const cooldownOptions = [30, 60, 120, 180, 240, 300, 360, 3600];
+  const cooldownLabels = [
+    "30s",
+    "1m",
+    "2m",
+    "3m",
+    "4m",
+    "5m",
+    "6m",
+    "60m",
+  ];
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!token || !isAdmin) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch("/api/claim/settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSettings();
+  }, [token, isAdmin]);
+
+  const handleSaveSettings = async () => {
+    if (!token || !isAdmin) return;
+
+    try {
+      setSaving(true);
+      const response = await fetch("/api/claim/settings", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
+      });
+
+      if (response.ok) {
+        toast.success("Settings updated successfully");
+      } else {
+        toast.error("Failed to update settings");
+      }
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast.error("Failed to update settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">
+            Loading settings...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Numbers Claim Settings</CardTitle>
+        <CardDescription>
+          Configure cooldown timer and claim line count
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">
+                Cooldown Timer (seconds)
+              </Label>
+              <span className="text-sm font-semibold text-primary">
+                {cooldownLabels[cooldownOptions.indexOf(settings.cooldownMinutes)] ||
+                  settings.cooldownMinutes + "s"}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max={cooldownOptions.length - 1}
+              step="1"
+              value={cooldownOptions.indexOf(settings.cooldownMinutes)}
+              onChange={(e) => {
+                const index = parseInt(e.target.value);
+                setSettings({
+                  ...settings,
+                  cooldownMinutes: cooldownOptions[index],
+                });
+              }}
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>30s</span>
+              <span>60m</span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">
+                Lines to Claim Per Request
+              </Label>
+              <span className="text-sm font-semibold text-primary">
+                {settings.lineCount} lines
+              </span>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="15"
+              step="1"
+              value={settings.lineCount}
+              onChange={(e) => {
+                setSettings({
+                  ...settings,
+                  lineCount: parseInt(e.target.value),
+                });
+              }}
+              className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>1 line</span>
+              <span>15 lines</span>
+            </div>
+          </div>
+        </div>
+
+        <Button
+          onClick={handleSaveSettings}
+          disabled={saving}
+          className="w-full"
+        >
+          {saving ? "Saving..." : "Save Settings"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Account Information Panel Component
+function AccountInfoPanel({
+  user,
+  token,
+}: {
+  user: any;
+  token: string | null;
+}) {
+  const [editName, setEditName] = useState(false);
+  const [newName, setNewName] = useState(user?.name || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSaveName = async () => {
+    if (!token || !newName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await fetch("/api/profile/update-name", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        toast.success("Name updated successfully");
+        setEditName(false);
+      } else {
+        toast.error("Failed to update name");
+      }
+    } catch (error) {
+      console.error("Error updating name:", error);
+      toast.error("Failed to update name");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Account Information</CardTitle>
+        <CardDescription>Manage your account details</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Name</Label>
+          {editName ? (
+            <div className="flex gap-2">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter your name"
+              />
+              <Button
+                onClick={handleSaveName}
+                disabled={saving}
+                size="sm"
+                className="flex-shrink-0"
+              >
+                {saving ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                onClick={() => {
+                  setEditName(false);
+                  setNewName(user?.name || "");
+                }}
+                variant="outline"
+                size="sm"
+                className="flex-shrink-0"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+              <Input
+                value={user?.name || ""}
+                disabled
+                className="bg-transparent border-0"
+              />
+              <Button
+                onClick={() => setEditName(true)}
+                variant="outline"
+                size="sm"
+              >
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Email</Label>
+          <Input
+            value={user?.email || ""}
+            disabled
+            className="bg-muted"
+          />
+          <p className="text-xs text-muted-foreground">
+            Email cannot be changed
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Role</Label>
+          <Input
+            value={user?.role || ""}
+            disabled
+            className="bg-muted capitalize"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Password Change Panel Component
+function PasswordChangePanel({
+  user,
+  token,
+}: {
+  user: any;
+  token: string | null;
+}) {
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !formData.currentPassword ||
+      !formData.newPassword ||
+      !formData.confirmPassword
+    ) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (formData.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await fetch("/api/profile/change-password", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Password changed successfully");
+        setFormData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to change password");
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error("Failed to change password");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Change Password</CardTitle>
+        <CardDescription>Update your account password</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleChangePassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password" className="text-sm font-medium">
+              Current Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="current-password"
+                type={showCurrentPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.currentPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    currentPassword: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showCurrentPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="new-password" className="text-sm font-medium">
+              New Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showNewPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.newPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    newPassword: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password" className="text-sm font-medium">
+              Confirm Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    confirmPassword: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <Button type="submit" disabled={saving} className="w-full">
+            {saving ? "Changing..." : "Change Password"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Team Account Creation Component
+function TeamMembersPanel() {
+  const { token, isAdmin } = useAuth();
+  const [members, setMembers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [showPasswords, setShowPasswords] = useState<{
+    [key: string]: boolean;
+  }>({});
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!token || !isAdmin) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch("/api/members", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setMembers(data);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMembers();
+  }, [token, isAdmin]);
+
+  const handleCreateMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const response = await fetch("/api/members", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (response.ok) {
+        const newMember = await response.json();
+        setMembers([...members, newMember]);
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          confirmPassword: "",
+        });
+        setShowForm(false);
+        toast.success("Team member created successfully");
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to create team member");
+      }
+    } catch (error) {
+      console.error("Error creating member:", error);
+      toast.error("Failed to create team member");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">
+            Loading team members...
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Create Team Member</CardTitle>
+          <CardDescription>
+            Add a new member to your team
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!showForm ? (
+            <Button onClick={() => setShowForm(true)} className="w-full">
+              Add New Team Member
+            </Button>
+          ) : (
+            <form onSubmit={handleCreateMember} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="member-name" className="text-sm font-medium">
+                  Name
+                </Label>
+                <Input
+                  id="member-name"
+                  placeholder="John Doe"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="member-email" className="text-sm font-medium">
+                  Email
+                </Label>
+                <Input
+                  id="member-email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="member-password"
+                  className="text-sm font-medium"
+                >
+                  Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="member-password"
+                    type={showPasswords["password"] ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        password: !showPasswords["password"],
+                      })
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPasswords["password"] ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="member-confirm-password"
+                  className="text-sm font-medium"
+                >
+                  Confirm Password
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="member-confirm-password"
+                    type={
+                      showPasswords["confirmPassword"] ? "text" : "password"
+                    }
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        confirmPassword: !showPasswords["confirmPassword"],
+                      })
+                    }
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPasswords["confirmPassword"] ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-4">
+                <Button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1"
+                >
+                  {submitting ? "Creating..." : "Create Member"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setShowForm(false);
+                    setFormData({
+                      name: "",
+                      email: "",
+                      password: "",
+                      confirmPassword: "",
+                    });
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Team Members</CardTitle>
+          <CardDescription>
+            {members.length} member{members.length !== 1 ? "s" : ""} in your team
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {members.length === 0 ? (
+            <div className="text-center text-muted-foreground py-6">
+              No team members yet
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {members.map((member) => (
+                <div
+                  key={member._id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">
+                      {member.name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {member.email}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-foreground capitalize">
+                      {member.role}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(member.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const { user, token, isAdmin } = useAuth();
@@ -231,196 +1022,23 @@ export default function SettingsPage() {
               </Card>
 
               {/* Account Information Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account Information</CardTitle>
-                  <CardDescription>Your account details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Name</Label>
-                    <Input
-                      value={user?.name || ""}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Email</Label>
-                    <Input
-                      value={user?.email || ""}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Role</Label>
-                    <Input
-                      value={user?.role || ""}
-                      disabled
-                      className="bg-muted capitalize"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <AccountInfoPanel user={user} token={token} />
+
+              {/* Password Change Card */}
+              <PasswordChangePanel user={user} token={token} />
             </TabsContent>
 
             {/* Team Management Tab (Admin Only) */}
             {isAdmin && (
               <TabsContent value="team" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Team Management</CardTitle>
-                    <CardDescription>
-                      Manage your team members and their roles
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg flex gap-2">
-                        <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-blue-900">
-                            Team Management
-                          </p>
-                          <p className="text-sm text-blue-800 mt-1">
-                            View all team members, create new team members, and
-                            manage their roles in the Settings section
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-border">
-                        <h3 className="font-semibold text-foreground mb-4">
-                          Features
-                        </h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            View all team members and their profiles
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            Create new team members with custom credentials
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            Auto-add members to group chat
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            View member creation date and status
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <TeamMembersPanel />
               </TabsContent>
             )}
 
             {/* Sorter Settings Tab (Admin Only) */}
             {isAdmin && (
               <TabsContent value="sorter" className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Numbers Sorter Settings</CardTitle>
-                    <CardDescription>
-                      Configure settings for the Numbers Sorter tool
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg flex gap-2">
-                        <AlertCircle className="h-5 w-5 text-purple-600 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-medium text-purple-900">
-                            Sorter Configuration
-                          </p>
-                          <p className="text-sm text-purple-800 mt-1">
-                            Advanced settings for deduplication and queue
-                            management
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-border space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Deduplication Strategy
-                          </Label>
-                          <Input
-                            placeholder="First 15 words comparison"
-                            disabled
-                            className="bg-muted"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Compares the first 15 words of each line to identify
-                            duplicates
-                          </p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Maximum Lines Per Queue
-                          </Label>
-                          <Input
-                            placeholder="1000"
-                            disabled
-                            className="bg-muted"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Maximum number of lines that can be added at once
-                          </p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-sm font-medium">
-                            Auto-save to Local Storage
-                          </Label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              defaultChecked
-                              disabled
-                              className="rounded"
-                            />
-                            <span className="text-sm text-muted-foreground">
-                              Enabled
-                            </span>
-                          </div>
-                          <p className="text-xs text-muted-foreground">
-                            Automatically save your input to continue later
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="pt-4 border-t border-border">
-                        <h3 className="font-semibold text-foreground mb-4">
-                          Advanced Features
-                        </h3>
-                        <ul className="space-y-2 text-sm text-muted-foreground">
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            Real-time deduplication preview
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            Batch copy deduplicated lines
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            Add directly to queue
-                          </li>
-                          <li className="flex items-center gap-2">
-                            <Check className="h-4 w-4 text-green-600" />
-                            Statistics and analytics
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <SorterSettingsPanel />
               </TabsContent>
             )}
           </Tabs>

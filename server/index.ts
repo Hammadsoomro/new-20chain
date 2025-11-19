@@ -17,7 +17,12 @@ import {
   deleteMessage,
 } from "./routes/chat";
 import { createTeamMember, getTeamMembers } from "./routes/members";
-import { uploadProfilePicture, getProfile } from "./routes/profile";
+import {
+  uploadProfilePicture,
+  getProfile,
+  updateName,
+  changePassword,
+} from "./routes/profile";
 import {
   getClaimSettings,
   updateClaimSettings,
@@ -43,8 +48,8 @@ export async function createServer() {
 
   // Middleware
   app.use(cors());
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
   // Middleware to populate teamId and role from database (after auth middleware)
   app.use((req, res, next) => {
@@ -64,40 +69,36 @@ export async function createServer() {
   app.post("/api/auth/login", handleLogin);
   app.post("/api/auth/signup", handleSignup);
 
-  // Protected routes
-  app.use("/api/queued", authMiddleware);
-  app.use("/api/history", authMiddleware);
-  app.use("/api/chat", authMiddleware);
-  app.use("/api/members", authMiddleware);
+  // Queued list routes (protected)
+  app.post("/api/queued/add", authMiddleware, addToQueue);
+  app.get("/api/queued", authMiddleware, getQueuedLines);
+  app.delete("/api/queued/:lineId", authMiddleware, clearQueuedLine);
 
-  // Queued list routes
-  app.post("/api/queued/add", addToQueue);
-  app.get("/api/queued", getQueuedLines);
-  app.delete("/api/queued/:lineId", clearQueuedLine);
+  // History routes (protected)
+  app.post("/api/history/add", authMiddleware, addToHistory);
+  app.get("/api/history", authMiddleware, getHistory);
+  app.get("/api/history/search", authMiddleware, searchHistory);
 
-  // History routes
-  app.post("/api/history/add", addToHistory);
-  app.get("/api/history", getHistory);
-  app.get("/api/history/search", searchHistory);
+  // Chat routes (protected)
+  app.get("/api/chat/group", authMiddleware, getOrCreateGroupChat);
+  app.post("/api/chat/send", authMiddleware, sendMessage);
+  app.get("/api/chat/messages", authMiddleware, getMessages);
+  app.post("/api/chat/group/add-member", authMiddleware, addMemberToGroup);
+  app.post("/api/chat/typing", authMiddleware, setTyping);
+  app.get("/api/chat/typing", authMiddleware, getTypingStatus);
+  app.post("/api/chat/mark-read", authMiddleware, markMessageAsRead);
+  app.post("/api/chat/edit", authMiddleware, editMessage);
+  app.post("/api/chat/delete", authMiddleware, deleteMessage);
 
-  // Chat routes
-  app.get("/api/chat/group", getOrCreateGroupChat);
-  app.post("/api/chat/send", sendMessage);
-  app.get("/api/chat/messages", getMessages);
-  app.post("/api/chat/group/add-member", addMemberToGroup);
-  app.post("/api/chat/typing", setTyping);
-  app.get("/api/chat/typing", getTypingStatus);
-  app.post("/api/chat/mark-read", markMessageAsRead);
-  app.post("/api/chat/edit", editMessage);
-  app.post("/api/chat/delete", deleteMessage);
+  // Member routes (protected)
+  app.get("/api/members", authMiddleware, getTeamMembers);
+  app.post("/api/members", authMiddleware, createTeamMember);
 
-  // Member routes
-  app.get("/api/members", getTeamMembers);
-  app.post("/api/members", createTeamMember);
-
-  // Profile routes
-  app.get("/api/profile", getProfile);
-  app.post("/api/profile/upload-picture", uploadProfilePicture);
+  // Profile routes (protected)
+  app.get("/api/profile", authMiddleware, getProfile);
+  app.post("/api/profile/upload-picture", authMiddleware, uploadProfilePicture);
+  app.post("/api/profile/update-name", authMiddleware, updateName);
+  app.post("/api/profile/change-password", authMiddleware, changePassword);
 
   // Claim routes (protected)
   app.use("/api/claim", authMiddleware);

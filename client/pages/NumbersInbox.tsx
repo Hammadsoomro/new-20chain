@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
@@ -22,10 +22,9 @@ export default function NumbersInbox() {
     lineCount: 5,
     cooldownMinutes: 30,
   });
-  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>(
-    {},
-  );
   const [canClaim, setCanClaim] = useState(false);
+  const [queuedLinesAvailable, setQueuedLinesAvailable] = useState(true);
+  const [cooldownTimer, setCooldownTimer] = useState<string>("");
 
   // Fetch claim settings
   useEffect(() => {
@@ -49,19 +48,21 @@ export default function NumbersInbox() {
     fetchSettings();
   }, [token]);
 
-  // Fetch claimed numbers
+  // Fetch claimed numbers and check queued lines availability
   useEffect(() => {
-    const fetchClaimedNumbers = async () => {
+    const fetchData = async () => {
       if (!token) return;
 
       try {
         setLoading(true);
-        const response = await fetch("/api/claim/numbers", {
+
+        // Fetch claimed numbers
+        const claimResponse = await fetch("/api/claim/numbers", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.ok) {
-          const data = await response.json();
+        if (claimResponse.ok) {
+          const data = await claimResponse.json();
           setClaimedNumbers(data);
 
           // Check if user can claim (no active cooldown)
@@ -70,37 +71,53 @@ export default function NumbersInbox() {
           });
           setCanClaim(!hasActiveCooldown);
         }
+
+        // Fetch queued lines to check availability
+        const queueResponse = await fetch("/api/queued", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (queueResponse.ok) {
+          const queueData = await queueResponse.json();
+          console.log("Queued lines fetched:", queueData);
+          setQueuedLinesAvailable(Array.isArray(queueData) && queueData.length > 0);
+        } else {
+          console.error("Failed to fetch queued lines:", queueResponse.status);
+          setQueuedLinesAvailable(false);
+        }
       } catch (error) {
-        console.error("Error fetching claimed numbers:", error);
+        console.error("Error fetching data:", error);
+        setQueuedLinesAvailable(false);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClaimedNumbers();
+    fetchData();
   }, [token]);
 
-  // Update remaining cooldown time
+  // Update remaining cooldown time for main button
   useEffect(() => {
     const interval = setInterval(() => {
-      const remaining: Record<string, string> = {};
+      if (claimedNumbers.length === 0) {
+        setCooldownTimer("");
+        return;
+      }
 
-      claimedNumbers.forEach((num) => {
-        const cooldownTime = new Date(num.cooldownUntil);
-        const now = new Date();
-        const diff = cooldownTime.getTime() - now.getTime();
+      // Get the first claimed number's cooldown time
+      const firstCooldown = claimedNumbers[0];
+      const cooldownTime = new Date(firstCooldown.cooldownUntil);
+      const now = new Date();
+      const diff = cooldownTime.getTime() - now.getTime();
 
-        if (diff <= 0) {
-          remaining[num._id] = "Ready";
-          setCanClaim(true);
-        } else {
-          const minutes = Math.floor(diff / 60000);
-          const seconds = Math.floor((diff % 60000) / 1000);
-          remaining[num._id] = `${minutes}m ${seconds}s`;
-        }
-      });
-
-      setTimeRemaining(remaining);
+      if (diff <= 0) {
+        setCooldownTimer("");
+        setCanClaim(true);
+      } else {
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        setCooldownTimer(`${minutes}m ${seconds}s`);
+      }
     }, 1000);
 
     return () => clearInterval(interval);
@@ -152,7 +169,6 @@ export default function NumbersInbox() {
   };
 
   const totalClaimed = claimedNumbers.length;
-  const readyToClaim = timeRemaining[claimedNumbers[0]?._id] === "Ready";
 
   return (
     <Layout>
@@ -184,10 +200,10 @@ export default function NumbersInbox() {
             </Card>
             <Card className="p-6">
               <div className="text-sm text-muted-foreground mb-1">
-                Can Claim Again
+                Status
               </div>
-              <div className="text-3xl font-bold text-green-600">
-                {readyToClaim ? "Yes" : "No"}
+              <div className={`text-3xl font-bold ${canClaim ? "text-green-600" : "text-red-600"}`}>
+                {canClaim ? "Ready" : "Cooldown"}
               </div>
             </Card>
             <Card className="p-6">
@@ -209,35 +225,61 @@ export default function NumbersInbox() {
                   Ready to Claim Numbers?
                 </h2>
                 <p className="text-muted-foreground">
-                  {canClaim
-                    ? `Click the button below to claim ${settings.lineCount} new numbers`
-                    : "You need to complete the cooldown before claiming again"}
+                  {!queuedLinesAvailable
+                    ? "No lines available in queue"
+                    : canClaim
+                      ? `Click the button below to claim ${settings.lineCount} new numbers`
+                      : `Cooldown active: ${cooldownTimer || "Loading..."}`}
                 </p>
               </div>
 
-              <Button
-                onClick={handleClaimNumbers}
-                disabled={!canClaim || claiming || loading}
-                size="lg"
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
-              >
-                {claiming ? (
-                  <>
-                    <Clock className="h-5 w-5 mr-2 animate-spin" />
-                    Claiming...
-                  </>
-                ) : canClaim ? (
-                  <>
-                    <AlertCircle className="h-5 w-5 mr-2" />
-                    Claim {settings.lineCount} Numbers
-                  </>
-                ) : (
-                  <>
-                    <Clock className="h-5 w-5 mr-2" />
-                    On Cooldown
-                  </>
-                )}
-              </Button>
+              {(() => {
+                let buttonClass = "";
+                let buttonEmoji = "";
+                let buttonText = "";
+                let isDisabled = false;
+
+                if (!queuedLinesAvailable) {
+                  buttonClass = "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
+                  buttonEmoji = "⚪️";
+                  buttonText = "No Lines Available";
+                  isDisabled = true;
+                } else if (!canClaim && cooldownTimer) {
+                  buttonClass = "bg-red-600 hover:bg-red-700 text-white";
+                  buttonEmoji = "🔴";
+                  buttonText = `Cooldown: ${cooldownTimer}`;
+                  isDisabled = true;
+                } else if (canClaim) {
+                  buttonClass = "bg-green-600 hover:bg-green-700 text-white";
+                  buttonEmoji = "🟢";
+                  buttonText = `Claim ${settings.lineCount} Numbers`;
+                  isDisabled = false;
+                } else {
+                  buttonClass = "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
+                  buttonEmoji = "⚪️";
+                  buttonText = "No Lines Available";
+                  isDisabled = true;
+                }
+
+                return (
+                  <Button
+                    onClick={handleClaimNumbers}
+                    disabled={isDisabled || claiming || loading}
+                    size="lg"
+                    className={`${buttonClass} px-8 py-6 text-lg font-semibold`}
+                  >
+                    <span className="mr-2">{buttonEmoji}</span>
+                    {claiming ? (
+                      <>
+                        <Clock className="h-5 w-5 mr-2 animate-spin" />
+                        Claiming...
+                      </>
+                    ) : (
+                      buttonText
+                    )}
+                  </Button>
+                );
+              })()}
             </div>
           </Card>
 
@@ -282,21 +324,6 @@ export default function NumbersInbox() {
                             Claimed at: {formatDate(number.claimedAt)}
                           </p>
                         </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <div className="text-right">
-                          <p className="text-xs text-muted-foreground">
-                            Cooldown Time Left
-                          </p>
-                          <p className="text-lg font-bold text-yellow-600">
-                            {timeRemaining[number._id] || "Calculating..."}
-                          </p>
-                        </div>
-                        {timeRemaining[number._id] === "Ready" && (
-                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
-                            Ready to Claim Again
-                          </span>
-                        )}
                       </div>
                     </div>
                   </Card>

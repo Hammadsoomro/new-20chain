@@ -53,9 +53,9 @@ export const getClaimSettings: RequestHandler = async (req, res) => {
 export const updateClaimSettings: RequestHandler = async (req, res) => {
   try {
     const teamId = (req as any).teamId;
-    const isAdmin = (req as any).isAdmin;
+    const role = (req as any).role;
 
-    if (!teamId || !isAdmin) {
+    if (!teamId || role !== "admin") {
       res.status(403).json({ error: "Admin access required" });
       return;
     }
