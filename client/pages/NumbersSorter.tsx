@@ -125,6 +125,40 @@ export default function NumbersSorter() {
     }
   };
 
+  const saveSettings = async () => {
+    if (!token || !isAdmin) {
+      toast.error("Admin access required");
+      return;
+    }
+
+    try {
+      setSavingSettings(true);
+      const response = await fetch("/api/claim/settings", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          lineCount: Math.max(1, Math.min(100, settings.lineCount)),
+          cooldownMinutes: Math.max(1, Math.min(1440, settings.cooldownMinutes)),
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Settings updated successfully!");
+      } else {
+        toast.error("Failed to update settings");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update settings"
+      );
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
   return (
     <Layout>
       <div className="min-h-screen p-6 md:p-8 bg-gradient-to-br from-background via-background to-primary/5">
