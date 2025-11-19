@@ -276,14 +276,16 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         const messageId = sentMessage._id || sentMessage.insertedId;
 
         // Emit the message through WebSocket so all users see it in real-time
-        socketRef.current.emit("send-message", {
+        const messageData = {
           messageId,
           sender: user?._id,
           senderName: user?.name || "Unknown",
           chatId: selectedChat.id,
           content: newMessage,
           timestamp: new Date().toISOString(),
-        });
+        };
+
+        socketRef.current.emit("send-message", messageData);
 
         setNewMessage("");
 
