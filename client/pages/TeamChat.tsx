@@ -31,6 +31,7 @@ export default function TeamChat() {
   useEffect(() => {
     if (!token || !user?._id) return;
 
+    // Create shared socket instance
     const socket = io(window.location.origin, {
       auth: { token },
       reconnection: true,
@@ -43,16 +44,21 @@ export default function TeamChat() {
 
     // Listen for new messages from other users
     socket.on("new-message", (data: any) => {
+      console.log("[TeamChat] Received message:", data);
+
       setConversations((prev) => {
         const updated = [...prev];
         const convIndex = updated.findIndex((c) => c.id === data.chatId);
 
         if (convIndex !== -1) {
           const conversation = updated[convIndex];
+          
           // Only increment unread if this message is not from current user and chat is not selected
           if (data.sender !== user._id && selectedChat?.id !== data.chatId) {
             conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+            console.log(`[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`);
           }
+          
           conversation.lastMessageTime = data.timestamp;
 
           // Move conversation to top
@@ -69,8 +75,12 @@ export default function TeamChat() {
       }
     });
 
+    socket.on("connect", () => {
+      console.log("[TeamChat] Socket connected:", socket.id);
+    });
+
     socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket");
+      console.log("[TeamChat] Socket disconnected");
     });
 
     return () => {
@@ -146,27 +156,38 @@ export default function TeamChat() {
   }, [token, user?._id]);
 
   const playNotificationSound = () => {
-    // Create a simple beep sound using Web Audio API
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    try {
+      // Create a simple beep sound using Web Audio API
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
 
-    // Short beep: frequency 800Hz, duration 200ms
-    oscillator.frequency.value = 800;
-    oscillator.type = "sine";
+      // Short beep: frequency 800Hz, duration 200ms
+      oscillator.frequency.value = 800;
+      oscillator.type = "sine";
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 0.2
+      );
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+
+      console.log("[TeamChat] Notification sound played");
+    } catch (error) {
+      console.error("Error playing notification sound:", error);
+    }
   };
 
   const handleSelectChat = (conversation: ChatConversation) => {
+    console.log("[TeamChat] Selected chat:", conversation.id);
+    
     setSelectedChat({
       type: conversation.type,
       id: conversation.id,
@@ -201,7 +222,11 @@ export default function TeamChat() {
           {/* Chat Area */}
           <div className="flex-1 flex flex-col">
             {selectedChat ? (
-              <ChatArea selectedChat={selectedChat} token={token} />
+              <ChatArea
+                selectedChat={selectedChat}
+                token={token}
+                socket={socketRef.current}
+              />
             ) : (
               <div className="flex items-center justify-center h-full text-muted-foreground">
                 Select a chat to start messaging
