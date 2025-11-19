@@ -60,6 +60,11 @@ export default function TeamChat() {
             console.log(
               `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
             );
+
+            // Show toast notification
+            toast.info(`New message from ${data.senderName}`, {
+              description: data.content.substring(0, 100),
+            });
           }
 
           conversation.lastMessageTime = data.timestamp;
