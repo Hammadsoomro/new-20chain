@@ -80,7 +80,7 @@ export default function NumbersInbox() {
         if (queueResponse.ok) {
           const queueData = await queueResponse.json();
           console.log("Queued lines fetched:", queueData);
-          setQueuedLinesAvailable(Array.isArray(queueData) && queueData.length > 0);
+          setQueuedLinesAvailable(Array.isArray(queueData.lines) && queueData.lines.length > 0);
         } else {
           console.error("Failed to fetch queued lines:", queueResponse.status);
           setQueuedLinesAvailable(false);
