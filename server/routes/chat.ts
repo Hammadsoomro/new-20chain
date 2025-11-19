@@ -277,7 +277,18 @@ export const markMessageAsRead: RequestHandler = async (
       return;
     }
 
-    res.json(result.value);
+    const message = result.value;
+    res.json({
+      _id: message._id.toString(),
+      sender: message.sender,
+      senderName: message.senderName,
+      senderPicture: message.senderPicture,
+      recipient: message.recipient,
+      groupId: message.groupId,
+      content: message.content,
+      createdAt: message.createdAt,
+      readBy: message.readBy,
+    });
   } catch (error) {
     console.error("Error marking message as read:", error);
     res.status(500).json({ error: "Failed to mark message as read" });
