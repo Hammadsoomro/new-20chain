@@ -88,3 +88,114 @@ export const getProfile: RequestHandler = async (req: AuthRequest, res) => {
     res.status(500).json({ error: "Failed to get profile" });
   }
 };
+
+// Update user name
+export const updateName: RequestHandler = async (req: AuthRequest, res) => {
+  try {
+    const { name } = req.body;
+
+    const schema = z.object({
+      name: z.string().min(2),
+    });
+
+    const validated = schema.parse({ name });
+
+    const collections = getCollections();
+    const result = await collections.users.findOneAndUpdate(
+      { _id: new ObjectId(req.userId) },
+      {
+        $set: {
+          name: validated.name,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      { returnDocument: "after" },
+    );
+
+    if (!result.value) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const updatedUser = {
+      _id: result.value._id.toString(),
+      email: result.value.email,
+      name: result.value.name,
+      role: result.value.role,
+      profilePictureUrl: result.value.profilePictureUrl,
+      teamId: result.value.teamId,
+      createdAt: result.value.createdAt,
+      updatedAt: result.value.updatedAt,
+    };
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Error updating name:", error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: "Invalid request" });
+      return;
+    }
+    res.status(500).json({ error: "Failed to update name" });
+  }
+};
+
+// Change password
+export const changePassword: RequestHandler = async (
+  req: AuthRequest,
+  res,
+) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    const schema = z.object({
+      currentPassword: z.string().min(1),
+      newPassword: z.string().min(8),
+    });
+
+    const validated = schema.parse({ currentPassword, newPassword });
+
+    const collections = getCollections();
+    const user = await collections.users.findOne({
+      _id: new ObjectId(req.userId),
+    });
+
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    // Verify current password
+    const hashedCurrentPassword = hashPassword(validated.currentPassword);
+    if (hashedCurrentPassword !== user.password) {
+      res.status(401).json({ error: "Current password is incorrect" });
+      return;
+    }
+
+    // Hash new password and update
+    const hashedNewPassword = hashPassword(validated.newPassword);
+    const result = await collections.users.findOneAndUpdate(
+      { _id: new ObjectId(req.userId) },
+      {
+        $set: {
+          password: hashedNewPassword,
+          updatedAt: new Date().toISOString(),
+        },
+      },
+      { returnDocument: "after" },
+    );
+
+    if (!result.value) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    res.json({ message: "Password changed successfully" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: "Invalid request" });
+      return;
+    }
+    res.status(500).json({ error: "Failed to change password" });
+  }
+};
