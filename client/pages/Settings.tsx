@@ -717,38 +717,10 @@ export default function SettingsPage() {
               </Card>
 
               {/* Account Information Card */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Account Information</CardTitle>
-                  <CardDescription>Your account details</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Name</Label>
-                    <Input
-                      value={user?.name || ""}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Email</Label>
-                    <Input
-                      value={user?.email || ""}
-                      disabled
-                      className="bg-muted"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium">Role</Label>
-                    <Input
-                      value={user?.role || ""}
-                      disabled
-                      className="bg-muted capitalize"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
+              <AccountInfoPanel user={user} token={token} />
+
+              {/* Password Change Card */}
+              <PasswordChangePanel user={user} token={token} />
             </TabsContent>
 
             {/* Team Management Tab (Admin Only) */}
