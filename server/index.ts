@@ -21,8 +21,6 @@ import { uploadProfilePicture, getProfile } from "./routes/profile";
 import { connectDB } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { getCollections } from "./db";
-import { Server } from "socket.io";
-import http from "http";
 
 export async function createServer() {
   // Initialize MongoDB connection
