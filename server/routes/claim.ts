@@ -154,6 +154,7 @@ export const claimNumbers: RequestHandler = async (req, res) => {
     const historyRecords = availableLines.map((line) => ({
       content: line.content,
       claimedBy: user.name,
+      claimedByUserId: userId,
       claimedAt,
       teamId,
     }));
