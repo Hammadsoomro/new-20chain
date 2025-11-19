@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,8 @@ import {
   User,
   Users,
   Settings as SettingsIcon,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
