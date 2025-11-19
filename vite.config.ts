@@ -73,7 +73,11 @@ function expressPlugin(): Plugin {
               timestamp: string;
             }) => {
               console.log(`[Socket.IO] Message from ${data.sender} in ${data.chatId}`);
-              io!.to(data.chatId).emit("new-message", data);
+              const messageToEmit = {
+                ...data,
+                chatId: data.chatId, // Ensure chatId is included
+              };
+              io!.to(data.chatId).emit("new-message", messageToEmit);
             }
           );
 
