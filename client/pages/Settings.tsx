@@ -198,6 +198,311 @@ function SorterSettingsPanel() {
   );
 }
 
+// Account Information Panel Component
+function AccountInfoPanel({
+  user,
+  token,
+}: {
+  user: any;
+  token: string | null;
+}) {
+  const [editName, setEditName] = useState(false);
+  const [newName, setNewName] = useState(user?.name || "");
+  const [saving, setSaving] = useState(false);
+
+  const handleSaveName = async () => {
+    if (!token || !newName.trim()) {
+      toast.error("Name cannot be empty");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await fetch("/api/profile/update-name", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: newName }),
+      });
+
+      if (response.ok) {
+        const updatedUser = await response.json();
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        toast.success("Name updated successfully");
+        setEditName(false);
+      } else {
+        toast.error("Failed to update name");
+      }
+    } catch (error) {
+      console.error("Error updating name:", error);
+      toast.error("Failed to update name");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Account Information</CardTitle>
+        <CardDescription>Manage your account details</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Name</Label>
+          {editName ? (
+            <div className="flex gap-2">
+              <Input
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter your name"
+              />
+              <Button
+                onClick={handleSaveName}
+                disabled={saving}
+                size="sm"
+                className="flex-shrink-0"
+              >
+                {saving ? "Saving..." : "Save"}
+              </Button>
+              <Button
+                onClick={() => {
+                  setEditName(false);
+                  setNewName(user?.name || "");
+                }}
+                variant="outline"
+                size="sm"
+                className="flex-shrink-0"
+              >
+                Cancel
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
+              <Input
+                value={user?.name || ""}
+                disabled
+                className="bg-transparent border-0"
+              />
+              <Button
+                onClick={() => setEditName(true)}
+                variant="outline"
+                size="sm"
+              >
+                Edit
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Email</Label>
+          <Input
+            value={user?.email || ""}
+            disabled
+            className="bg-muted"
+          />
+          <p className="text-xs text-muted-foreground">
+            Email cannot be changed
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-sm font-medium">Role</Label>
+          <Input
+            value={user?.role || ""}
+            disabled
+            className="bg-muted capitalize"
+          />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Password Change Panel Component
+function PasswordChangePanel({
+  user,
+  token,
+}: {
+  user: any;
+  token: string | null;
+}) {
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [saving, setSaving] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (
+      !formData.currentPassword ||
+      !formData.newPassword ||
+      !formData.confirmPassword
+    ) {
+      toast.error("All fields are required");
+      return;
+    }
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    if (formData.newPassword.length < 8) {
+      toast.error("New password must be at least 8 characters");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const response = await fetch("/api/profile/change-password", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Password changed successfully");
+        setFormData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to change password");
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      toast.error("Failed to change password");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Change Password</CardTitle>
+        <CardDescription>Update your account password</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleChangePassword} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password" className="text-sm font-medium">
+              Current Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="current-password"
+                type={showCurrentPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.currentPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    currentPassword: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showCurrentPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="new-password" className="text-sm font-medium">
+              New Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showNewPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.newPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    newPassword: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPassword(!showNewPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showNewPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password" className="text-sm font-medium">
+              Confirm Password
+            </Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={formData.confirmPassword}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    confirmPassword: e.target.value,
+                  })
+                }
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <Button type="submit" disabled={saving} className="w-full">
+            {saving ? "Changing..." : "Change Password"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
 // Team Account Creation Component
 function TeamMembersPanel() {
   const { token, isAdmin } = useAuth();
