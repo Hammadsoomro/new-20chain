@@ -49,7 +49,7 @@ export const getHistory: RequestHandler = async (req, res) => {
     const filter: any = { teamId };
 
     // Filter by user if not admin
-    if (!isAdmin) {
+    if (!isAdmin && userId) {
       filter.claimedByUserId = userId;
     }
 
