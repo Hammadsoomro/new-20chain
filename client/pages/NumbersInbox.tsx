@@ -224,35 +224,61 @@ export default function NumbersInbox() {
                   Ready to Claim Numbers?
                 </h2>
                 <p className="text-muted-foreground">
-                  {canClaim
-                    ? `Click the button below to claim ${settings.lineCount} new numbers`
-                    : "You need to complete the cooldown before claiming again"}
+                  {!queuedLinesAvailable
+                    ? "No lines available in queue"
+                    : canClaim
+                      ? `Click the button below to claim ${settings.lineCount} new numbers`
+                      : `Cooldown active: ${cooldownTimer || "Loading..."}`}
                 </p>
               </div>
 
-              <Button
-                onClick={handleClaimNumbers}
-                disabled={!canClaim || claiming || loading}
-                size="lg"
-                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
-              >
-                {claiming ? (
-                  <>
-                    <Clock className="h-5 w-5 mr-2 animate-spin" />
-                    Claiming...
-                  </>
-                ) : canClaim ? (
-                  <>
-                    <AlertCircle className="h-5 w-5 mr-2" />
-                    Claim {settings.lineCount} Numbers
-                  </>
-                ) : (
-                  <>
-                    <Clock className="h-5 w-5 mr-2" />
-                    On Cooldown
-                  </>
-                )}
-              </Button>
+              {(() => {
+                let buttonClass = "";
+                let buttonEmoji = "";
+                let buttonText = "";
+                let isDisabled = false;
+
+                if (!queuedLinesAvailable) {
+                  buttonClass = "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
+                  buttonEmoji = "⚪️";
+                  buttonText = "No Lines Available";
+                  isDisabled = true;
+                } else if (!canClaim && cooldownTimer) {
+                  buttonClass = "bg-red-600 hover:bg-red-700 text-white";
+                  buttonEmoji = "🔴";
+                  buttonText = `Cooldown: ${cooldownTimer}`;
+                  isDisabled = true;
+                } else if (canClaim) {
+                  buttonClass = "bg-green-600 hover:bg-green-700 text-white";
+                  buttonEmoji = "🟢";
+                  buttonText = `Claim ${settings.lineCount} Numbers`;
+                  isDisabled = false;
+                } else {
+                  buttonClass = "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
+                  buttonEmoji = "⚪️";
+                  buttonText = "No Lines Available";
+                  isDisabled = true;
+                }
+
+                return (
+                  <Button
+                    onClick={handleClaimNumbers}
+                    disabled={isDisabled || claiming || loading}
+                    size="lg"
+                    className={`${buttonClass} px-8 py-6 text-lg font-semibold`}
+                  >
+                    <span className="mr-2">{buttonEmoji}</span>
+                    {claiming ? (
+                      <>
+                        <Clock className="h-5 w-5 mr-2 animate-spin" />
+                        Claiming...
+                      </>
+                    ) : (
+                      buttonText
+                    )}
+                  </Button>
+                );
+              })()}
             </div>
           </Card>
 
