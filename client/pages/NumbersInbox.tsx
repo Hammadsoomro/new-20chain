@@ -26,6 +26,8 @@ export default function NumbersInbox() {
     {},
   );
   const [canClaim, setCanClaim] = useState(false);
+  const [queuedLinesAvailable, setQueuedLinesAvailable] = useState(true);
+  const [cooldownTimer, setCooldownTimer] = useState<string>("");
 
   // Fetch claim settings
   useEffect(() => {
