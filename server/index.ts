@@ -103,6 +103,8 @@ export async function createServer() {
   // Profile routes
   app.get("/api/profile", getProfile);
   app.post("/api/profile/upload-picture", uploadProfilePicture);
+  app.post("/api/profile/update-name", updateName);
+  app.post("/api/profile/change-password", changePassword);
 
   // Claim routes (protected)
   app.use("/api/claim", authMiddleware);
