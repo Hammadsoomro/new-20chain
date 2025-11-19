@@ -87,7 +87,10 @@ function SorterSettingsPanel() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          lineCount: settings.lineCount,
+          cooldownMinutes: Math.round(settings.cooldownMinutes / 60),
+        }),
       });
 
       if (response.ok) {
