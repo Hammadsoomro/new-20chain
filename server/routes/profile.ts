@@ -1,7 +1,14 @@
 import { RequestHandler } from "express";
+import { z } from "zod";
 import { AuthRequest } from "../middleware/auth";
 import { getCollections } from "../db";
 import { ObjectId } from "mongodb";
+import crypto from "crypto";
+
+// Hash password helper
+const hashPassword = (password: string): string => {
+  return crypto.createHash("sha256").update(password).digest("hex");
+};
 
 // Upload profile picture
 export const uploadProfilePicture: RequestHandler = async (
