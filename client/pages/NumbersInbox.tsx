@@ -168,6 +168,17 @@ export default function NumbersInbox() {
     }
   };
 
+  const formatCooldownDuration = (minutes: number) => {
+    if (minutes < 1) {
+      return `${Math.round(minutes * 60)} seconds`;
+    } else if (minutes < 60) {
+      return `${Math.round(minutes)} minute${Math.round(minutes) !== 1 ? 's' : ''}`;
+    } else {
+      const hours = Math.round(minutes / 60);
+      return `${hours} hour${hours !== 1 ? 's' : ''}`;
+    }
+  };
+
   const totalClaimed = claimedNumbers.length;
 
   return (
