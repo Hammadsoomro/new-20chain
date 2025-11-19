@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, AlertCircle } from "lucide-react";
+import { Clock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
