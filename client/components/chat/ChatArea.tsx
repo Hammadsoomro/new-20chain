@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/context/AuthContext";
 import type { ChatMessage } from "@shared/api";
-import { io, Socket } from "socket.io-client";
+import { Socket } from "socket.io-client";
 
 interface ChatAreaProps {
   selectedChat: {
@@ -28,6 +28,7 @@ interface ChatAreaProps {
     name: string;
   };
   token: string | null;
+  socket: Socket | null;
 }
 
 interface TypingIndicator {
@@ -45,7 +46,7 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
-export function ChatArea({ selectedChat, token }: ChatAreaProps) {
+export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
@@ -54,87 +55,68 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [typingUsers, setTypingUsers] = useState<Map<string, TypingIndicator>>(
-    new Map(),
+    new Map()
   );
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const socketRef = useRef<Socket | null>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Initialize WebSocket connection
+  // Setup socket listeners for this chat
   useEffect(() => {
-    if (!token || !user?._id) return;
+    if (!socket || !user?._id) {
+      console.log("[ChatArea] Socket not available, skipping setup");
+      return;
+    }
 
-    // Create socket connection
-    const socket = io(window.location.origin, {
-      auth: { token },
-      reconnection: true,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+    console.log("[ChatArea] Setting up socket listeners for chat:", selectedChat.id);
+
+    // Join the chat room
+    socket.emit("join-chat", {
+      chatId: selectedChat.id,
+      userId: user._id,
     });
 
-    socketRef.current = socket;
+    // Listen for new messages
+    const handleNewMessage = (data: any) => {
+      console.log("[ChatArea] New message received:", data);
+      if (data.chatId === selectedChat.id && data.sender !== user._id) {
+        const newMsg: ChatMessage = {
+          _id: data.messageId || data._id,
+          sender: data.sender,
+          senderName: data.senderName,
+          senderPicture: data.senderPicture,
+          content: data.content,
+          createdAt: data.timestamp || data.createdAt,
+          groupId: data.groupId,
+          recipient: data.recipient,
+          readBy: data.readBy || [],
+        };
+        setMessages((prev) => [...prev, newMsg]);
+      }
+    };
 
-    // Socket event listeners
-    socket.on("connect", () => {
-      console.log("Connected to WebSocket server");
-      // Join the chat room
-      socket.emit("join-chat", {
-        chatId: selectedChat.id,
-        userId: user._id,
-      });
-      // Fetch initial messages
-      fetchInitialMessages();
-    });
+    const handleMessageEdited = (data: any) => {
+      if (data.chatId === selectedChat.id) {
+        console.log("[ChatArea] Message edited:", data.messageId);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === data.messageId
+              ? { ...msg, content: data.content, editedAt: new Date().toISOString() }
+              : msg
+          )
+        );
+      }
+    };
 
-    socket.on("new-message", (data: any) => {
-      const newMsg: ChatMessage = {
-        _id: data.messageId || data._id,
-        sender: data.sender,
-        senderName: data.senderName,
-        senderPicture: data.senderPicture,
-        content: data.content,
-        createdAt: data.timestamp || data.createdAt,
-        groupId: data.groupId,
-        recipient: data.recipient,
-        readBy: data.readBy || [],
-      };
-      setMessages((prev) => [...prev, newMsg]);
-    });
+    const handleMessageDeleted = (data: any) => {
+      if (data.chatId === selectedChat.id) {
+        console.log("[ChatArea] Message deleted:", data.messageId);
+        setMessages((prev) => prev.filter((msg) => msg._id !== data.messageId));
+      }
+    };
 
-    socket.on("message-edited", (data: any) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === data.messageId
-            ? {
-                ...msg,
-                content: data.content,
-                editedAt: new Date().toISOString(),
-              }
-            : msg,
-        ),
-      );
-    });
-
-    socket.on("message-deleted", (data: any) => {
-      setMessages((prev) => prev.filter((msg) => msg._id !== data.messageId));
-    });
-
-    socket.on("message-read", (data: any) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg._id === data.messageId
-            ? {
-                ...msg,
-                readBy: [...(msg.readBy || []), data.userId],
-              }
-            : msg,
-        ),
-      );
-    });
-
-    socket.on("user-typing", (data: any) => {
+    const handleUserTyping = (data: any) => {
+      console.log("[ChatArea] User typing:", data.userId, data.isTyping);
       if (data.isTyping) {
         setTypingUsers((prev) => {
           const updated = new Map(prev);
@@ -161,23 +143,40 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
           return updated;
         });
       }
-    });
+    };
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server");
-    });
+    const handleMessageRead = (data: any) => {
+      console.log("[ChatArea] Message read:", data.messageId);
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === data.messageId
+            ? {
+                ...msg,
+                readBy: [...(msg.readBy || []), data.userId],
+              }
+            : msg
+        )
+      );
+    };
 
-    socket.on("connect_error", (error) => {
-      console.error("WebSocket connection error:", error);
-    });
+    socket.on("new-message", handleNewMessage);
+    socket.on("message-edited", handleMessageEdited);
+    socket.on("message-deleted", handleMessageDeleted);
+    socket.on("user-typing", handleUserTyping);
+    socket.on("message-read", handleMessageRead);
+
+    // Fetch initial messages
+    fetchInitialMessages();
 
     return () => {
-      if (socket) {
-        socket.emit("leave-chat", { chatId: selectedChat.id });
-        socket.disconnect();
-      }
+      socket.off("new-message", handleNewMessage);
+      socket.off("message-edited", handleMessageEdited);
+      socket.off("message-deleted", handleMessageDeleted);
+      socket.off("user-typing", handleUserTyping);
+      socket.off("message-read", handleMessageRead);
+      socket.emit("leave-chat", { chatId: selectedChat.id });
     };
-  }, [selectedChat.id, token, user?._id]);
+  }, [socket, selectedChat.id, user?._id]);
 
   // Fetch initial messages
   const fetchInitialMessages = async () => {
@@ -193,13 +192,18 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         params.append("recipient", selectedChat.id);
       }
 
-      const response = await fetch(`/api/chat/messages?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await fetch(
+        `/api/chat/messages?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setMessages(data.filter((msg: ChatMessage) => !msg.deleted));
+        const filtered = data.filter((msg: ChatMessage) => !msg.deleted);
+        setMessages(filtered);
+        console.log("[ChatArea] Loaded messages:", filtered.length);
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -214,16 +218,17 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   }, [messages, typingUsers]);
 
   const handleTyping = () => {
-    if (!socketRef.current) return;
+    if (!socket) return;
 
     if (!isTyping) {
-      socketRef.current.emit("typing", {
+      socket.emit("typing", {
         chatId: selectedChat.id,
         userId: user?._id,
         senderName: user?.name || "Unknown",
         isTyping: true,
       });
       setIsTyping(true);
+      console.log("[ChatArea] User started typing");
     }
 
     // Clear existing timeout
@@ -233,8 +238,8 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
 
     // Set new timeout to stop typing after 2 seconds of inactivity
     typingTimeoutRef.current = setTimeout(() => {
-      if (socketRef.current) {
-        socketRef.current.emit("typing", {
+      if (socket) {
+        socket.emit("typing", {
           chatId: selectedChat.id,
           userId: user?._id,
           senderName: user?.name || "Unknown",
@@ -242,13 +247,14 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         });
       }
       setIsTyping(false);
+      console.log("[ChatArea] User stopped typing");
     }, 2000);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newMessage.trim() || !token || !socketRef.current) return;
+    if (!newMessage.trim() || !token || !socket) return;
 
     try {
       setSending(true);
@@ -275,6 +281,23 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         const sentMessage = await response.json();
         const messageId = sentMessage._id || sentMessage.insertedId;
 
+        console.log("[ChatArea] Message sent:", messageId);
+
+        // Add message to local state
+        const newMsg: ChatMessage = {
+          _id: messageId,
+          sender: user?._id || "",
+          senderName: user?.name || "Unknown",
+          senderPicture: user?.profilePictureUrl || user?.profilePicture,
+          content: newMessage,
+          createdAt: new Date().toISOString(),
+          groupId: selectedChat.type === "group" ? selectedChat.id : undefined,
+          recipient:
+            selectedChat.type === "direct" ? selectedChat.id : undefined,
+          readBy: [],
+        };
+        setMessages((prev) => [...prev, newMsg]);
+
         // Emit the message through WebSocket so all users see it in real-time
         const messageData = {
           messageId,
@@ -285,12 +308,12 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
           timestamp: new Date().toISOString(),
         };
 
-        socketRef.current.emit("send-message", messageData);
+        socket.emit("send-message", messageData);
 
         setNewMessage("");
 
         // Clear typing indicator
-        socketRef.current.emit("typing", {
+        socket.emit("typing", {
           chatId: selectedChat.id,
           userId: user?._id,
           senderName: user?.name || "Unknown",
@@ -307,7 +330,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   };
 
   const handleEditMessage = async (messageId: string) => {
-    if (!editContent.trim() || !token || !socketRef.current) return;
+    if (!editContent.trim() || !token || !socket) return;
 
     try {
       const response = await fetch("/api/chat/edit", {
@@ -325,15 +348,17 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
       if (response.ok) {
         const updated = await response.json();
         setMessages(
-          messages.map((msg) => (msg._id === messageId ? updated : msg)),
+          messages.map((msg) => (msg._id === messageId ? updated : msg))
         );
 
         // Emit edit through WebSocket
-        socketRef.current.emit("edit-message", {
+        socket.emit("edit-message", {
           messageId,
           content: editContent,
           chatId: selectedChat.id,
         });
+
+        console.log("[ChatArea] Message edited:", messageId);
 
         setEditingId(null);
         setEditContent("");
@@ -344,7 +369,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   };
 
   const handleDeleteMessage = async (messageId: string) => {
-    if (!token || !socketRef.current) return;
+    if (!token || !socket) return;
 
     try {
       const response = await fetch("/api/chat/delete", {
@@ -360,10 +385,12 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         setMessages(messages.filter((msg) => msg._id !== messageId));
 
         // Emit delete through WebSocket
-        socketRef.current.emit("delete-message", {
+        socket.emit("delete-message", {
           messageId,
           chatId: selectedChat.id,
         });
+
+        console.log("[ChatArea] Message deleted:", messageId);
       }
     } catch (error) {
       console.error("Error deleting message:", error);
@@ -371,7 +398,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
   };
 
   const handleMarkAsRead = async (messageId: string) => {
-    if (!token || !socketRef.current) return;
+    if (!token || !socket) return;
 
     try {
       await fetch("/api/chat/mark-read", {
@@ -384,10 +411,12 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
       });
 
       // Emit read status through WebSocket
-      socketRef.current.emit("message-read", {
+      socket.emit("message-read", {
         messageId,
         userId: user?._id,
       });
+
+      console.log("[ChatArea] Message marked as read:", messageId);
     } catch (error) {
       console.error("Error marking message as read:", error);
     }
@@ -408,7 +437,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
         <h3 className="font-semibold text-lg">{selectedChat.name}</h3>
         {selectedChat.type === "group" && (
           <p className="text-xs text-muted-foreground">
-            Group Chat {socketRef.current?.connected ? "● Online" : "● Offline"}
+            Group Chat {socket?.connected ? "● Online" : "● Offline"}
           </p>
         )}
       </div>
@@ -428,6 +457,15 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
                   className={`flex gap-3 group ${
                     message.sender === user?._id ? "flex-row-reverse" : ""
                   }`}
+                  onMouseEnter={() => {
+                    // Auto-mark as read when message comes into view
+                    if (
+                      message.sender !== user?._id &&
+                      !message.readBy?.includes(user?._id || "")
+                    ) {
+                      handleMarkAsRead(message._id);
+                    }
+                  }}
                 >
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={message.senderPicture} />
@@ -527,7 +565,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
                       {message.sender === user?._id && (
                         <span className="text-xs text-muted-foreground">
                           {message.readBy && message.readBy.length > 0 ? (
-                            <CheckCheck className="h-3 w-3 inline" />
+                            <CheckCheck className="h-3 w-3 inline text-blue-500" />
                           ) : (
                             <Check className="h-3 w-3 inline" />
                           )}
@@ -540,7 +578,7 @@ export function ChatArea({ selectedChat, token }: ChatAreaProps) {
 
               {/* Typing Indicators */}
               {typingUsers.size > 0 && (
-                <div className="flex gap-3 items-center text-sm text-muted-foreground">
+                <div className="flex gap-3 items-center text-sm text-muted-foreground py-2">
                   <div className="flex gap-1">
                     {[0, 1, 2].map((i) => (
                       <div
