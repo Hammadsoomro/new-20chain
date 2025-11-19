@@ -313,7 +313,18 @@ export const editMessage: RequestHandler = async (req: AuthRequest, res) => {
       return;
     }
 
-    res.json(result.value);
+    const message = result.value;
+    res.json({
+      _id: message._id.toString(),
+      sender: message.sender,
+      senderName: message.senderName,
+      senderPicture: message.senderPicture,
+      recipient: message.recipient,
+      groupId: message.groupId,
+      content: message.content,
+      createdAt: message.createdAt,
+      editedAt: message.editedAt,
+    });
   } catch (error) {
     console.error("Error editing message:", error);
     res.status(500).json({ error: "Failed to edit message" });
