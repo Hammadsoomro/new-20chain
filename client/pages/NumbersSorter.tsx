@@ -15,16 +15,46 @@ import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function NumbersSorter() {
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
   const [inputNumbers, setInputNumbers] = useState<string>("");
   const [deduplicated, setDeduplicated] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState({
+    lineCount: 5,
+    cooldownMinutes: 30,
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("sorterInput");
     if (saved) setInputNumbers(saved);
   }, []);
+
+  // Load settings from server
+  useEffect(() => {
+    const loadSettings = async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch("/api/claim/settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSettings({
+            lineCount: data.lineCount || 5,
+            cooldownMinutes: data.cooldownMinutes || 30,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
+
+    loadSettings();
+  }, [token]);
 
   // Save to localStorage when input changes
   useEffect(() => {
