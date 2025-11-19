@@ -95,11 +95,6 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           readBy: data.readBy || [],
         };
         setMessages((prev) => [...prev, newMsg]);
-
-        // Auto-mark as read after a short delay
-        setTimeout(() => {
-          handleMarkAsRead(newMsg._id);
-        }, 500);
       }
     };
 
