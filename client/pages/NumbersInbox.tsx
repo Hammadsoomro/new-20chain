@@ -2,113 +2,143 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle, AlertCircle } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
-interface InboxItem {
+interface ClaimedNumber {
   _id: string;
   content: string;
   claimedAt: string;
-  cooldownUntil?: string;
-  status: "claimed" | "cooldown" | "available";
+  cooldownUntil: string;
 }
 
 export default function NumbersInbox() {
   const { token, user } = useAuth();
-  const [inboxItems, setInboxItems] = useState<InboxItem[]>([]);
+  const [claimedNumbers, setClaimedNumbers] = useState<ClaimedNumber[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cooldownMinutes, setCooldownMinutes] = useState(5);
+  const [claiming, setClaiming] = useState(false);
+  const [settings, setSettings] = useState({
+    lineCount: 5,
+    cooldownMinutes: 30,
+  });
+  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>({});
+  const [canClaim, setCanClaim] = useState(false);
 
-  // Fetch inbox data - simulating user's claimed numbers
+  // Fetch claim settings
   useEffect(() => {
-    const fetchInbox = async () => {
+    const fetchSettings = async () => {
       if (!token) return;
 
       try {
-        setLoading(true);
-        const response = await fetch("/api/history", {
+        const response = await fetch("/api/claim/settings", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.ok) {
           const data = await response.json();
-          const userEntries = data.entries || [];
-
-          // Transform history entries to inbox format
-          const inbox = userEntries.map((entry: any) => {
-            const claimedTime = new Date(entry.claimedAt);
-            const cooldownTime = new Date(
-              claimedTime.getTime() + cooldownMinutes * 60000,
-            );
-            const now = new Date();
-            const status =
-              now > cooldownTime
-                ? "available"
-                : now > claimedTime
-                  ? "cooldown"
-                  : "claimed";
-
-            return {
-              _id: entry._id,
-              content: entry.content,
-              claimedAt: entry.claimedAt,
-              cooldownUntil: cooldownTime.toISOString(),
-              status,
-            };
-          });
-
-          setInboxItems(inbox);
+          setSettings(data);
         }
       } catch (error) {
-        console.error("Error fetching inbox:", error);
+        console.error("Error fetching settings:", error);
+      }
+    };
+
+    fetchSettings();
+  }, [token]);
+
+  // Fetch claimed numbers
+  useEffect(() => {
+    const fetchClaimedNumbers = async () => {
+      if (!token) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch("/api/claim/numbers", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setClaimedNumbers(data);
+          
+          // Check if user can claim (no active cooldown)
+          const hasActiveCooldown = data.some((num: ClaimedNumber) => {
+            return new Date(num.cooldownUntil) > new Date();
+          });
+          setCanClaim(!hasActiveCooldown);
+        }
+      } catch (error) {
+        console.error("Error fetching claimed numbers:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchInbox();
+    fetchClaimedNumbers();
   }, [token]);
 
-  const getStatusColor = (status: "claimed" | "cooldown" | "available") => {
-    switch (status) {
-      case "available":
-        return "text-green-600 bg-green-50 dark:bg-green-950";
-      case "cooldown":
-        return "text-yellow-600 bg-yellow-50 dark:bg-yellow-950";
-      case "claimed":
-        return "text-blue-600 bg-blue-50 dark:bg-blue-950";
-      default:
-        return "text-gray-600 bg-gray-50 dark:bg-gray-950";
+  // Update remaining cooldown time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining: Record<string, string> = {};
+
+      claimedNumbers.forEach((num) => {
+        const cooldownTime = new Date(num.cooldownUntil);
+        const now = new Date();
+        const diff = cooldownTime.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          remaining[num._id] = "Ready";
+          setCanClaim(true);
+        } else {
+          const minutes = Math.floor(diff / 60000);
+          const seconds = Math.floor((diff % 60000) / 1000);
+          remaining[num._id] = `${minutes}m ${seconds}s`;
+        }
+      });
+
+      setTimeRemaining(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [claimedNumbers]);
+
+  const handleClaimNumbers = async () => {
+    if (!token || claiming || !canClaim) return;
+
+    try {
+      setClaiming(true);
+
+      // Release previous claims
+      if (claimedNumbers.length > 0) {
+        await fetch("/api/claim/release", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      // Claim new numbers
+      const response = await fetch("/api/claim", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setClaimedNumbers(data.claimedLines);
+        setCanClaim(false);
+        toast.success(`${data.claimedCount} numbers claimed successfully!`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to claim numbers");
+      }
+    } catch (error) {
+      console.error("Error claiming numbers:", error);
+      toast.error("Failed to claim numbers");
+    } finally {
+      setClaiming(false);
     }
-  };
-
-  const getStatusIcon = (status: "claimed" | "cooldown" | "available") => {
-    switch (status) {
-      case "available":
-        return <CheckCircle className="h-5 w-5" />;
-      case "cooldown":
-        return <Clock className="h-5 w-5" />;
-      case "claimed":
-        return <AlertCircle className="h-5 w-5" />;
-      default:
-        return null;
-    }
-  };
-
-  const getRemainingTime = (cooldownUntil: string) => {
-    const now = new Date();
-    const until = new Date(cooldownUntil);
-    const diff = until.getTime() - now.getTime();
-
-    if (diff <= 0) return "Ready";
-
-    const minutes = Math.floor(diff / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-
-    if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    }
-    return `${seconds}s`;
   };
 
   const formatDate = (dateString: string) => {
@@ -119,13 +149,8 @@ export default function NumbersInbox() {
     }
   };
 
-  const claimedCount = inboxItems.filter((i) => i.status === "claimed").length;
-  const cooldownCount = inboxItems.filter(
-    (i) => i.status === "cooldown",
-  ).length;
-  const availableCount = inboxItems.filter(
-    (i) => i.status === "available",
-  ).length;
+  const totalClaimed = claimedNumbers.length;
+  const readyToClaim = timeRemaining[claimedNumbers[0]?._id] === "Ready";
 
   return (
     <Layout>
@@ -140,118 +165,137 @@ export default function NumbersInbox() {
               </h1>
             </div>
             <p className="text-muted-foreground">
-              Claim your allocated numbers with cooldown timer and status
-              indicators
+              Claim {settings.lineCount} numbers at a time with{" "}
+              {settings.cooldownMinutes} minute cooldown
             </p>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
             <Card className="p-6">
               <div className="text-sm text-muted-foreground mb-1">
                 Total Claimed
               </div>
               <div className="text-3xl font-bold text-foreground">
-                {inboxItems.length}
+                {totalClaimed}
               </div>
             </Card>
             <Card className="p-6">
               <div className="text-sm text-muted-foreground mb-1">
-                Just Claimed
-              </div>
-              <div className="text-3xl font-bold text-blue-600">
-                {claimedCount}
-              </div>
-            </Card>
-            <Card className="p-6">
-              <div className="text-sm text-muted-foreground mb-1">
-                In Cooldown
-              </div>
-              <div className="text-3xl font-bold text-yellow-600">
-                {cooldownCount}
-              </div>
-            </Card>
-            <Card className="p-6">
-              <div className="text-sm text-muted-foreground mb-1">
-                Ready to Claim
+                Can Claim Again
               </div>
               <div className="text-3xl font-bold text-green-600">
-                {availableCount}
+                {readyToClaim ? "Yes" : "No"}
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="text-sm text-muted-foreground mb-1">
+                Claim Settings
+              </div>
+              <div className="text-sm text-foreground">
+                {settings.lineCount} lines per claim • {settings.cooldownMinutes}{" "}
+                min cooldown
               </div>
             </Card>
           </div>
 
-          {/* Content */}
+          {/* Claim Button Section */}
+          <Card className="p-8 mb-8 bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
+            <div className="flex flex-col items-center gap-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  Ready to Claim Numbers?
+                </h2>
+                <p className="text-muted-foreground">
+                  {canClaim
+                    ? `Click the button below to claim ${settings.lineCount} new numbers`
+                    : "You need to complete the cooldown before claiming again"}
+                </p>
+              </div>
+
+              <Button
+                onClick={handleClaimNumbers}
+                disabled={!canClaim || claiming || loading}
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
+              >
+                {claiming ? (
+                  <>
+                    <Clock className="h-5 w-5 mr-2 animate-spin" />
+                    Claiming...
+                  </>
+                ) : canClaim ? (
+                  <>
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    Claim {settings.lineCount} Numbers
+                  </>
+                ) : (
+                  <>
+                    <Clock className="h-5 w-5 mr-2" />
+                    On Cooldown
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+
+          {/* Claimed Numbers Section */}
           {loading ? (
             <Card className="p-8">
               <div className="text-center text-muted-foreground">
-                Loading inbox...
+                Loading claimed numbers...
               </div>
             </Card>
-          ) : inboxItems.length === 0 ? (
+          ) : claimedNumbers.length === 0 ? (
             <Card className="p-8">
               <div className="text-center">
                 <Clock className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
                 <p className="text-muted-foreground">
-                  No numbers in your inbox yet
+                  No numbers claimed yet. Click the Claim button to get started!
                 </p>
               </div>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {inboxItems.map((item) => (
-                <Card
-                  key={item._id}
-                  className="p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div
-                        className={`rounded-full p-2 ${getStatusColor(item.status)}`}
-                      >
-                        {getStatusIcon(item.status)}
+            <div>
+              <h2 className="text-xl font-bold text-foreground mb-4">
+                Your Claimed Numbers ({claimedNumbers.length}/{settings.lineCount})
+              </h2>
+              <div className="space-y-3">
+                {claimedNumbers.map((number, index) => (
+                  <Card key={number._id} className="p-4 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-foreground text-lg break-words">
+                            {number.content}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Claimed at: {formatDate(number.claimedAt)}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-foreground text-lg">
-                          {item.content}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Claimed at: {formatDate(item.claimedAt)}
-                        </p>
-                        {item.status === "cooldown" && (
-                          <p className="text-sm font-semibold text-yellow-600 mt-1">
-                            Cooldown:{" "}
-                            {getRemainingTime(item.cooldownUntil || "")}
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">
+                            Cooldown Time Left
                           </p>
-                        )}
-                        {item.status === "available" && (
-                          <p className="text-sm font-semibold text-green-600 mt-1">
-                            Ready to claim another
+                          <p className="text-lg font-bold text-yellow-600">
+                            {timeRemaining[number._id] || "Calculating..."}
                           </p>
+                        </div>
+                        {timeRemaining[number._id] === "Ready" && (
+                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
+                            Ready to Claim Again
+                          </span>
                         )}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold capitalize ${getStatusColor(item.status)}`}
-                      >
-                        {item.status === "cooldown"
-                          ? `${item.status} - ${getRemainingTime(item.cooldownUntil || "")}`
-                          : item.status === "available"
-                            ? "Available"
-                            : "Claimed"}
-                      </span>
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        disabled={item.status === "cooldown"}
-                      >
-                        {item.status === "cooldown" ? "On Cooldown" : "Claim"}
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))}
+              </div>
             </div>
           )}
         </div>
