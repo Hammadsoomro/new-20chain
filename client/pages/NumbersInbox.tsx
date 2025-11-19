@@ -195,7 +195,7 @@ export default function NumbersInbox() {
             </div>
             <p className="text-muted-foreground">
               Claim {settings.lineCount} numbers at a time with{" "}
-              {settings.cooldownMinutes} minute cooldown
+              {formatCooldownDuration(settings.cooldownMinutes)} cooldown
             </p>
           </div>
 
