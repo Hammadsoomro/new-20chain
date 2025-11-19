@@ -51,19 +51,21 @@ export default function NumbersInbox() {
     fetchSettings();
   }, [token]);
 
-  // Fetch claimed numbers
+  // Fetch claimed numbers and check queued lines availability
   useEffect(() => {
-    const fetchClaimedNumbers = async () => {
+    const fetchData = async () => {
       if (!token) return;
 
       try {
         setLoading(true);
-        const response = await fetch("/api/claim/numbers", {
+
+        // Fetch claimed numbers
+        const claimResponse = await fetch("/api/claim/numbers", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.ok) {
-          const data = await response.json();
+        if (claimResponse.ok) {
+          const data = await claimResponse.json();
           setClaimedNumbers(data);
 
           // Check if user can claim (no active cooldown)
@@ -72,14 +74,24 @@ export default function NumbersInbox() {
           });
           setCanClaim(!hasActiveCooldown);
         }
+
+        // Fetch queued lines to check availability
+        const queueResponse = await fetch("/api/queued", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (queueResponse.ok) {
+          const queueData = await queueResponse.json();
+          setQueuedLinesAvailable(queueData.length > 0);
+        }
       } catch (error) {
-        console.error("Error fetching claimed numbers:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClaimedNumbers();
+    fetchData();
   }, [token]);
 
   // Update remaining cooldown time
