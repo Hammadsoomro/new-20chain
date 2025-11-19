@@ -62,7 +62,7 @@ export const updateClaimSettings: RequestHandler = async (req, res) => {
 
     const schema = z.object({
       lineCount: z.number().min(1).max(100),
-      cooldownMinutes: z.number().min(1).max(1440),
+      cooldownMinutes: z.number().min(0.5).max(1440),
     });
 
     const validated = schema.parse(req.body);
