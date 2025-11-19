@@ -5,6 +5,7 @@ import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatArea } from "@/components/chat/ChatArea";
 import type { User, ChatGroup } from "@shared/api";
 import { io, Socket } from "socket.io-client";
+import { toast } from "sonner";
 
 interface ChatConversation {
   type: "group" | "direct";
