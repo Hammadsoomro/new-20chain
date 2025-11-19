@@ -64,7 +64,10 @@ function SorterSettingsPanel() {
 
         if (response.ok) {
           const data = await response.json();
-          setSettings(data);
+          setSettings({
+            ...data,
+            cooldownMinutes: data.cooldownMinutes * 60,
+          });
         }
       } catch (error) {
         console.error("Error fetching settings:", error);
