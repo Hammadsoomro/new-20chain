@@ -92,7 +92,7 @@ function SorterSettingsPanel() {
         },
         body: JSON.stringify({
           lineCount: settings.lineCount,
-          cooldownMinutes: Math.round(settings.cooldownMinutes / 60),
+          cooldownMinutes: settings.cooldownMinutes / 60,
         }),
       });
 
@@ -477,7 +477,7 @@ function PasswordChangePanel({
               <Input
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="••••••���•"
                 value={formData.confirmPassword}
                 onChange={(e) =>
                   setFormData({
