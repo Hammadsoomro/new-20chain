@@ -164,7 +164,6 @@ export default function NumbersInbox() {
   };
 
   const totalClaimed = claimedNumbers.length;
-  const readyToClaim = timeRemaining[claimedNumbers[0]?._id] === "Ready";
 
   return (
     <Layout>
