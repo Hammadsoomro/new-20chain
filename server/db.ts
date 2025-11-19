@@ -51,12 +51,22 @@ export async function connectDB(): Promise<Db> {
     const groupCollection = db.collection("chatGroups");
     await groupCollection.createIndex({ teamId: 1 });
 
+    const settingsCollection = db.collection("claimSettings");
+    await settingsCollection.createIndex({ teamId: 1 });
+
+    const claimedCollection = db.collection("claimedNumbers");
+    await claimedCollection.createIndex({ teamId: 1 });
+    await claimedCollection.createIndex({ claimedBy: 1 });
+    await claimedCollection.createIndex({ claimedAt: -1 });
+
     collections = {
       users: usersCollection,
       queuedLines: queuedCollection,
       history: historyCollection,
       chatMessages: chatCollection,
       chatGroups: groupCollection,
+      claimSettings: settingsCollection,
+      claimedNumbers: claimedCollection,
     };
 
     console.log("MongoDB connected successfully");
