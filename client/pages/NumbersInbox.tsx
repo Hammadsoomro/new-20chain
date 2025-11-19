@@ -305,86 +305,28 @@ export default function NumbersInbox() {
                 {settings.lineCount})
               </h2>
               <div className="space-y-3">
-                {claimedNumbers.map((number, index) => {
-                  const timeLeft = timeRemaining[number._id];
-                  const isReady = timeLeft === "Ready";
-                  const hasActiveCooldown = timeLeft && timeLeft !== "Ready";
-                  const buttonState = hasActiveCooldown
-                    ? "red"
-                    : isReady
-                      ? "green"
-                      : claimedNumbers.length === 0
-                        ? "grey"
-                        : "green";
-
-                  const getButtonColors = (state: string) => {
-                    switch (state) {
-                      case "red":
-                        return "bg-red-600 hover:bg-red-700 text-white";
-                      case "green":
-                        return "bg-green-600 hover:bg-green-700 text-white";
-                      case "grey":
-                        return "bg-gray-400 text-gray-200 cursor-not-allowed";
-                      default:
-                        return "bg-gray-400 text-gray-200 cursor-not-allowed";
-                    }
-                  };
-
-                  const getStateEmoji = (state: string) => {
-                    switch (state) {
-                      case "red":
-                        return "🔴";
-                      case "green":
-                        return "🟢";
-                      case "grey":
-                        return "⚪️";
-                      default:
-                        return "⚪️";
-                    }
-                  };
-
-                  return (
-                    <Card
-                      key={number._id}
-                      className="p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex flex-col gap-3 mb-3">
-                        <div className="flex items-center gap-2">
-                          <Button
-                            disabled={
-                              buttonState === "grey" || buttonState === "red"
-                            }
-                            className={`${getButtonColors(buttonState)} w-full font-semibold text-sm`}
-                          >
-                            <span className="mr-2">
-                              {getStateEmoji(buttonState)}
-                            </span>
-                            {hasActiveCooldown
-                              ? `Cooldown: ${timeLeft}`
-                              : isReady
-                                ? "Ready to Claim"
-                                : "No Lines Available"}
-                          </Button>
+                {claimedNumbers.map((number, index) => (
+                  <Card
+                    key={number._id}
+                    className="p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-foreground text-lg break-words">
+                            {number.content}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Claimed at: {formatDate(number.claimedAt)}
+                          </p>
                         </div>
                       </div>
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-start gap-4 flex-1">
-                          <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground text-lg break-words">
-                              {number.content}
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              Claimed at: {formatDate(number.claimedAt)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
+                    </div>
+                  </Card>
+                ))}
               </div>
             </div>
           )}
