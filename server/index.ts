@@ -17,7 +17,12 @@ import {
   deleteMessage,
 } from "./routes/chat";
 import { createTeamMember, getTeamMembers } from "./routes/members";
-import { uploadProfilePicture, getProfile } from "./routes/profile";
+import {
+  uploadProfilePicture,
+  getProfile,
+  updateName,
+  changePassword,
+} from "./routes/profile";
 import {
   getClaimSettings,
   updateClaimSettings,
