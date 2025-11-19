@@ -9,6 +9,8 @@ export interface DbCollections {
   history: Collection;
   chatMessages: Collection;
   chatGroups: Collection;
+  claimSettings: Collection;
+  claimedNumbers: Collection;
 }
 
 let collections: DbCollections | null = null;
