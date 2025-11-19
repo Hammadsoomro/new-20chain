@@ -297,6 +297,83 @@ export default function NumbersSorter() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Admin Settings Section */}
+          {isAdmin && (
+            <Card className="border-primary/50 bg-primary/5">
+              <CardHeader>
+                <CardTitle>Claim Settings</CardTitle>
+                <CardDescription>
+                  Configure how many numbers users can claim at once and the cooldown time
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Line Count Setting */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-foreground">
+                      Numbers per Claim
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={settings.lineCount}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            lineCount: parseInt(e.target.value) || 1,
+                          })
+                        }
+                        className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      />
+                      <span className="text-sm text-muted-foreground">lines</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      How many numbers each team member can claim at once (1-100)
+                    </p>
+                  </div>
+
+                  {/* Cooldown Setting */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-foreground">
+                      Cooldown Time
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="1"
+                        max="1440"
+                        value={settings.cooldownMinutes}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            cooldownMinutes: parseInt(e.target.value) || 1,
+                          })
+                        }
+                        className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      />
+                      <span className="text-sm text-muted-foreground">minutes</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      How long users must wait before claiming again (1-1440 minutes)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <Button
+                    onClick={saveSettings}
+                    disabled={savingSettings}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {savingSettings ? "Saving..." : "Save Settings"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </Layout>
