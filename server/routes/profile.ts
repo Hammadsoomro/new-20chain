@@ -16,9 +16,16 @@ export const uploadProfilePicture: RequestHandler = async (
   res,
 ) => {
   try {
+    if (!req.userId) {
+      console.error("Upload failed: No userId in request");
+      res.status(401).json({ error: "Authentication required" });
+      return;
+    }
+
     const { profilePictureUrl } = req.body;
 
     if (!profilePictureUrl) {
+      console.error("Upload failed: No profilePictureUrl provided");
       res.status(400).json({ error: "Profile picture URL is required" });
       return;
     }
@@ -36,6 +43,7 @@ export const uploadProfilePicture: RequestHandler = async (
     );
 
     if (!result.value) {
+      console.error("Upload failed: User not found for userId:", req.userId);
       res.status(404).json({ error: "User not found" });
       return;
     }
