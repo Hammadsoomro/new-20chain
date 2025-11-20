@@ -198,16 +198,16 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="space-y-3 pt-4 border-t border-sidebar-border">
             <Link
               to="/settings"
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
+              className={`flex items-center px-4 py-3 rounded-lg transition-all relative group ${
                 isActive("/settings")
                   ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              } ${sidebarCollapsed ? "justify-center" : ""}`}
+              } ${sidebarCollapsed ? "justify-start" : "gap-3"}`}
               title={sidebarCollapsed ? "Settings" : ""}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 ${
-                sidebarCollapsed ? "hidden" : "inline sm:inline"
+              <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                sidebarCollapsed ? "w-0" : "w-auto"
               }`}>
                 Settings
               </span>
