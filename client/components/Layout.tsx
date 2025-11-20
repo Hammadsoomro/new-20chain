@@ -95,22 +95,39 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-sidebar border-r border-sidebar-border transform transition-transform duration-300 overflow-y-auto ${
+        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 overflow-y-auto ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:relative md:translate-x-0`}
+        } md:relative md:translate-x-0 ${
+          sidebarCollapsed ? "w-20" : "w-64"
+        }`}
       >
         <div className="flex flex-col h-full p-6">
-          {/* Logo */}
-          <Link to="/dashboard" className="flex items-center gap-2 mb-8 group">
-            <div className="h-10 w-10 rounded-lg bg-sidebar-primary flex items-center justify-center group-hover:shadow-lg transition-shadow">
-              <div className="text-sidebar-primary-foreground font-bold text-lg">
-                ◆
+          {/* Logo and Collapse Button */}
+          <div className="flex items-center justify-between mb-8">
+            <Link to="/dashboard" className="flex items-center gap-2 group">
+              <div className="h-10 w-10 rounded-lg bg-sidebar-primary flex items-center justify-center group-hover:shadow-lg transition-shadow flex-shrink-0">
+                <div className="text-sidebar-primary-foreground font-bold text-lg">
+                  ◆
+                </div>
               </div>
-            </div>
-            <span className="font-bold text-lg text-sidebar-foreground hidden sm:inline">
-              TaskFlow
-            </span>
-          </Link>
+              <span className={`font-bold text-lg text-sidebar-foreground transition-all duration-300 ${
+                sidebarCollapsed ? "hidden" : "inline"
+              }`}>
+                TaskFlow
+              </span>
+            </Link>
+            <button
+              onClick={toggleSidebarCollapse}
+              className="hidden md:flex p-1.5 hover:bg-sidebar-accent rounded-lg transition-colors ml-auto"
+              aria-label="Toggle sidebar"
+            >
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-5 w-5 text-sidebar-foreground" />
+              ) : (
+                <ChevronLeft className="h-5 w-5 text-sidebar-foreground" />
+              )}
+            </button>
+          </div>
 
           {/* User Info Card */}
           <div className="bg-sidebar-primary/10 border border-sidebar-border rounded-lg p-4 mb-6">
