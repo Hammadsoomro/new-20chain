@@ -28,8 +28,17 @@ export default function NumbersSorter() {
 
   // Load from localStorage on mount
   useEffect(() => {
-    const saved = localStorage.getItem("sorterInput");
-    if (saved) setInputNumbers(saved);
+    const savedInput = localStorage.getItem("sorterInput");
+    if (savedInput) setInputNumbers(savedInput);
+
+    const savedDeduplicated = localStorage.getItem("sorterDeduplicated");
+    if (savedDeduplicated) {
+      try {
+        setDeduplicated(JSON.parse(savedDeduplicated));
+      } catch (error) {
+        console.error("Error loading deduplicated lines:", error);
+      }
+    }
   }, []);
 
   // Load settings from server
