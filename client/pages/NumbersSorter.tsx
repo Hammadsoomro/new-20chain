@@ -254,9 +254,10 @@ export default function NumbersSorter() {
                 <div className="flex gap-2">
                   <Button
                     onClick={deduplicateLines}
+                    disabled={isDeduplicating}
                     className="flex-1 bg-primary hover:bg-primary/90"
                   >
-                    Deduplicate
+                    {isDeduplicating ? "Deduplicating..." : "Deduplicate"}
                   </Button>
                   <Button
                     onClick={clearInput}
