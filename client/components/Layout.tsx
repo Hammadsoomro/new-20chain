@@ -198,21 +198,43 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="space-y-3 pt-4 border-t border-sidebar-border">
             <Link
               to="/settings"
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
                 isActive("/settings")
                   ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              }`}
+              } ${sidebarCollapsed ? "justify-center" : ""}`}
+              title={sidebarCollapsed ? "Settings" : ""}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
-              <span className="hidden sm:inline">Settings</span>
+              <span className={`transition-all duration-300 ${
+                sidebarCollapsed ? "hidden" : "inline sm:inline"
+              }`}>
+                Settings
+              </span>
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                  Settings
+                </div>
+              )}
             </Link>
             <button
               onClick={logout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all"
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group ${
+                sidebarCollapsed ? "justify-center" : ""
+              }`}
+              title={sidebarCollapsed ? "Logout" : ""}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className={`transition-all duration-300 ${
+                sidebarCollapsed ? "hidden" : "inline sm:inline"
+              }`}>
+                Logout
+              </span>
+              {sidebarCollapsed && (
+                <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                  Logout
+                </div>
+              )}
             </button>
           </div>
         </div>
