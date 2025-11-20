@@ -170,15 +170,25 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
                     isActive(item.path)
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  }`}
+                  } ${sidebarCollapsed ? "justify-center" : ""}`}
                   onClick={() => setSidebarOpen(false)}
+                  title={sidebarCollapsed ? item.label : ""}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span className="hidden sm:inline">{item.label}</span>
+                  <span className={`transition-all duration-300 ${
+                    sidebarCollapsed ? "hidden" : "inline sm:inline"
+                  }`}>
+                    {item.label}
+                  </span>
+                  {sidebarCollapsed && (
+                    <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                      {item.label}
+                    </div>
+                  )}
                 </Link>
               );
             })}
