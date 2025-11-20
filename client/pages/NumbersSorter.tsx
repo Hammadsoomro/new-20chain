@@ -62,27 +62,84 @@ export default function NumbersSorter() {
     localStorage.setItem("sorterInput", inputNumbers);
   }, [inputNumbers]);
 
-  const deduplicateLines = () => {
+  const deduplicateLines = async () => {
+    if (!token) {
+      toast.error("Authentication required");
+      return;
+    }
+
     const lines = inputNumbers.split("\n").filter((line) => line.trim());
 
-    // Get first 15 words of each line for comparison
-    const getFirstWords = (text: string) => {
-      return text.split(/\s+/).slice(0, 15).join(" ");
-    };
+    if (lines.length === 0) {
+      toast.error("Please enter some numbers first");
+      return;
+    }
 
-    // Deduplicate: keep only first occurrence of each unique set of first 15 words
-    const seen = new Set<string>();
-    const unique: string[] = [];
+    try {
+      setIsDeduplicating(true);
 
-    lines.forEach((line) => {
-      const key = getFirstWords(line);
-      if (!seen.has(key)) {
-        seen.add(key);
-        unique.push(line);
+      // Fetch queued lines
+      const queuedResponse = await fetch("/api/queued", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const queuedData = queuedResponse.ok ? await queuedResponse.json() : {};
+      const queuedLines = new Set(
+        (queuedData.lines || []).map((line: any) => line.content.trim().toLowerCase())
+      );
+
+      // Fetch history entries
+      const historyResponse = await fetch("/api/history", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const historyData = historyResponse.ok
+        ? await historyResponse.json()
+        : {};
+      const historyLines = new Set(
+        (historyData.entries || []).map((entry: any) =>
+          entry.content.trim().toLowerCase()
+        )
+      );
+
+      // Get first 15 words of each line for comparison
+      const getFirstWords = (text: string) => {
+        return text.split(/\s+/).slice(0, 15).join(" ");
+      };
+
+      // Deduplicate: keep only first occurrence of each unique set of first 15 words
+      // AND exclude lines that are already in queued list or history
+      const seen = new Set<string>();
+      const unique: string[] = [];
+
+      lines.forEach((line) => {
+        const trimmedLine = line.trim().toLowerCase();
+        const key = getFirstWords(trimmedLine);
+
+        // Check if not already seen, and not in queued list or history
+        if (
+          !seen.has(key) &&
+          !queuedLines.has(trimmedLine) &&
+          !historyLines.has(trimmedLine)
+        ) {
+          seen.add(key);
+          unique.push(line);
+        }
+      });
+
+      setDeduplicated(unique);
+
+      if (unique.length === 0) {
+        toast.info("All lines already exist in Queued List or History");
+      } else {
+        toast.success(`${unique.length} unique lines after deduplication`);
       }
-    });
-
-    setDeduplicated(unique);
+    } catch (error) {
+      console.error("Error deduplicating lines:", error);
+      toast.error("Failed to deduplicate lines");
+    } finally {
+      setIsDeduplicating(false);
+    }
   };
 
   const addToQueue = async () => {
