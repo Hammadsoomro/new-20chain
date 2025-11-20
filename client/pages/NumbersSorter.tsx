@@ -19,6 +19,7 @@ export default function NumbersSorter() {
   const [inputNumbers, setInputNumbers] = useState<string>("");
   const [deduplicated, setDeduplicated] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeduplicating, setIsDeduplicating] = useState(false);
   const [settings, setSettings] = useState({
     lineCount: 5,
     cooldownMinutes: 30,
