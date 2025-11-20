@@ -170,17 +170,17 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all relative group ${
+                  className={`flex items-center px-4 py-3 rounded-lg transition-all relative group ${
                     isActive(item.path)
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  } ${sidebarCollapsed ? "justify-center" : ""}`}
+                  } ${sidebarCollapsed ? "justify-start" : "gap-3"}`}
                   onClick={() => setSidebarOpen(false)}
                   title={sidebarCollapsed ? item.label : ""}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span className={`transition-all duration-300 ${
-                    sidebarCollapsed ? "hidden" : "inline sm:inline"
+                  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                    sidebarCollapsed ? "w-0" : "w-auto"
                   }`}>
                     {item.label}
                   </span>
