@@ -130,30 +130,36 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
 
           {/* User Info Card */}
-          <div className="bg-sidebar-primary/10 border border-sidebar-border rounded-lg p-4 mb-6">
+          <div className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg p-4 mb-6 transition-all duration-300 ${
+            sidebarCollapsed ? "p-2" : "p-4"
+          }`}>
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center flex-shrink-0">
                 <div className="text-sidebar-primary-foreground font-bold">
                   {user?.name?.[0]?.toUpperCase() || "U"}
                 </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-sidebar-foreground/60 capitalize">
-                  {user?.role}
-                </p>
-              </div>
+              {!sidebarCollapsed && (
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-sidebar-foreground truncate">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs text-sidebar-foreground/60 capitalize">
+                    {user?.role}
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Clock and Date */}
-            <div className="space-y-1 text-xs text-sidebar-foreground/70">
-              <p className="font-mono font-semibold">
-                {currentTime.toLocaleTimeString()}
-              </p>
-              <p>{currentTime.toLocaleDateString()}</p>
-            </div>
+            {!sidebarCollapsed && (
+              <div className="space-y-1 text-xs text-sidebar-foreground/70">
+                <p className="font-mono font-semibold">
+                  {currentTime.toLocaleTimeString()}
+                </p>
+                <p>{currentTime.toLocaleDateString()}</p>
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
