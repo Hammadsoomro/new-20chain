@@ -1,15 +1,311 @@
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/Layout";
-import { PagePlaceholder } from "@/components/PagePlaceholder";
-import { Clock } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Clock, AlertCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
+
+interface ClaimedNumber {
+  _id: string;
+  content: string;
+  claimedAt: string;
+  cooldownUntil: string;
+}
 
 export default function NumbersInbox() {
+  const { token, user } = useAuth();
+  const [claimedNumbers, setClaimedNumbers] = useState<ClaimedNumber[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState(false);
+  const [settings, setSettings] = useState({
+    lineCount: 5,
+    cooldownMinutes: 30,
+  });
+  const [timeRemaining, setTimeRemaining] = useState<Record<string, string>>(
+    {},
+  );
+  const [canClaim, setCanClaim] = useState(false);
+
+  // Fetch claim settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch("/api/claim/settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSettings(data);
+        }
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+
+    fetchSettings();
+  }, [token]);
+
+  // Fetch claimed numbers
+  useEffect(() => {
+    const fetchClaimedNumbers = async () => {
+      if (!token) return;
+
+      try {
+        setLoading(true);
+        const response = await fetch("/api/claim/numbers", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setClaimedNumbers(data);
+
+          // Check if user can claim (no active cooldown)
+          const hasActiveCooldown = data.some((num: ClaimedNumber) => {
+            return new Date(num.cooldownUntil) > new Date();
+          });
+          setCanClaim(!hasActiveCooldown);
+        }
+      } catch (error) {
+        console.error("Error fetching claimed numbers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClaimedNumbers();
+  }, [token]);
+
+  // Update remaining cooldown time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const remaining: Record<string, string> = {};
+
+      claimedNumbers.forEach((num) => {
+        const cooldownTime = new Date(num.cooldownUntil);
+        const now = new Date();
+        const diff = cooldownTime.getTime() - now.getTime();
+
+        if (diff <= 0) {
+          remaining[num._id] = "Ready";
+          setCanClaim(true);
+        } else {
+          const minutes = Math.floor(diff / 60000);
+          const seconds = Math.floor((diff % 60000) / 1000);
+          remaining[num._id] = `${minutes}m ${seconds}s`;
+        }
+      });
+
+      setTimeRemaining(remaining);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [claimedNumbers]);
+
+  const handleClaimNumbers = async () => {
+    if (!token || claiming || !canClaim) return;
+
+    try {
+      setClaiming(true);
+
+      // Release previous claims
+      if (claimedNumbers.length > 0) {
+        await fetch("/api/claim/release", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      }
+
+      // Claim new numbers
+      const response = await fetch("/api/claim", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setClaimedNumbers(data.claimedLines);
+        setCanClaim(false);
+        toast.success(`${data.claimedCount} numbers claimed successfully!`);
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to claim numbers");
+      }
+    } catch (error) {
+      console.error("Error claiming numbers:", error);
+      toast.error("Failed to claim numbers");
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleString();
+    } catch {
+      return dateString;
+    }
+  };
+
+  const totalClaimed = claimedNumbers.length;
+  const readyToClaim = timeRemaining[claimedNumbers[0]?._id] === "Ready";
+
   return (
     <Layout>
-      <PagePlaceholder
-        icon={<Clock className="h-8 w-8 text-primary" />}
-        title="Numbers Inbox"
-        description="Claim your allocated numbers with cooldown timer and status indicators"
-      />
+      <div className="min-h-screen p-6 md:p-8 bg-gradient-to-br from-background to-muted/30">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <Clock className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">
+                Numbers Inbox
+              </h1>
+            </div>
+            <p className="text-muted-foreground">
+              Claim {settings.lineCount} numbers at a time with{" "}
+              {settings.cooldownMinutes} minute cooldown
+            </p>
+          </div>
+
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <Card className="p-6">
+              <div className="text-sm text-muted-foreground mb-1">
+                Total Claimed
+              </div>
+              <div className="text-3xl font-bold text-foreground">
+                {totalClaimed}
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="text-sm text-muted-foreground mb-1">
+                Can Claim Again
+              </div>
+              <div className="text-3xl font-bold text-green-600">
+                {readyToClaim ? "Yes" : "No"}
+              </div>
+            </Card>
+            <Card className="p-6">
+              <div className="text-sm text-muted-foreground mb-1">
+                Claim Settings
+              </div>
+              <div className="text-sm text-foreground">
+                {settings.lineCount} lines per claim •{" "}
+                {settings.cooldownMinutes} min cooldown
+              </div>
+            </Card>
+          </div>
+
+          {/* Claim Button Section */}
+          <Card className="p-8 mb-8 bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
+            <div className="flex flex-col items-center gap-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-foreground mb-2">
+                  Ready to Claim Numbers?
+                </h2>
+                <p className="text-muted-foreground">
+                  {canClaim
+                    ? `Click the button below to claim ${settings.lineCount} new numbers`
+                    : "You need to complete the cooldown before claiming again"}
+                </p>
+              </div>
+
+              <Button
+                onClick={handleClaimNumbers}
+                disabled={!canClaim || claiming || loading}
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white px-8 py-6 text-lg"
+              >
+                {claiming ? (
+                  <>
+                    <Clock className="h-5 w-5 mr-2 animate-spin" />
+                    Claiming...
+                  </>
+                ) : canClaim ? (
+                  <>
+                    <AlertCircle className="h-5 w-5 mr-2" />
+                    Claim {settings.lineCount} Numbers
+                  </>
+                ) : (
+                  <>
+                    <Clock className="h-5 w-5 mr-2" />
+                    On Cooldown
+                  </>
+                )}
+              </Button>
+            </div>
+          </Card>
+
+          {/* Claimed Numbers Section */}
+          {loading ? (
+            <Card className="p-8">
+              <div className="text-center text-muted-foreground">
+                Loading claimed numbers...
+              </div>
+            </Card>
+          ) : claimedNumbers.length === 0 ? (
+            <Card className="p-8">
+              <div className="text-center">
+                <Clock className="h-12 w-12 text-muted-foreground/50 mx-auto mb-3" />
+                <p className="text-muted-foreground">
+                  No numbers claimed yet. Click the Claim button to get started!
+                </p>
+              </div>
+            </Card>
+          ) : (
+            <div>
+              <h2 className="text-xl font-bold text-foreground mb-4">
+                Your Claimed Numbers ({claimedNumbers.length}/
+                {settings.lineCount})
+              </h2>
+              <div className="space-y-3">
+                {claimedNumbers.map((number, index) => (
+                  <Card
+                    key={number._id}
+                    className="p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-semibold text-foreground text-lg break-words">
+                            {number.content}
+                          </p>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            Claimed at: {formatDate(number.claimedAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">
+                            Cooldown Time Left
+                          </p>
+                          <p className="text-lg font-bold text-yellow-600">
+                            {timeRemaining[number._id] || "Calculating..."}
+                          </p>
+                        </div>
+                        {timeRemaining[number._id] === "Ready" && (
+                          <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded">
+                            Ready to Claim Again
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </Layout>
   );
 }

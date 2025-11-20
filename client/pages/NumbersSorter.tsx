@@ -15,16 +15,46 @@ import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 
 export default function NumbersSorter() {
-  const { token } = useAuth();
+  const { token, isAdmin } = useAuth();
   const [inputNumbers, setInputNumbers] = useState<string>("");
   const [deduplicated, setDeduplicated] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [settings, setSettings] = useState({
+    lineCount: 5,
+    cooldownMinutes: 30,
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
     const saved = localStorage.getItem("sorterInput");
     if (saved) setInputNumbers(saved);
   }, []);
+
+  // Load settings from server
+  useEffect(() => {
+    const loadSettings = async () => {
+      if (!token) return;
+
+      try {
+        const response = await fetch("/api/claim/settings", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setSettings({
+            lineCount: data.lineCount || 5,
+            cooldownMinutes: data.cooldownMinutes || 30,
+          });
+        }
+      } catch (error) {
+        console.error("Error loading settings:", error);
+      }
+    };
+
+    loadSettings();
+  }, [token]);
 
   // Save to localStorage when input changes
   useEffect(() => {
@@ -92,6 +122,43 @@ export default function NumbersSorter() {
       alert("Copied to clipboard!");
     } catch (error) {
       alert("Failed to copy");
+    }
+  };
+
+  const saveSettings = async () => {
+    if (!token || !isAdmin) {
+      toast.error("Admin access required");
+      return;
+    }
+
+    try {
+      setSavingSettings(true);
+      const response = await fetch("/api/claim/settings", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          lineCount: Math.max(1, Math.min(100, settings.lineCount)),
+          cooldownMinutes: Math.max(
+            1,
+            Math.min(1440, settings.cooldownMinutes),
+          ),
+        }),
+      });
+
+      if (response.ok) {
+        toast.success("Settings updated successfully!");
+      } else {
+        toast.error("Failed to update settings");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update settings",
+      );
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -233,6 +300,90 @@ export default function NumbersSorter() {
               </CardContent>
             </Card>
           </div>
+
+          {/* Admin Settings Section */}
+          {isAdmin && (
+            <Card className="border-primary/50 bg-primary/5">
+              <CardHeader>
+                <CardTitle>Claim Settings</CardTitle>
+                <CardDescription>
+                  Configure how many numbers users can claim at once and the
+                  cooldown time
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Line Count Setting */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-foreground">
+                      Numbers per Claim
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={settings.lineCount}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            lineCount: parseInt(e.target.value) || 1,
+                          })
+                        }
+                        className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        lines
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      How many numbers each team member can claim at once
+                      (1-100)
+                    </p>
+                  </div>
+
+                  {/* Cooldown Setting */}
+                  <div className="space-y-3">
+                    <label className="block text-sm font-medium text-foreground">
+                      Cooldown Time
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="1"
+                        max="1440"
+                        value={settings.cooldownMinutes}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            cooldownMinutes: parseInt(e.target.value) || 1,
+                          })
+                        }
+                        className="flex-1 px-3 py-2 border border-border rounded-lg bg-background text-foreground"
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        minutes
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      How long users must wait before claiming again (1-1440
+                      minutes)
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <Button
+                    onClick={saveSettings}
+                    disabled={savingSettings}
+                    className="bg-primary hover:bg-primary/90"
+                  >
+                    {savingSettings ? "Saving..." : "Save Settings"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </Layout>

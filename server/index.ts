@@ -18,6 +18,13 @@ import {
 } from "./routes/chat";
 import { createTeamMember, getTeamMembers } from "./routes/members";
 import { uploadProfilePicture, getProfile } from "./routes/profile";
+import {
+  getClaimSettings,
+  updateClaimSettings,
+  claimNumbers,
+  getClaimedNumbers,
+  releaseClaimedNumbers,
+} from "./routes/claim";
 import { connectDB } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { getCollections } from "./db";
@@ -91,6 +98,14 @@ export async function createServer() {
   // Profile routes
   app.get("/api/profile", getProfile);
   app.post("/api/profile/upload-picture", uploadProfilePicture);
+
+  // Claim routes (protected)
+  app.use("/api/claim", authMiddleware);
+  app.get("/api/claim/settings", getClaimSettings);
+  app.put("/api/claim/settings", updateClaimSettings);
+  app.post("/api/claim", claimNumbers);
+  app.get("/api/claim/numbers", getClaimedNumbers);
+  app.post("/api/claim/release", releaseClaimedNumbers);
 
   return app;
 }
