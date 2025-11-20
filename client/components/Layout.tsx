@@ -35,6 +35,12 @@ export const Layout = ({ children }: LayoutProps) => {
   const { user, logout, isAdmin } = useAuth();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sidebarCollapsed") === "true";
+    }
+    return false;
+  });
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       return document.documentElement.classList.contains("dark");
@@ -42,6 +48,13 @@ export const Layout = ({ children }: LayoutProps) => {
     return false;
   });
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Toggle sidebar collapse and save to localStorage
+  const toggleSidebarCollapse = () => {
+    const newValue = !sidebarCollapsed;
+    setSidebarCollapsed(newValue);
+    localStorage.setItem("sidebarCollapsed", String(newValue));
+  };
 
   // Update time every second
   useEffect(() => {
