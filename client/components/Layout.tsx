@@ -97,9 +97,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:relative md:translate-x-0 ${
-          sidebarCollapsed ? "w-20" : "w-64"
-        }`}
+        } md:relative md:translate-x-0 ${sidebarCollapsed ? "w-20" : "w-64"}`}
       >
         {/* Fixed Header - Logo */}
         <div className="flex items-center p-6 border-b border-sidebar-border flex-shrink-0">
@@ -109,9 +107,11 @@ export const Layout = ({ children }: LayoutProps) => {
                 ◆
               </div>
             </div>
-            <span className={`font-bold text-lg text-sidebar-foreground transition-all duration-300 ${
-              sidebarCollapsed ? "hidden" : "inline"
-            }`}>
+            <span
+              className={`font-bold text-lg text-sidebar-foreground transition-all duration-300 ${
+                sidebarCollapsed ? "hidden" : "inline"
+              }`}
+            >
               TaskFlow
             </span>
           </Link>
@@ -119,12 +119,15 @@ export const Layout = ({ children }: LayoutProps) => {
 
         {/* Scrollable Content */}
         <div className="flex flex-col h-full overflow-y-auto p-6">
-
           {/* User Info Card */}
-          <div className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 ${
-            sidebarCollapsed ? "p-2" : "p-4"
-          }`}>
-            <div className={`flex items-center ${sidebarCollapsed ? "" : "gap-3"} mb-3`}>
+          <div
+            className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 ${
+              sidebarCollapsed ? "p-2" : "p-4"
+            }`}
+          >
+            <div
+              className={`flex items-center ${sidebarCollapsed ? "" : "gap-3"} mb-3`}
+            >
               <div className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center flex-shrink-0">
                 <div className="text-sidebar-primary-foreground font-bold">
                   {user?.name?.[0]?.toUpperCase() || "U"}
@@ -170,9 +173,11 @@ export const Layout = ({ children }: LayoutProps) => {
                   title={sidebarCollapsed ? item.label : ""}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                    sidebarCollapsed ? "w-0" : "w-auto"
-                  }`}>
+                  <span
+                    className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                      sidebarCollapsed ? "w-0" : "w-auto"
+                    }`}
+                  >
                     {item.label}
                   </span>
                   {sidebarCollapsed && (
@@ -197,9 +202,11 @@ export const Layout = ({ children }: LayoutProps) => {
               title={sidebarCollapsed ? "Settings" : ""}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                sidebarCollapsed ? "w-0" : "w-auto"
-              }`}>
+              <span
+                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                  sidebarCollapsed ? "w-0" : "w-auto"
+                }`}
+              >
                 Settings
               </span>
               {sidebarCollapsed && (
@@ -216,9 +223,11 @@ export const Layout = ({ children }: LayoutProps) => {
               title={sidebarCollapsed ? "Logout" : ""}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                sidebarCollapsed ? "w-0" : "w-auto"
-              }`}>
+              <span
+                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                  sidebarCollapsed ? "w-0" : "w-auto"
+                }`}
+              >
                 Logout
               </span>
               {sidebarCollapsed && (
