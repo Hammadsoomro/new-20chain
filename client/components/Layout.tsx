@@ -101,8 +101,8 @@ export const Layout = ({ children }: LayoutProps) => {
           sidebarCollapsed ? "w-20" : "w-64"
         }`}
       >
-        {/* Fixed Header - Logo and Collapse Button */}
-        <div className="flex items-center justify-between p-6 border-b border-sidebar-border flex-shrink-0">
+        {/* Fixed Header - Logo */}
+        <div className="flex items-center p-6 border-b border-sidebar-border flex-shrink-0">
           <Link to="/dashboard" className="flex items-center gap-2 group">
             <div className="h-10 w-10 rounded-lg bg-sidebar-primary flex items-center justify-center group-hover:shadow-lg transition-shadow flex-shrink-0">
               <div className="text-sidebar-primary-foreground font-bold text-lg">
@@ -115,17 +115,6 @@ export const Layout = ({ children }: LayoutProps) => {
               TaskFlow
             </span>
           </Link>
-          <button
-            onClick={toggleSidebarCollapse}
-            className="hidden md:flex p-1.5 hover:bg-sidebar-accent rounded-lg transition-colors flex-shrink-0"
-            aria-label="Toggle sidebar"
-          >
-            {sidebarCollapsed ? (
-              <ChevronRight className="h-5 w-5 text-sidebar-foreground" />
-            ) : (
-              <ChevronLeft className="h-5 w-5 text-sidebar-foreground" />
-            )}
-          </button>
         </div>
 
         {/* Scrollable Content */}
