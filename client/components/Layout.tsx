@@ -23,6 +23,8 @@ import {
   ArrowRight,
   ChevronDown,
   BarChart3,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface LayoutProps {
