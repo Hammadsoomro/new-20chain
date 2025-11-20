@@ -219,14 +219,14 @@ export const Layout = ({ children }: LayoutProps) => {
             </Link>
             <button
               onClick={logout}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group ${
-                sidebarCollapsed ? "justify-center" : ""
+              className={`w-full flex items-center px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group ${
+                sidebarCollapsed ? "justify-start" : "gap-3"
               }`}
               title={sidebarCollapsed ? "Logout" : ""}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
-              <span className={`transition-all duration-300 ${
-                sidebarCollapsed ? "hidden" : "inline sm:inline"
+              <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
+                sidebarCollapsed ? "w-0" : "w-auto"
               }`}>
                 Logout
               </span>
