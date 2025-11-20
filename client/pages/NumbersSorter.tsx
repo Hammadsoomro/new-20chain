@@ -71,6 +71,11 @@ export default function NumbersSorter() {
     localStorage.setItem("sorterInput", inputNumbers);
   }, [inputNumbers]);
 
+  // Save deduplicated lines to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem("sorterDeduplicated", JSON.stringify(deduplicated));
+  }, [deduplicated]);
+
   const deduplicateLines = async () => {
     if (!token) {
       toast.error("Authentication required");
