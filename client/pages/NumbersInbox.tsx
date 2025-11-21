@@ -80,7 +80,9 @@ export default function NumbersInbox() {
         if (queueResponse.ok) {
           const queueData = await queueResponse.json();
           console.log("Queued lines fetched:", queueData);
-          setQueuedLinesAvailable(Array.isArray(queueData) && queueData.length > 0);
+          setQueuedLinesAvailable(
+            Array.isArray(queueData.lines) && queueData.lines.length > 0,
+          );
         } else {
           console.error("Failed to fetch queued lines:", queueResponse.status);
           setQueuedLinesAvailable(false);
@@ -168,6 +170,17 @@ export default function NumbersInbox() {
     }
   };
 
+  const formatCooldownDuration = (minutes: number) => {
+    if (minutes < 1) {
+      return `${Math.round(minutes * 60)} seconds`;
+    } else if (minutes < 60) {
+      return `${Math.round(minutes)} minute${Math.round(minutes) !== 1 ? "s" : ""}`;
+    } else {
+      const hours = Math.round(minutes / 60);
+      return `${hours} hour${hours !== 1 ? "s" : ""}`;
+    }
+  };
+
   const totalClaimed = claimedNumbers.length;
 
   return (
@@ -184,7 +197,7 @@ export default function NumbersInbox() {
             </div>
             <p className="text-muted-foreground">
               Claim {settings.lineCount} numbers at a time with{" "}
-              {settings.cooldownMinutes} minute cooldown
+              {formatCooldownDuration(settings.cooldownMinutes)} cooldown
             </p>
           </div>
 
@@ -199,10 +212,10 @@ export default function NumbersInbox() {
               </div>
             </Card>
             <Card className="p-6">
-              <div className="text-sm text-muted-foreground mb-1">
-                Status
-              </div>
-              <div className={`text-3xl font-bold ${canClaim ? "text-green-600" : "text-red-600"}`}>
+              <div className="text-sm text-muted-foreground mb-1">Status</div>
+              <div
+                className={`text-3xl font-bold ${canClaim ? "text-green-600" : "text-red-600"}`}
+              >
                 {canClaim ? "Ready" : "Cooldown"}
               </div>
             </Card>
@@ -240,7 +253,8 @@ export default function NumbersInbox() {
                 let isDisabled = false;
 
                 if (!queuedLinesAvailable) {
-                  buttonClass = "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
+                  buttonClass =
+                    "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
                   buttonEmoji = "⚪️";
                   buttonText = "No Lines Available";
                   isDisabled = true;
@@ -255,7 +269,8 @@ export default function NumbersInbox() {
                   buttonText = `Claim ${settings.lineCount} Numbers`;
                   isDisabled = false;
                 } else {
-                  buttonClass = "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
+                  buttonClass =
+                    "bg-gray-400 hover:bg-gray-400 text-white cursor-not-allowed";
                   buttonEmoji = "⚪️";
                   buttonText = "No Lines Available";
                   isDisabled = true;

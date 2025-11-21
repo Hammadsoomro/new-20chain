@@ -41,7 +41,7 @@ export const getHistory: RequestHandler = async (req, res) => {
   try {
     const teamId = (req as any).teamId || "default-team";
     const userId = (req as any).userId || "";
-    const isAdmin = (req as any).isAdmin || false;
+    const isAdmin = (req as any).role === "admin";
     const { search, date } = req.query;
 
     const collections = getCollections();
@@ -49,8 +49,8 @@ export const getHistory: RequestHandler = async (req, res) => {
     const filter: any = { teamId };
 
     // Filter by user if not admin
-    if (!isAdmin) {
-      filter.claimedBy = userId;
+    if (!isAdmin && userId) {
+      filter.claimedByUserId = userId;
     }
 
     // Build query with search

@@ -5,6 +5,7 @@ import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatArea } from "@/components/chat/ChatArea";
 import type { User, ChatGroup } from "@shared/api";
 import { io, Socket } from "socket.io-client";
+import { toast } from "sonner";
 
 interface ChatConversation {
   type: "group" | "direct";
@@ -59,6 +60,11 @@ export default function TeamChat() {
             console.log(
               `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
             );
+
+            // Show toast notification
+            toast.info(`New message from ${data.senderName}`, {
+              description: data.content.substring(0, 100),
+            });
           }
 
           conversation.lastMessageTime = data.timestamp;

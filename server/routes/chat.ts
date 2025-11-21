@@ -43,7 +43,13 @@ export const getOrCreateGroupChat: RequestHandler = async (
       };
     }
 
-    res.json(group);
+    res.json({
+      _id: group._id.toString(),
+      name: group.name,
+      teamId: group.teamId,
+      members: group.members,
+      createdAt: group.createdAt,
+    });
   } catch (error) {
     console.error("Error getting group chat:", error);
     res.status(500).json({ error: "Failed to get group chat" });
@@ -188,7 +194,14 @@ export const addMemberToGroup: RequestHandler = async (
       return;
     }
 
-    res.json(result.value);
+    const group = result.value;
+    res.json({
+      _id: group._id.toString(),
+      name: group.name,
+      teamId: group.teamId,
+      members: group.members,
+      createdAt: group.createdAt,
+    });
   } catch (error) {
     console.error("Error adding member to group:", error);
     res.status(500).json({ error: "Failed to add member to group" });
@@ -277,7 +290,18 @@ export const markMessageAsRead: RequestHandler = async (
       return;
     }
 
-    res.json(result.value);
+    const message = result.value;
+    res.json({
+      _id: message._id.toString(),
+      sender: message.sender,
+      senderName: message.senderName,
+      senderPicture: message.senderPicture,
+      recipient: message.recipient,
+      groupId: message.groupId,
+      content: message.content,
+      createdAt: message.createdAt,
+      readBy: message.readBy,
+    });
   } catch (error) {
     console.error("Error marking message as read:", error);
     res.status(500).json({ error: "Failed to mark message as read" });
@@ -313,7 +337,18 @@ export const editMessage: RequestHandler = async (req: AuthRequest, res) => {
       return;
     }
 
-    res.json(result.value);
+    const message = result.value;
+    res.json({
+      _id: message._id.toString(),
+      sender: message.sender,
+      senderName: message.senderName,
+      senderPicture: message.senderPicture,
+      recipient: message.recipient,
+      groupId: message.groupId,
+      content: message.content,
+      createdAt: message.createdAt,
+      editedAt: message.editedAt,
+    });
   } catch (error) {
     console.error("Error editing message:", error);
     res.status(500).json({ error: "Failed to edit message" });
@@ -349,7 +384,19 @@ export const deleteMessage: RequestHandler = async (req: AuthRequest, res) => {
       return;
     }
 
-    res.json(result.value);
+    const message = result.value;
+    res.json({
+      _id: message._id.toString(),
+      sender: message.sender,
+      senderName: message.senderName,
+      senderPicture: message.senderPicture,
+      recipient: message.recipient,
+      groupId: message.groupId,
+      content: message.content,
+      createdAt: message.createdAt,
+      deleted: message.deleted,
+      deletedAt: message.deletedAt,
+    });
   } catch (error) {
     console.error("Error deleting message:", error);
     res.status(500).json({ error: "Failed to delete message" });

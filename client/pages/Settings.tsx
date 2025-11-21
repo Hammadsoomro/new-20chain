@@ -41,16 +41,7 @@ function SorterSettingsPanel() {
   const [saving, setSaving] = useState(false);
 
   const cooldownOptions = [30, 60, 120, 180, 240, 300, 360, 3600];
-  const cooldownLabels = [
-    "30s",
-    "1m",
-    "2m",
-    "3m",
-    "4m",
-    "5m",
-    "6m",
-    "60m",
-  ];
+  const cooldownLabels = ["30s", "1m", "2m", "3m", "4m", "5m", "6m", "60m"];
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -64,7 +55,10 @@ function SorterSettingsPanel() {
 
         if (response.ok) {
           const data = await response.json();
-          setSettings(data);
+          setSettings({
+            ...data,
+            cooldownMinutes: data.cooldownMinutes * 60,
+          });
         }
       } catch (error) {
         console.error("Error fetching settings:", error);
@@ -87,13 +81,18 @@ function SorterSettingsPanel() {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(settings),
+        body: JSON.stringify({
+          lineCount: settings.lineCount,
+          cooldownMinutes: settings.cooldownMinutes / 60,
+        }),
       });
 
       if (response.ok) {
         toast.success("Settings updated successfully");
       } else {
-        toast.error("Failed to update settings");
+        const errorData = await response.json();
+        console.error("Settings save error:", errorData);
+        toast.error(errorData.error || "Failed to update settings");
       }
     } catch (error) {
       console.error("Error saving settings:", error);
@@ -131,8 +130,9 @@ function SorterSettingsPanel() {
                 Cooldown Timer (seconds)
               </Label>
               <span className="text-sm font-semibold text-primary">
-                {cooldownLabels[cooldownOptions.indexOf(settings.cooldownMinutes)] ||
-                  settings.cooldownMinutes + "s"}
+                {cooldownLabels[
+                  cooldownOptions.indexOf(settings.cooldownMinutes)
+                ] || settings.cooldownMinutes + "s"}
               </span>
             </div>
             <input
@@ -298,11 +298,7 @@ function AccountInfoPanel({
         </div>
         <div className="space-y-2">
           <Label className="text-sm font-medium">Email</Label>
-          <Input
-            value={user?.email || ""}
-            disabled
-            className="bg-muted"
-          />
+          <Input value={user?.email || ""} disabled className="bg-muted" />
           <p className="text-xs text-muted-foreground">
             Email cannot be changed
           </p>
@@ -471,7 +467,7 @@ function PasswordChangePanel({
               <Input
                 id="confirm-password"
                 type={showConfirmPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="••••••���•"
                 value={formData.confirmPassword}
                 onChange={(e) =>
                   setFormData({
@@ -622,9 +618,7 @@ function TeamMembersPanel() {
       <Card>
         <CardHeader>
           <CardTitle>Create Team Member</CardTitle>
-          <CardDescription>
-            Add a new member to your team
-          </CardDescription>
+          <CardDescription>Add a new member to your team</CardDescription>
         </CardHeader>
         <CardContent>
           {!showForm ? (
@@ -740,11 +734,7 @@ function TeamMembersPanel() {
               </div>
 
               <div className="flex gap-2 pt-4">
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  className="flex-1"
-                >
+                <Button type="submit" disabled={submitting} className="flex-1">
                   {submitting ? "Creating..." : "Create Member"}
                 </Button>
                 <Button
@@ -773,7 +763,8 @@ function TeamMembersPanel() {
         <CardHeader>
           <CardTitle>Team Members</CardTitle>
           <CardDescription>
-            {members.length} member{members.length !== 1 ? "s" : ""} in your team
+            {members.length} member{members.length !== 1 ? "s" : ""} in your
+            team
           </CardDescription>
         </CardHeader>
         <CardContent>
