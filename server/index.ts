@@ -51,6 +51,14 @@ export async function createServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
+  // Debug middleware to log all requests
+  app.use((req, res, next) => {
+    if (req.path.startsWith("/api/chat/mark-read")) {
+      console.log(`[API] ${req.method} ${req.path} - Auth: ${req.headers.authorization ? "present" : "missing"}`);
+    }
+    next();
+  });
+
   // Middleware to populate teamId and role from database (after auth middleware)
   app.use((req, res, next) => {
     // This will be set by authMiddleware, we just ensure it's available

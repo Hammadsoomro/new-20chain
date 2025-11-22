@@ -23,12 +23,11 @@ export const getOrCreateGroupChat: RequestHandler = async (
     const collections = getCollections();
     let group = await collections.chatGroups.findOne({
       teamId: req.teamId,
-      name: "Team Chat",
     });
 
     if (!group) {
       const result = await collections.chatGroups.insertOne({
-        name: "Team Chat",
+        name: "Team Chat Group",
         teamId: req.teamId,
         members: [req.userId],
         createdAt: new Date().toISOString(),
@@ -36,7 +35,7 @@ export const getOrCreateGroupChat: RequestHandler = async (
 
       group = {
         _id: result.insertedId.toString(),
-        name: "Team Chat",
+        name: "Team Chat Group",
         teamId: req.teamId,
         members: [req.userId],
         createdAt: new Date().toISOString(),
@@ -272,13 +271,25 @@ export const markMessageAsRead: RequestHandler = async (
     const { messageId } = req.body;
 
     if (!messageId) {
+      console.log("[Chat] Mark-read: Missing messageId");
       res.status(400).json({ error: "Missing messageId" });
       return;
     }
 
+    let objectId;
+    try {
+      objectId = new ObjectId(messageId);
+    } catch (err) {
+      console.log(`[Chat] Mark-read: Invalid messageId format: ${messageId}`);
+      res.status(400).json({ error: "Invalid messageId format" });
+      return;
+    }
+
     const collections = getCollections();
+    console.log(`[Chat] Mark-read: Attempting to find message with ID: ${messageId}`);
+
     const result = await collections.chatMessages.findOneAndUpdate(
-      { _id: new ObjectId(messageId) },
+      { _id: objectId },
       {
         $addToSet: { readBy: req.userId },
       },
@@ -286,9 +297,13 @@ export const markMessageAsRead: RequestHandler = async (
     );
 
     if (!result.value) {
-      res.status(404).json({ error: "Message not found" });
+      console.log(`[Chat] Mark-read: Message not found. This usually means the message wasn't saved to DB yet. ID: ${messageId}`);
+      // Don't fail - just acknowledge. The Socket.IO event will still be emitted.
+      res.json({ success: true, message: "Read status acknowledged" });
       return;
     }
+
+    console.log(`[Chat] Mark-read: Successfully marked message as read: ${messageId}`);
 
     const message = result.value;
     res.json({

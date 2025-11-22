@@ -29,6 +29,7 @@ interface ChatAreaProps {
   };
   token: string | null;
   socket: Socket | null;
+  currentUserId?: string;
 }
 
 interface TypingIndicator {
@@ -44,6 +45,24 @@ const getInitials = (name: string) => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
+};
+
+const getDirectMessageRoomId = (userId1: string, userId2: string): string => {
+  // Create a normalized room ID so both users join the same room
+  const sorted = [userId1, userId2].sort();
+  return `dm-${sorted[0]}-${sorted[1]}`;
+};
+
+const getChatRoomId = (chatId: string, chatType: "group" | "direct", currentUserId?: string): string => {
+  if (chatType === "group") {
+    return chatId;
+  }
+
+  if (!currentUserId) {
+    return chatId;
+  }
+
+  return getDirectMessageRoomId(currentUserId, chatId);
 };
 
 export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
@@ -68,21 +87,31 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       return;
     }
 
+    const roomId = getChatRoomId(selectedChat.id, selectedChat.type, user._id);
     console.log(
       "[ChatArea] Setting up socket listeners for chat:",
       selectedChat.id,
+      "room:",
+      roomId,
     );
 
     // Join the chat room
     socket.emit("join-chat", {
-      chatId: selectedChat.id,
+      chatId: roomId,
       userId: user._id,
+      originalChatId: selectedChat.id,
+      chatType: selectedChat.type,
     });
 
     // Listen for new messages
     const handleNewMessage = (data: any) => {
       console.log("[ChatArea] New message received:", data);
-      if (data.chatId === selectedChat.id && data.sender !== user._id) {
+      const isTargetChat = selectedChat.type === "group"
+        ? data.groupId === selectedChat.id
+        : (data.recipient === user._id && data.sender === selectedChat.id) ||
+          (data.sender === user._id && data.recipient === selectedChat.id);
+
+      if (isTargetChat && data.sender !== user._id) {
         const newMsg: ChatMessage = {
           _id: data.messageId || data._id,
           sender: data.sender,
@@ -405,7 +434,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     if (!token || !socket) return;
 
     try {
-      await fetch("/api/chat/mark-read", {
+      const response = await fetch("/api/chat/mark-read", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -414,7 +443,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         body: JSON.stringify({ messageId }),
       });
 
-      // Emit read status through WebSocket
+      if (!response.ok) {
+        console.warn(`[ChatArea] Mark-read returned ${response.status}, but proceeding with Socket.IO event`);
+      }
+
+      // Always emit read status through WebSocket
       socket.emit("message-read", {
         messageId,
         userId: user?._id,

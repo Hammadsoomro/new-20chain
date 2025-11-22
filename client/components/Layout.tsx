@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { SidebarProfileCard } from "@/components/SidebarProfileCard";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -16,8 +18,6 @@ import {
   MessageSquare,
   Settings,
   LogOut,
-  Moon,
-  Sun,
   List,
   Clock,
   ArrowRight,
@@ -41,13 +41,6 @@ export const Layout = ({ children }: LayoutProps) => {
     }
     return false;
   });
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
-    }
-    return false;
-  });
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Toggle sidebar collapse and save to localStorage
   const toggleSidebarCollapse = () => {
@@ -56,25 +49,6 @@ export const Layout = ({ children }: LayoutProps) => {
     localStorage.setItem("sidebarCollapsed", String(newValue));
   };
 
-  // Update time every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const root = document.documentElement;
-    if (root.classList.contains("dark")) {
-      root.classList.remove("dark");
-      setIsDark(false);
-      localStorage.setItem("theme", "light");
-    } else {
-      root.classList.add("dark");
-      setIsDark(true);
-      localStorage.setItem("theme", "dark");
-    }
-  };
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -119,41 +93,13 @@ export const Layout = ({ children }: LayoutProps) => {
 
         {/* Scrollable Content */}
         <div className="flex flex-col h-full overflow-y-auto p-6">
-          {/* User Info Card */}
-          <div
-            className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 ${
-              sidebarCollapsed ? "p-2" : "p-4"
-            }`}
-          >
-            <div
-              className={`flex items-center ${sidebarCollapsed ? "" : "gap-3"} mb-3`}
-            >
-              <div className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center flex-shrink-0">
-                <div className="text-sidebar-primary-foreground font-bold">
-                  {user?.name?.[0]?.toUpperCase() || "U"}
-                </div>
-              </div>
-              {!sidebarCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-sidebar-foreground truncate">
-                    {user?.name}
-                  </p>
-                  <p className="text-xs text-sidebar-foreground/60 capitalize">
-                    {user?.role}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Clock and Date */}
-            {!sidebarCollapsed && (
-              <div className="space-y-1 text-xs text-sidebar-foreground/70">
-                <p className="font-mono font-semibold">
-                  {currentTime.toLocaleTimeString()}
-                </p>
-                <p>{currentTime.toLocaleDateString()}</p>
-              </div>
-            )}
+          {/* Profile Card with Integrated Clock */}
+          <div className="mb-6">
+            <SidebarProfileCard
+              name={user?.name || "User"}
+              role={user?.role || "Member"}
+              collapsed={sidebarCollapsed}
+            />
           </div>
 
           {/* Navigation */}
@@ -283,18 +229,8 @@ export const Layout = ({ children }: LayoutProps) => {
 
             {/* Right */}
             <div className="flex items-center gap-3">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleDarkMode}
-                className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Toggle theme"
-              >
-                {isDark ? (
-                  <Sun className="h-5 w-5 text-yellow-500" />
-                ) : (
-                  <Moon className="h-5 w-5 text-slate-400" />
-                )}
-              </button>
+              {/* Theme Switcher */}
+              <ThemeSwitcher />
 
               {/* Profile Dropdown */}
               <DropdownMenu>
