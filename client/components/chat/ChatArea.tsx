@@ -106,7 +106,12 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     // Listen for new messages
     const handleNewMessage = (data: any) => {
       console.log("[ChatArea] New message received:", data);
-      if (data.chatId === selectedChat.id && data.sender !== user._id) {
+      const isTargetChat = selectedChat.type === "group"
+        ? data.groupId === selectedChat.id
+        : (data.recipient === user._id && data.sender === selectedChat.id) ||
+          (data.sender === user._id && data.recipient === selectedChat.id);
+
+      if (isTargetChat && data.sender !== user._id) {
         const newMsg: ChatMessage = {
           _id: data.messageId || data._id,
           sender: data.sender,
