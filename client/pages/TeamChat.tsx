@@ -45,7 +45,12 @@ export default function TeamChat() {
 
     // Listen for new messages from other users (setup only once)
     const handleNewMessage = (data: any) => {
-      console.log("[TeamChat] Received message from", data.senderName, "in chat", data.chatId);
+      console.log(
+        "[TeamChat] Received message from",
+        data.senderName,
+        "in chat",
+        data.chatId,
+      );
 
       // Don't process messages from current user
       if (data.sender === user._id) {
@@ -53,42 +58,53 @@ export default function TeamChat() {
         return;
       }
 
-      // Get current selected chat state
+      // Update conversations list
+      setConversations((prev) => {
+        const updated = [...prev];
+        const convIndex = updated.findIndex((c) => c.id === data.chatId);
+
+        if (convIndex !== -1) {
+          const conversation = updated[convIndex];
+          conversation.lastMessageTime = data.timestamp;
+
+          // Move conversation to top
+          const [moved] = updated.splice(convIndex, 1);
+          updated.unshift(moved);
+
+          return updated;
+        }
+
+        return prev;
+      });
+
+      // Check current selected chat and handle notifications
       setSelectedChat((currentSelected) => {
         const isCurrentChatSelected = currentSelected?.id === data.chatId;
 
-        // Update conversations list
-        setConversations((prev) => {
-          const updated = [...prev];
-          const convIndex = updated.findIndex((c) => c.id === data.chatId);
+        // Only show notifications if not viewing this chat
+        if (!isCurrentChatSelected) {
+          // Show toast notification
+          toast.info(`New message from ${data.senderName}`, {
+            description: data.content.substring(0, 100),
+          });
 
-          if (convIndex !== -1) {
-            const conversation = updated[convIndex];
-            conversation.lastMessageTime = data.timestamp;
+          // Play notification sound
+          playNotificationSound();
 
-            // Only increment unread if not viewing this chat
-            if (!isCurrentChatSelected) {
-              conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+          // Increment unread count
+          setConversations((prev) => {
+            const updated = [...prev];
+            const convIndex = updated.findIndex((c) => c.id === data.chatId);
+            if (convIndex !== -1) {
+              updated[convIndex].unreadCount =
+                (updated[convIndex].unreadCount || 0) + 1;
               console.log(
-                `[TeamChat] Unread updated for ${conversation.name}: ${conversation.unreadCount}`,
+                `[TeamChat] Unread: ${updated[convIndex].name} = ${updated[convIndex].unreadCount}`,
               );
-
-              // Show toast notification
-              toast.info(`New message from ${data.senderName}`, {
-                description: data.content.substring(0, 100),
-              });
-
-              // Play notification sound
-              playNotificationSound();
             }
-
-            // Move conversation to top
-            const [moved] = updated.splice(convIndex, 1);
-            updated.unshift(moved);
-          }
-
-          return prev;
-        });
+            return updated;
+          });
+        }
 
         return currentSelected;
       });
