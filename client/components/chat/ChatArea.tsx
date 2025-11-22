@@ -87,15 +87,20 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       return;
     }
 
+    const roomId = getChatRoomId(selectedChat.id, selectedChat.type, user._id);
     console.log(
       "[ChatArea] Setting up socket listeners for chat:",
       selectedChat.id,
+      "room:",
+      roomId,
     );
 
     // Join the chat room
     socket.emit("join-chat", {
-      chatId: selectedChat.id,
+      chatId: roomId,
       userId: user._id,
+      originalChatId: selectedChat.id,
+      chatType: selectedChat.type,
     });
 
     // Listen for new messages
