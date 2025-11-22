@@ -415,11 +415,10 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       });
 
       if (!response.ok) {
-        console.error(`[ChatArea] Failed to mark message as read: ${response.status}`);
-        return;
+        console.warn(`[ChatArea] Mark-read returned ${response.status}, but proceeding with Socket.IO event`);
       }
 
-      // Emit read status through WebSocket
+      // Always emit read status through WebSocket
       socket.emit("message-read", {
         messageId,
         userId: user?._id,
