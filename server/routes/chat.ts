@@ -271,13 +271,25 @@ export const markMessageAsRead: RequestHandler = async (
     const { messageId } = req.body;
 
     if (!messageId) {
+      console.log("[Chat] Mark-read: Missing messageId");
       res.status(400).json({ error: "Missing messageId" });
       return;
     }
 
+    let objectId;
+    try {
+      objectId = new ObjectId(messageId);
+    } catch (err) {
+      console.log(`[Chat] Mark-read: Invalid messageId format: ${messageId}`, err);
+      res.status(400).json({ error: "Invalid messageId format" });
+      return;
+    }
+
     const collections = getCollections();
+    console.log(`[Chat] Mark-read: Attempting to find message with ID: ${messageId}`);
+
     const result = await collections.chatMessages.findOneAndUpdate(
-      { _id: new ObjectId(messageId) },
+      { _id: objectId },
       {
         $addToSet: { readBy: req.userId },
       },
@@ -285,9 +297,12 @@ export const markMessageAsRead: RequestHandler = async (
     );
 
     if (!result.value) {
+      console.log(`[Chat] Mark-read: Message not found with ID: ${messageId}`);
       res.status(404).json({ error: "Message not found" });
       return;
     }
+
+    console.log(`[Chat] Mark-read: Successfully marked message as read: ${messageId}`);
 
     const message = result.value;
     res.json({
