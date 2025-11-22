@@ -190,7 +190,12 @@ export default function TeamChat() {
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
 
-      // Create multiple beeps for better notification
+      // Resume audio context if suspended (required by some browsers)
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      // Create two short beeps for notification
       const now = audioContext.currentTime;
 
       // Beep 1: 800Hz
