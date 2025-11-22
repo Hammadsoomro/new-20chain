@@ -47,6 +47,24 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
+const getDirectMessageRoomId = (userId1: string, userId2: string): string => {
+  // Create a normalized room ID so both users join the same room
+  const sorted = [userId1, userId2].sort();
+  return `dm-${sorted[0]}-${sorted[1]}`;
+};
+
+const getChatRoomId = (chatId: string, chatType: "group" | "direct", currentUserId?: string): string => {
+  if (chatType === "group") {
+    return chatId;
+  }
+
+  if (!currentUserId) {
+    return chatId;
+  }
+
+  return getDirectMessageRoomId(currentUserId, chatId);
+};
+
 export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
