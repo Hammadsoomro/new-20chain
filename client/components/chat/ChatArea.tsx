@@ -405,7 +405,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     if (!token || !socket) return;
 
     try {
-      await fetch("/api/chat/mark-read", {
+      const response = await fetch("/api/chat/mark-read", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -413,6 +413,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         },
         body: JSON.stringify({ messageId }),
       });
+
+      if (!response.ok) {
+        console.error(`[ChatArea] Failed to mark message as read: ${response.status}`);
+        return;
+      }
 
       // Emit read status through WebSocket
       socket.emit("message-read", {
