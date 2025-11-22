@@ -29,6 +29,7 @@ interface ChatAreaProps {
   };
   token: string | null;
   socket: Socket | null;
+  currentUserId?: string;
 }
 
 interface TypingIndicator {
