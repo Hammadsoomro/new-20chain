@@ -23,12 +23,11 @@ export const getOrCreateGroupChat: RequestHandler = async (
     const collections = getCollections();
     let group = await collections.chatGroups.findOne({
       teamId: req.teamId,
-      name: "Team Chat",
     });
 
     if (!group) {
       const result = await collections.chatGroups.insertOne({
-        name: "Team Chat",
+        name: "Team Chat Group",
         teamId: req.teamId,
         members: [req.userId],
         createdAt: new Date().toISOString(),
@@ -36,7 +35,7 @@ export const getOrCreateGroupChat: RequestHandler = async (
 
       group = {
         _id: result.insertedId.toString(),
-        name: "Team Chat",
+        name: "Team Chat Group",
         teamId: req.teamId,
         members: [req.userId],
         createdAt: new Date().toISOString(),
