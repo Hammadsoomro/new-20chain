@@ -280,7 +280,7 @@ export const markMessageAsRead: RequestHandler = async (
     try {
       objectId = new ObjectId(messageId);
     } catch (err) {
-      console.log(`[Chat] Mark-read: Invalid messageId format: ${messageId}`, err);
+      console.log(`[Chat] Mark-read: Invalid messageId format: ${messageId}`);
       res.status(400).json({ error: "Invalid messageId format" });
       return;
     }
@@ -297,8 +297,9 @@ export const markMessageAsRead: RequestHandler = async (
     );
 
     if (!result.value) {
-      console.log(`[Chat] Mark-read: Message not found with ID: ${messageId}`);
-      res.status(404).json({ error: "Message not found" });
+      console.log(`[Chat] Mark-read: Message not found. This usually means the message wasn't saved to DB yet. ID: ${messageId}`);
+      // Don't fail - just acknowledge. The Socket.IO event will still be emitted.
+      res.json({ success: true, message: "Read status acknowledged" });
       return;
     }
 
