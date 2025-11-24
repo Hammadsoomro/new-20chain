@@ -97,7 +97,21 @@ export default function TeamChat() {
         socket.disconnect();
       }
     };
-  }, [token, user?._id, selectedChat?.id]);
+  }, [token, user?._id]);
+
+  // Join all chat rooms when conversations load
+  useEffect(() => {
+    if (!socketRef.current || conversations.length === 0 || !user?._id) return;
+
+    console.log(`[TeamChat] Joining ${conversations.length} chat rooms`);
+    conversations.forEach((conv) => {
+      socketRef.current?.emit("join-chat", {
+        chatId: conv.id,
+        userId: user._id,
+      });
+      console.log(`[TeamChat] Joined chat room: ${conv.id}`);
+    });
+  }, [conversations, user?._id]);
 
   // Fetch initial team members and group chat
   useEffect(() => {
