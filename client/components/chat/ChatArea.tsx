@@ -413,6 +413,9 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     markedAsReadRef.current.add(messageId);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
       const response = await fetch("/api/chat/mark-read", {
         method: "POST",
         headers: {
@@ -420,7 +423,10 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ messageId }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         console.error("[ChatArea] Mark as read failed:", response.status, response.statusText);
@@ -436,7 +442,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
       console.log("[ChatArea] Message marked as read:", messageId);
     } catch (error) {
-      console.error("Error marking message as read:", error);
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        console.warn("[ChatArea] Mark as read request timed out:", messageId);
+      } else {
+        console.error("Error marking message as read:", error);
+      }
       markedAsReadRef.current.delete(messageId);
     }
   };
