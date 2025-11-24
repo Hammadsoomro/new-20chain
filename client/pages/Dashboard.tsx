@@ -95,37 +95,6 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [token]);
 
-  const stats = [
-    {
-      label: "Team Members",
-      value: "5",
-      icon: Users,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-    },
-    {
-      label: "Lines Queued",
-      value: "24",
-      icon: List,
-      color: "text-purple-500",
-      bgColor: "bg-purple-500/10",
-    },
-    {
-      label: "Claimed Today",
-      value: "12",
-      icon: TrendingUp,
-      color: "text-green-500",
-      bgColor: "bg-green-500/10",
-    },
-    {
-      label: "Claim Cooldown",
-      value: "5m",
-      icon: Clock,
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
-    },
-  ];
-
   const quickLinks = isAdmin
     ? [
         {
