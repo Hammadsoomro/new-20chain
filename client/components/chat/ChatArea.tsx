@@ -60,6 +60,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const markedAsReadRef = useRef<Set<string>>(new Set());
 
   // Setup socket listeners for this chat
   useEffect(() => {
