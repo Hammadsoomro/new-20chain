@@ -443,7 +443,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   };
 
   const handleMarkAsRead = async (messageId: string) => {
-    if (!token || !socket) return;
+    if (!socket) return;
 
     // Prevent marking the same message as read multiple times
     if (markedAsReadRef.current.has(messageId)) {
@@ -453,40 +453,15 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     markedAsReadRef.current.add(messageId);
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
-
-      const response = await fetch("/api/chat/mark-read", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ messageId }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        console.error("[ChatArea] Mark as read failed:", response.status, response.statusText);
-        markedAsReadRef.current.delete(messageId);
-        return;
-      }
-
-      // Emit read status through WebSocket
+      // Use WebSocket for marking as read (more efficient)
       socket.emit("message-read", {
         messageId,
         userId: user?._id,
+        chatId: selectedChat.id,
       });
-
       console.log("[ChatArea] Message marked as read:", messageId);
     } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        console.warn("[ChatArea] Mark as read request timed out:", messageId);
-      } else {
-        console.error("Error marking message as read:", error);
-      }
+      console.error("Error marking message as read:", error);
       markedAsReadRef.current.delete(messageId);
     }
   };
