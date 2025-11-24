@@ -17,9 +17,83 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
+import type { User } from "@shared/api";
+import { TeamMemberCard } from "@/components/TeamMemberCard";
 
 export default function Dashboard() {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, token } = useAuth();
+  const [stats, setStats] = useState([
+    {
+      label: "Team Members",
+      value: "0",
+      icon: Users,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+    },
+    {
+      label: "Lines Queued",
+      value: "0",
+      icon: List,
+      color: "text-purple-500",
+      bgColor: "bg-purple-500/10",
+    },
+    {
+      label: "Claimed Today",
+      value: "0",
+      icon: TrendingUp,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+    },
+    {
+      label: "Claim Cooldown",
+      value: "5m",
+      icon: Clock,
+      color: "text-orange-500",
+      bgColor: "bg-orange-500/10",
+    },
+  ]);
+  const [teamMembers, setTeamMembers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real-time stats and team members
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) return;
+
+      try {
+        // Fetch team members
+        const response = await fetch("/api/members", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.ok) {
+          const members = await response.json();
+          setTeamMembers(members);
+
+          // Update team members count in stats
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Team Members"
+                ? { ...stat, value: members.length.toString() }
+                : stat,
+            ),
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching team data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up polling for real-time updates (every 10 seconds)
+    const interval = setInterval(fetchData, 10000);
+
+    return () => clearInterval(interval);
+  }, [token]);
 
   const stats = [
     {
