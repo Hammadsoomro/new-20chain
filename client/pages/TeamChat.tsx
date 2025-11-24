@@ -62,8 +62,9 @@ export default function TeamChat() {
             );
 
             // Show toast notification
-            toast.info(`New message from ${data.senderName}`, {
+            toast.success(`💬 New message from ${data.senderName}`, {
               description: data.content.substring(0, 100),
+              duration: 4000,
             });
           }
 
