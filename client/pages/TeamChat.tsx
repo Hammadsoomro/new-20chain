@@ -196,7 +196,8 @@ export default function TeamChat() {
         oscillator.frequency.value = freq;
         oscillator.type = "sine";
 
-        const startTime = audioContext.currentTime + index * (toneDuration + gapDuration);
+        const startTime =
+          audioContext.currentTime + index * (toneDuration + gapDuration);
 
         // Ramp up at start
         gainNode.gain.setValueAtTime(0, startTime);

@@ -243,7 +243,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
             chatId: selectedChat.id,
           });
         });
-        console.log("[ChatArea] Marked", unreadMessages.length, "messages as read");
+        console.log(
+          "[ChatArea] Marked",
+          unreadMessages.length,
+          "messages as read",
+        );
       }
 
       setLoading(false);
