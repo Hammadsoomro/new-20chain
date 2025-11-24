@@ -20,11 +20,12 @@ export function TeamMemberCard({ member }: TeamMemberCardProps) {
 
   return (
     <div
-      className="h-56 cursor-pointer perspective"
+      className="h-56 cursor-pointer"
       onClick={() => setIsFlipped(!isFlipped)}
+      style={{ perspective: "1000px" }}
     >
       <div
-        className="relative w-full h-full transition-transform duration-500 transform-gpu"
+        className="relative w-full h-full transition-transform duration-500"
         style={{
           transformStyle: "preserve-3d",
           transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
@@ -32,7 +33,7 @@ export function TeamMemberCard({ member }: TeamMemberCardProps) {
       >
         {/* Front of card */}
         <div
-          className="absolute w-full h-full p-6 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white shadow-lg border border-white/20 flex flex-col justify-between"
+          className="absolute w-full h-full p-6 rounded-xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 text-white shadow-xl border border-white/20 flex flex-col justify-between hover:shadow-2xl transition-shadow"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
