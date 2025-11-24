@@ -186,7 +186,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     };
   }, [socket, selectedChat.id, user?._id]);
 
-  // Fetch initial messages
+  // Fetch initial messages and mark unread messages as read
   const fetchInitialMessages = async () => {
     if (!token) return;
 
@@ -209,6 +209,44 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         const filtered = data.filter((msg: ChatMessage) => !msg.deleted);
         setMessages(filtered);
         console.log("[ChatArea] Loaded messages:", filtered.length);
+
+        // Mark all unread messages from other users as read
+        const unreadMessages = filtered.filter(
+          (msg: ChatMessage) =>
+            msg.sender !== user?._id && !msg.readBy?.includes(user?._id || ""),
+        );
+
+        for (const msg of unreadMessages) {
+          markedAsReadRef.current.add(msg._id);
+          try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+            await fetch("/api/chat/mark-read", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messageId: msg._id }),
+              signal: controller.signal,
+            });
+
+            clearTimeout(timeoutId);
+
+            // Emit read status through WebSocket
+            if (socket) {
+              socket.emit("message-read", {
+                messageId: msg._id,
+                userId: user?._id,
+              });
+            }
+          } catch (error) {
+            // Silently fail for individual read receipts
+            console.debug("[ChatArea] Failed to mark message as read:", msg._id);
+            markedAsReadRef.current.delete(msg._id);
+          }
+        }
       }
     } catch (error) {
       console.error("Error fetching messages:", error);
