@@ -313,6 +313,9 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         payload.recipient = selectedChat.id;
       }
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch("/api/chat/send", {
         method: "POST",
         headers: {
@@ -320,7 +323,10 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const sentMessage = await response.json();
@@ -368,7 +374,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         setIsTyping(false);
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.error("[ChatArea] Send message timeout");
+      } else {
+        console.error("[ChatArea] Error sending message:", error);
+      }
     } finally {
       setSending(false);
     }
@@ -378,6 +388,9 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     if (!editContent.trim() || !token || !socket) return;
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch("/api/chat/edit", {
         method: "POST",
         headers: {
@@ -388,7 +401,10 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           messageId,
           content: editContent,
         }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const updated = await response.json();
@@ -409,7 +425,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         setEditContent("");
       }
     } catch (error) {
-      console.error("Error editing message:", error);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.error("[ChatArea] Edit message timeout");
+      } else {
+        console.error("[ChatArea] Error editing message:", error);
+      }
     }
   };
 
@@ -417,6 +437,9 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     if (!token || !socket) return;
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
       const response = await fetch("/api/chat/delete", {
         method: "POST",
         headers: {
@@ -424,7 +447,10 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ messageId }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         setMessages(messages.filter((msg) => msg._id !== messageId));
@@ -438,7 +464,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         console.log("[ChatArea] Message deleted:", messageId);
       }
     } catch (error) {
-      console.error("Error deleting message:", error);
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.error("[ChatArea] Delete message timeout");
+      } else {
+        console.error("[ChatArea] Error deleting message:", error);
+      }
     }
   };
 
