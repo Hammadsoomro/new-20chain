@@ -524,15 +524,6 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
                   className={`flex gap-3 group ${
                     message.sender === user?._id ? "flex-row-reverse" : ""
                   }`}
-                  onMouseEnter={() => {
-                    // Auto-mark as read when message comes into view
-                    if (
-                      message.sender !== user?._id &&
-                      !message.readBy?.includes(user?._id || "")
-                    ) {
-                      handleMarkAsRead(message._id);
-                    }
-                  }}
                 >
                   <Avatar className="h-8 w-8 flex-shrink-0">
                     <AvatarImage src={message.senderPicture} />
