@@ -190,8 +190,9 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const fetchInitialMessages = async () => {
     if (!token) return;
 
+    setLoading(true);
+
     try {
-      setLoading(true);
       const params = new URLSearchParams();
 
       if (selectedChat.type === "group") {
@@ -200,57 +201,58 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         params.append("recipient", selectedChat.id);
       }
 
+      // Set timeout for initial message fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const response = await fetch(`/api/chat/messages?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
+        signal: controller.signal,
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const filtered = data.filter((msg: ChatMessage) => !msg.deleted);
-        setMessages(filtered);
-        console.log("[ChatArea] Loaded messages:", filtered.length);
+      clearTimeout(timeoutId);
 
-        // Mark all unread messages from other users as read
-        const unreadMessages = filtered.filter(
-          (msg: ChatMessage) =>
-            msg.sender !== user?._id && !msg.readBy?.includes(user?._id || ""),
+      if (!response.ok) {
+        console.error(
+          "[ChatArea] Failed to fetch messages:",
+          response.status,
+          response.statusText,
         );
-
-        for (const msg of unreadMessages) {
-          markedAsReadRef.current.add(msg._id);
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-            await fetch("/api/chat/mark-read", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ messageId: msg._id }),
-              signal: controller.signal,
-            });
-
-            clearTimeout(timeoutId);
-
-            // Emit read status through WebSocket
-            if (socket) {
-              socket.emit("message-read", {
-                messageId: msg._id,
-                userId: user?._id,
-              });
-            }
-          } catch (error) {
-            // Silently fail for individual read receipts
-            console.debug("[ChatArea] Failed to mark message as read:", msg._id);
-            markedAsReadRef.current.delete(msg._id);
-          }
-        }
+        setLoading(false);
+        return;
       }
+
+      const data = await response.json();
+      const filtered = data.filter((msg: ChatMessage) => !msg.deleted);
+      setMessages(filtered);
+      console.log("[ChatArea] Loaded messages:", filtered.length);
+
+      // Mark all unread messages from other users as read (async, non-blocking)
+      const unreadMessages = filtered.filter(
+        (msg: ChatMessage) =>
+          msg.sender !== user?._id && !msg.readBy?.includes(user?._id || ""),
+      );
+
+      if (unreadMessages.length > 0 && socket) {
+        // Use WebSocket to mark as read instead of individual API calls
+        unreadMessages.forEach((msg) => {
+          markedAsReadRef.current.add(msg._id);
+          socket.emit("message-read", {
+            messageId: msg._id,
+            userId: user?._id,
+            chatId: selectedChat.id,
+          });
+        });
+        console.log("[ChatArea] Marked", unreadMessages.length, "messages as read");
+      }
+
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching messages:", error);
-    } finally {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        console.error("[ChatArea] Message fetch timeout");
+      } else {
+        console.error("[ChatArea] Error fetching messages:", error);
+      }
       setLoading(false);
     }
   };
