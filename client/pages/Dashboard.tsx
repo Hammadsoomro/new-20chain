@@ -17,9 +17,10 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { User } from "@shared/api";
 import { TeamMemberCard } from "@/components/TeamMemberCard";
+import { io, Socket } from "socket.io-client";
 
 export default function Dashboard() {
   const { user, isAdmin, token } = useAuth();
