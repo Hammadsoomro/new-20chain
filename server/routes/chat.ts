@@ -276,32 +276,37 @@ export const markMessageAsRead: RequestHandler = async (
       return;
     }
 
-    const collections = getCollections();
-    const result = await collections.chatMessages.findOneAndUpdate(
-      { _id: new ObjectId(messageId) },
-      {
-        $addToSet: { readBy: req.userId },
-      },
-      { returnDocument: "after" },
-    );
+    try {
+      const collections = getCollections();
+      const result = await collections.chatMessages.findOneAndUpdate(
+        { _id: new ObjectId(messageId) },
+        {
+          $addToSet: { readBy: req.userId },
+        },
+        { returnDocument: "after" },
+      );
 
-    if (!result.value) {
-      res.status(404).json({ error: "Message not found" });
-      return;
+      if (!result.value) {
+        res.status(404).json({ error: "Message not found" });
+        return;
+      }
+
+      const message = result.value;
+      res.json({
+        _id: message._id.toString(),
+        sender: message.sender,
+        senderName: message.senderName,
+        senderPicture: message.senderPicture,
+        recipient: message.recipient,
+        groupId: message.groupId,
+        content: message.content,
+        createdAt: message.createdAt,
+        readBy: message.readBy,
+      });
+    } catch (dbError) {
+      console.error("Database error marking message as read:", dbError);
+      res.status(500).json({ error: "Database operation failed" });
     }
-
-    const message = result.value;
-    res.json({
-      _id: message._id.toString(),
-      sender: message.sender,
-      senderName: message.senderName,
-      senderPicture: message.senderPicture,
-      recipient: message.recipient,
-      groupId: message.groupId,
-      content: message.content,
-      createdAt: message.createdAt,
-      readBy: message.readBy,
-    });
   } catch (error) {
     console.error("Error marking message as read:", error);
     res.status(500).json({ error: "Failed to mark message as read" });
