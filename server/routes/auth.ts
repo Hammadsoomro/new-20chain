@@ -110,33 +110,38 @@ export const handleLogin: RequestHandler = async (req, res) => {
     const validated = schema.parse(body);
     const hashedPassword = hashPassword(validated.password);
 
-    const collections = getCollections();
+    try {
+      const collections = getCollections();
 
-    // Find user
-    const userRecord = await collections.users.findOne({
-      email: validated.email,
-      password: hashedPassword,
-    });
+      // Find user
+      const userRecord = await collections.users.findOne({
+        email: validated.email,
+        password: hashedPassword,
+      });
 
-    if (!userRecord) {
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
+      if (!userRecord) {
+        res.status(401).json({ error: "Invalid credentials" });
+        return;
+      }
+
+      const user: User = {
+        _id: userRecord._id.toString(),
+        email: userRecord.email,
+        name: userRecord.name,
+        role: userRecord.role,
+        teamId: userRecord.teamId,
+        createdAt: userRecord.createdAt,
+        updatedAt: userRecord.updatedAt,
+      };
+
+      const token = createToken(user);
+      const response: AuthResponse = { token, user };
+
+      res.json(response);
+    } catch (dbError) {
+      console.error("Database error in login:", dbError);
+      res.status(500).json({ error: "Database is not configured" });
     }
-
-    const user: User = {
-      _id: userRecord._id.toString(),
-      email: userRecord.email,
-      name: userRecord.name,
-      role: userRecord.role,
-      teamId: userRecord.teamId,
-      createdAt: userRecord.createdAt,
-      updatedAt: userRecord.updatedAt,
-    };
-
-    const token = createToken(user);
-    const response: AuthResponse = { token, user };
-
-    res.json(response);
   } catch (error) {
     console.error("Login error:", error);
     res.status(400).json({ error: "Invalid request" });
