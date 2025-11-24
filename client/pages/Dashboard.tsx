@@ -219,26 +219,29 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Recent Activity */}
-          <Card className="border-border/50">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Your team's recent actions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {isAdmin ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>No recent activity yet</p>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Claim some numbers to see your activity</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Team Members Section */}
+          {isAdmin && (
+            <div>
+              <h2 className="text-2xl font-bold text-foreground mb-6">
+                Team Members
+              </h2>
+              {loading ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>Loading team members...</p>
+                </div>
+              ) : teamMembers.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>No team members yet</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {teamMembers.map((member) => (
+                    <TeamMemberCard key={member._id} member={member} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </Layout>
