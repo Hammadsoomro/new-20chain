@@ -405,6 +405,13 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const handleMarkAsRead = async (messageId: string) => {
     if (!token || !socket) return;
 
+    // Prevent marking the same message as read multiple times
+    if (markedAsReadRef.current.has(messageId)) {
+      return;
+    }
+
+    markedAsReadRef.current.add(messageId);
+
     try {
       const response = await fetch("/api/chat/mark-read", {
         method: "POST",
@@ -417,6 +424,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
       if (!response.ok) {
         console.error("[ChatArea] Mark as read failed:", response.status, response.statusText);
+        markedAsReadRef.current.delete(messageId);
         return;
       }
 
@@ -429,6 +437,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       console.log("[ChatArea] Message marked as read:", messageId);
     } catch (error) {
       console.error("Error marking message as read:", error);
+      markedAsReadRef.current.delete(messageId);
     }
   };
 
