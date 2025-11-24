@@ -166,27 +166,38 @@ export default function TeamChat() {
 
   const playNotificationSound = () => {
     try {
-      // Create a simple beep sound using Web Audio API
       const audioContext = new (window.AudioContext ||
         (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-
-      oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      // Short beep: frequency 800Hz, duration 200ms
-      oscillator.frequency.value = 800;
-      oscillator.type = "sine";
+      // Play a double-tone notification sound
+      const frequencies = [800, 600]; // Two different tones for notification
+      const toneDuration = 0.15; // 150ms per tone
+      const gapDuration = 0.05; // 50ms gap between tones
 
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(
-        0.01,
-        audioContext.currentTime + 0.2,
-      );
+      frequencies.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        oscillator.connect(gainNode);
+        oscillator.frequency.value = freq;
+        oscillator.type = "sine";
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.2);
+        const startTime = audioContext.currentTime + index * (toneDuration + gapDuration);
+
+        // Ramp up at start
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.02);
+
+        // Hold
+        gainNode.gain.setValueAtTime(0.4, startTime + 0.02);
+        gainNode.gain.setValueAtTime(0.4, startTime + toneDuration - 0.02);
+
+        // Ramp down at end
+        gainNode.gain.linearRampToValueAtTime(0, startTime + toneDuration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + toneDuration);
+      });
 
       console.log("[TeamChat] Notification sound played");
     } catch (error) {
