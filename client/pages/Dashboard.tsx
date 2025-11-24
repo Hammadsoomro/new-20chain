@@ -56,8 +56,9 @@ export default function Dashboard() {
   ]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const socketRef = useRef<Socket | null>(null);
 
-  // Fetch real-time stats and team members
+  // Fetch real-time stats and team members with WebSocket support
   useEffect(() => {
     const fetchData = async () => {
       if (!token) return;
@@ -90,10 +91,46 @@ export default function Dashboard() {
 
     fetchData();
 
-    // Set up polling for real-time updates (every 10 seconds)
-    const interval = setInterval(fetchData, 10000);
+    // Set up WebSocket connection for real-time updates
+    if (!socketRef.current && token) {
+      socketRef.current = io(window.location.origin, {
+        auth: { token },
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        reconnectionAttempts: 5,
+      });
 
-    return () => clearInterval(interval);
+      // Listen for member updates
+      socketRef.current.on("member-added", (newMember: User) => {
+        console.log("[Dashboard] New member added:", newMember.name);
+        setTeamMembers((prev) => [...prev, newMember]);
+      });
+
+      socketRef.current.on("member-updated", (updatedMember: User) => {
+        console.log("[Dashboard] Member updated:", updatedMember.name);
+        setTeamMembers((prev) =>
+          prev.map((m) => (m._id === updatedMember._id ? updatedMember : m)),
+        );
+      });
+
+      socketRef.current.on("member-removed", (memberId: string) => {
+        console.log("[Dashboard] Member removed:", memberId);
+        setTeamMembers((prev) => prev.filter((m) => m._id !== memberId));
+      });
+    }
+
+    // Set up polling for fallback real-time updates (every 30 seconds)
+    const interval = setInterval(fetchData, 30000);
+
+    return () => {
+      clearInterval(interval);
+      if (socketRef.current) {
+        socketRef.current.off("member-added");
+        socketRef.current.off("member-updated");
+        socketRef.current.off("member-removed");
+      }
+    };
   }, [token]);
 
   const quickLinks = isAdmin
