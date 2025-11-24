@@ -45,47 +45,52 @@ export const handleSignup: RequestHandler = async (req, res) => {
 
     const validated = schema.parse(body);
 
-    const collections = getCollections();
+    try {
+      const collections = getCollections();
 
-    // Check if user exists
-    const existing = await collections.users.findOne({
-      email: validated.email,
-    });
+      // Check if user exists
+      const existing = await collections.users.findOne({
+        email: validated.email,
+      });
 
-    if (existing) {
-      res.status(400).json({ error: "User already exists" });
-      return;
+      if (existing) {
+        res.status(400).json({ error: "User already exists" });
+        return;
+      }
+
+      // Create admin user with new team
+      const teamId = new ObjectId().toHexString();
+      const hashedPassword = hashPassword(validated.password);
+
+      const result = await collections.users.insertOne({
+        email: validated.email,
+        name: validated.name,
+        role: "admin",
+        teamId,
+        password: hashedPassword,
+        profilePicture: undefined,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      const newUser: User = {
+        _id: result.insertedId.toString(),
+        email: validated.email,
+        name: validated.name,
+        role: "admin",
+        teamId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const token = createToken(newUser);
+      const response: AuthResponse = { token, user: newUser };
+
+      res.status(201).json(response);
+    } catch (dbError) {
+      console.error("Database error in signup:", dbError);
+      res.status(500).json({ error: "Database is not configured" });
     }
-
-    // Create admin user with new team
-    const teamId = new ObjectId().toHexString();
-    const hashedPassword = hashPassword(validated.password);
-
-    const result = await collections.users.insertOne({
-      email: validated.email,
-      name: validated.name,
-      role: "admin",
-      teamId,
-      password: hashedPassword,
-      profilePicture: undefined,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-
-    const newUser: User = {
-      _id: result.insertedId.toString(),
-      email: validated.email,
-      name: validated.name,
-      role: "admin",
-      teamId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const token = createToken(newUser);
-    const response: AuthResponse = { token, user: newUser };
-
-    res.status(201).json(response);
   } catch (error) {
     console.error("Signup error:", error);
     res.status(400).json({ error: "Invalid request" });
