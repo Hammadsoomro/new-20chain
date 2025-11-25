@@ -168,18 +168,16 @@ export const Layout = ({ children }: LayoutProps) => {
                     isActive(item.path)
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  } ${sidebarCollapsed ? "justify-start" : "gap-3"}`}
+                  } ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
                   onClick={() => setSidebarOpen(false)}
                   title={sidebarCollapsed ? item.label : ""}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span
-                    className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                      sidebarCollapsed ? "w-0" : "w-auto"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
+                  {!sidebarCollapsed && (
+                    <span className="transition-all duration-300 whitespace-nowrap overflow-hidden">
+                      {item.label}
+                    </span>
+                  )}
                   {sidebarCollapsed && (
                     <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                       {item.label}
