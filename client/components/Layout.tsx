@@ -241,7 +241,7 @@ export const Layout = ({ children }: LayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 md:ml-0 ${
+      <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 ${
         sidebarCollapsed ? "md:ml-20" : "md:ml-64"
       }`}>
         {/* Top Navbar */}
