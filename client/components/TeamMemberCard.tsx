@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { User } from "@shared/api";
 
 const getInitials = (name: string) => {
@@ -70,70 +71,140 @@ interface TeamMemberCardProps {
 }
 
 export function TeamMemberCard({ member, index = 0 }: TeamMemberCardProps) {
+  const [isFlipped, setIsFlipped] = useState(false);
   const style = getCardStyle(index);
   const maskedNumber = `•••• •••• •••• ${member._id.slice(-4).toUpperCase()}`;
 
   return (
-    <div className="h-56 w-full">
+    <div
+      className="h-56 w-full cursor-pointer"
+      onClick={() => setIsFlipped(!isFlipped)}
+      style={{ perspective: "1000px" }}
+    >
       <div
-        className={`h-full w-full rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden relative`}
+        className="relative w-full h-full transition-transform duration-500"
+        style={{
+          transformStyle: "preserve-3d",
+          transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+        }}
       >
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full -ml-20 -mb-20"></div>
+        {/* Front of card */}
+        <div
+          className={`absolute w-full h-full rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden relative`}
+          style={{
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+          }}
+        >
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full -ml-20 -mb-20"></div>
 
-        {/* Top section: Chip and Brand */}
-        <div className="flex justify-between items-start relative z-10">
-          {/* Chip */}
-          <div className={`w-12 h-10 bg-gradient-to-br ${style.chipColor} rounded-lg shadow-lg`}>
-            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-700">
-              ◆◆
+          {/* Top section: Chip and Brand */}
+          <div className="flex justify-between items-start relative z-10">
+            {/* Chip */}
+            <div className={`w-12 h-10 bg-gradient-to-br ${style.chipColor} rounded-lg shadow-lg`}>
+              <div className="w-full h-full flex items-center justify-center text-xs font-bold text-gray-700">
+                ◆◆
+              </div>
+            </div>
+
+            {/* Brand name */}
+            <div className={`${style.textColor} font-bold text-xl tracking-widest`}>
+              {style.brand}
             </div>
           </div>
 
-          {/* Brand name */}
-          <div className={`${style.textColor} font-bold text-xl tracking-widest`}>
-            {style.brand}
-          </div>
-        </div>
+          {/* Middle section: Card number and holder name */}
+          <div className="flex flex-col gap-4 relative z-10">
+            {/* Card number */}
+            <div className={`${style.textColor} font-mono tracking-widest text-sm font-bold`}>
+              {maskedNumber}
+            </div>
 
-        {/* Middle section: Card number and holder name */}
-        <div className="flex flex-col gap-4 relative z-10">
-          {/* Card number */}
-          <div className={`${style.textColor} font-mono tracking-widest text-sm font-bold`}>
-            {maskedNumber}
+            {/* Cardholder name */}
+            <div className="flex justify-between items-end">
+              <div>
+                <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
+                  Cardholder
+                </p>
+                <p className={`${style.textColor} font-bold text-lg uppercase truncate max-w-xs`}>
+                  {member.name}
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Cardholder name */}
-          <div className="flex justify-between items-end">
+          {/* Bottom section: Role and Initials */}
+          <div className="flex justify-between items-center relative z-10">
             <div>
               <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
-                Cardholder
+                Role
               </p>
-              <p className={`${style.textColor} font-bold text-lg uppercase truncate max-w-xs`}>
-                {member.name}
+              <p className={`${style.textColor} font-semibold capitalize`}>
+                {member.role}
               </p>
+            </div>
+
+            {/* Initials circle */}
+            <div className={`h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center`}>
+              <span className={`${style.textColor} font-bold text-sm`}>
+                {getInitials(member.name)}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Bottom section: Expiry and role */}
-        <div className="flex justify-between items-center relative z-10">
-          <div>
-            <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
-              Role
-            </p>
-            <p className={`${style.textColor} font-semibold capitalize`}>
-              {member.role}
-            </p>
+        {/* Back of card */}
+        <div
+          className={`absolute w-full h-full rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden`}
+          style={{
+            backfaceVisibility: "hidden",
+            WebkitBackfaceVisibility: "hidden",
+            transform: "rotateY(180deg)",
+          }}
+        >
+          <div className={`${style.textColor} font-bold text-xl tracking-widest text-center`}>
+            {style.brand}
           </div>
 
-          {/* Initials circle */}
-          <div className={`h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm border border-white/40 flex items-center justify-center`}>
-            <span className={`${style.textColor} font-bold text-sm`}>
-              {getInitials(member.name)}
-            </span>
+          <div className="space-y-3">
+            <div>
+              <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
+                Email
+              </p>
+              <p className={`${style.textColor} text-sm font-mono break-all`}>
+                {member.email}
+              </p>
+            </div>
+
+            <div>
+              <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
+                Member Since
+              </p>
+              <p className={`${style.textColor} text-sm`}>
+                {new Date(member.createdAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+
+            <div>
+              <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
+                Status
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                <p className={`${style.textColor} text-sm font-medium`}>Active</p>
+              </div>
+            </div>
           </div>
+
+          <p className={`${style.textColor} text-xs opacity-60 text-center`}>
+            Tap to flip back
+          </p>
         </div>
       </div>
     </div>
