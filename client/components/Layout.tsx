@@ -92,10 +92,10 @@ export const Layout = ({ children }: LayoutProps) => {
   ];
 
   return (
-    <div className="h-screen bg-background">
+    <div className="flex h-screen bg-background">
       {/* Sidebar - Floating */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:static md:transform-none ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } ${sidebarCollapsed ? "w-20" : "w-64"}`}
       >
