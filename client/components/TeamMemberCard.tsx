@@ -191,14 +191,19 @@ export function TeamMemberCard({ member, index = 0 }: TeamMemberCardProps) {
 
             <div>
               <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
-                Member Since
+                Today Claim
               </p>
-              <p className={`${style.textColor} text-sm`}>
-                {new Date(member.createdAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "short",
-                  day: "numeric",
-                })}
+              <p className={`${style.textColor} text-sm font-bold`}>
+                {member.claimsToday || 0}
+              </p>
+            </div>
+
+            <div>
+              <p className={`${style.textColor} text-xs opacity-70 uppercase tracking-wider`}>
+                Total Claim
+              </p>
+              <p className={`${style.textColor} text-sm font-bold`}>
+                {member.totalClaims || 0}
               </p>
             </div>
 
