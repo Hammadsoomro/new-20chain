@@ -68,6 +68,9 @@ export default function TeamChat() {
                 `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
               );
 
+              // Update global unread count
+              setUnreadCount(data.chatId, conversation.unreadCount);
+
               // Show toast notification
               toast.success(`💬 New message from ${data.senderName}`, {
                 description: data.content.substring(0, 100),
