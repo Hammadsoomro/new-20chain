@@ -79,22 +79,30 @@ export function TeamMemberCard({ member, index = 0 }: TeamMemberCardProps) {
     <div
       className="h-56 w-full cursor-pointer"
       onClick={() => setIsFlipped(!isFlipped)}
-      style={{ perspective: "1000px" }}
+      style={{
+        perspective: "1000px",
+      }}
     >
       <div
-        className="relative w-full h-full transition-transform duration-500"
         style={{
+          position: "relative",
+          width: "100%",
+          height: "100%",
           transformStyle: "preserve-3d",
           transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+          transition: "transform 500ms ease-in-out",
         }}
       >
         {/* Front of card */}
         <div
-          className={`absolute w-full h-full rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden relative`}
           style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
           }}
+          className={`rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden`}
         >
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
@@ -157,12 +165,15 @@ export function TeamMemberCard({ member, index = 0 }: TeamMemberCardProps) {
 
         {/* Back of card */}
         <div
-          className={`absolute w-full h-full rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden`}
           style={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
           }}
+          className={`rounded-2xl bg-gradient-to-br ${style.gradient} shadow-2xl border border-white/10 p-6 flex flex-col justify-between overflow-hidden`}
         >
           <div className={`${style.textColor} font-bold text-xl tracking-widest text-center`}>
             {style.brand}
