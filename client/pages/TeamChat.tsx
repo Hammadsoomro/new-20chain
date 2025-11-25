@@ -20,6 +20,7 @@ interface ChatConversation {
 
 export default function TeamChat() {
   const { user, token } = useAuth();
+  const { setUnreadCount } = useChat();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedChat, setSelectedChat] = useState<{
     type: "group" | "direct";
