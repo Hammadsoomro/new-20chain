@@ -92,12 +92,12 @@ export const Layout = ({ children }: LayoutProps) => {
   ];
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Sidebar */}
+    <div className="h-screen bg-background">
+      {/* Sidebar - Floating */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:relative md:translate-x-0 ${sidebarCollapsed ? "w-20" : "w-64"}`}
+        } ${sidebarCollapsed ? "w-20" : "w-64"}`}
       >
         {/* Fixed Header - Logo */}
         <div className="flex items-center p-6 border-b border-sidebar-border flex-shrink-0">
