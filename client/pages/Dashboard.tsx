@@ -220,43 +220,6 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h2 className="text-2xl font-bold text-foreground mb-6">
-              Quick Access
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {quickLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link key={link.path} to={link.path}>
-                    <Card className="border-border/50 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group h-full">
-                      <CardContent className="pt-6">
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {link.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {link.description}
-                              </p>
-                            </div>
-                            <Icon className="h-6 w-6 text-primary/50 group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                          </div>
-                          <div className="flex items-center gap-2 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Go to {link.title}
-                            <ArrowRight className="h-4 w-4" />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
           {/* Team Members Section */}
           {isAdmin && (
             <div>
