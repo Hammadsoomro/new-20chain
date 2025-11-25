@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useChat } from "@/context/ChatContext";
 import { Layout } from "@/components/Layout";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatArea } from "@/components/chat/ChatArea";
