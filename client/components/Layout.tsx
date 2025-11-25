@@ -196,17 +196,11 @@ export const Layout = ({ children }: LayoutProps) => {
                 isActive("/settings")
                   ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              } ${sidebarCollapsed ? "justify-start" : "gap-3"}`}
+              } ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
               title={sidebarCollapsed ? "Settings" : ""}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
-              <span
-                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                  sidebarCollapsed ? "w-0" : "w-auto"
-                }`}
-              >
-                Settings
-              </span>
+              {!sidebarCollapsed && <span>Settings</span>}
               {sidebarCollapsed && (
                 <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                   Settings
@@ -216,18 +210,12 @@ export const Layout = ({ children }: LayoutProps) => {
             <button
               onClick={logout}
               className={`w-full flex items-center px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group ${
-                sidebarCollapsed ? "justify-start" : "gap-3"
+                sidebarCollapsed ? "justify-center" : "gap-3"
               }`}
               title={sidebarCollapsed ? "Logout" : ""}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
-              <span
-                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                  sidebarCollapsed ? "w-0" : "w-auto"
-                }`}
-              >
-                Logout
-              </span>
+              {!sidebarCollapsed && <span>Logout</span>}
               {sidebarCollapsed && (
                 <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                   Logout
