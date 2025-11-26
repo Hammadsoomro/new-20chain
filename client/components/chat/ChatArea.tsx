@@ -326,10 +326,30 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
     if (!newMessage.trim() || !token || !socket) return;
 
+    const tempMessageId = `temp_${Date.now()}_${Math.random()}`;
+    const messageContent = newMessage;
+
     try {
       setSending(true);
+
+      // Add optimistic message to UI immediately
+      const tempMsg: ChatMessage = {
+        _id: tempMessageId,
+        sender: user?._id || "",
+        senderName: user?.name || "Unknown",
+        senderPicture: user?.profilePictureUrl || user?.profilePicture,
+        content: messageContent,
+        createdAt: new Date().toISOString(),
+        groupId: selectedChat.type === "group" ? selectedChat.id : undefined,
+        recipient:
+          selectedChat.type === "direct" ? selectedChat.id : undefined,
+        readBy: [user?._id || ""],
+      };
+      setMessages((prev) => [...prev, tempMsg]);
+      setNewMessage("");
+
       const payload: any = {
-        content: newMessage,
+        content: messageContent,
       };
 
       if (selectedChat.type === "group") {
@@ -355,38 +375,34 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
       if (response.ok) {
         const sentMessage = await response.json();
-        const messageId = sentMessage._id || sentMessage.insertedId;
+        const actualMessageId = sentMessage._id || sentMessage.insertedId;
 
-        console.log("[ChatArea] Message sent:", messageId);
+        console.log("[ChatArea] Message sent:", actualMessageId);
 
-        // Add message to local state
-        const newMsg: ChatMessage = {
-          _id: messageId,
-          sender: user?._id || "",
-          senderName: user?.name || "Unknown",
-          senderPicture: user?.profilePictureUrl || user?.profilePicture,
-          content: newMessage,
-          createdAt: new Date().toISOString(),
-          groupId: selectedChat.type === "group" ? selectedChat.id : undefined,
-          recipient:
-            selectedChat.type === "direct" ? selectedChat.id : undefined,
-          readBy: [user?._id || ""],
-        };
-        setMessages((prev) => [...prev, newMsg]);
+        // Update the temp message with the real ID from server
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempMessageId
+              ? {
+                  ...msg,
+                  _id: actualMessageId,
+                  createdAt: sentMessage.createdAt || msg.createdAt,
+                }
+              : msg,
+          ),
+        );
 
         // Emit the message through WebSocket so all users see it in real-time
         const messageData = {
-          messageId,
+          messageId: actualMessageId,
           sender: user?._id,
           senderName: user?.name || "Unknown",
           chatId: selectedChat.id,
-          content: newMessage,
-          timestamp: new Date().toISOString(),
+          content: messageContent,
+          timestamp: sentMessage.createdAt || new Date().toISOString(),
         };
 
         socket.emit("send-message", messageData);
-
-        setNewMessage("");
 
         // Clear typing indicator
         socket.emit("typing", {
@@ -397,8 +413,15 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         });
 
         setIsTyping(false);
+      } else {
+        // Remove optimistic message if send failed
+        setMessages((prev) => prev.filter((msg) => msg._id !== tempMessageId));
+        console.error("[ChatArea] Failed to send message:", response.status);
       }
     } catch (error) {
+      // Remove optimistic message if error occurred
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempMessageId));
+
       if (error instanceof DOMException && error.name === "AbortError") {
         console.error("[ChatArea] Send message timeout");
       } else {
