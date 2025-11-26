@@ -36,13 +36,20 @@ export default function TeamChat() {
   useEffect(() => {
     if (!token || !user?._id) return;
 
-    // Create shared socket instance
+    // Disconnect existing socket if any
+    if (socketRef.current && socketRef.current.connected) {
+      console.log("[TeamChat] Disconnecting previous socket");
+      socketRef.current.disconnect();
+    }
+
+    // Create shared socket instance with optimized configuration
     const socket = io(window.location.origin, {
       auth: { token },
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      transports: ["websocket", "polling"],
     });
 
     socketRef.current = socket;
@@ -60,6 +67,9 @@ export default function TeamChat() {
         if (convIndex !== -1) {
           const conversation = updated[convIndex];
           const isFromCurrentUser = data.sender === user._id;
+
+          // Update last message time for all messages
+          conversation.lastMessageTime = data.timestamp;
 
           // Only increment unread if this message is not from current user
           if (!isFromCurrentUser) {
@@ -83,8 +93,6 @@ export default function TeamChat() {
             }
           }
 
-          conversation.lastMessageTime = data.timestamp;
-
           // Move conversation to top
           const [moved] = updated.splice(convIndex, 1);
           updated.unshift(moved);
@@ -96,22 +104,44 @@ export default function TeamChat() {
 
     const handleConnect = () => {
       console.log("[TeamChat] Socket connected:", socket.id);
+      // Re-join all active chat rooms after reconnection
+      setConversations((prev) => {
+        prev.forEach((conv) => {
+          socket.emit("join-chat", {
+            chatId: conv.id,
+            userId: user._id,
+          });
+        });
+        return prev;
+      });
     };
 
     const handleDisconnect = () => {
       console.log("[TeamChat] Socket disconnected");
     };
 
+    const handleConnectError = (error: any) => {
+      console.error("[TeamChat] Socket connection error:", error);
+    };
+
+    const handleReconnectAttempt = () => {
+      console.log("[TeamChat] Attempting to reconnect...");
+    };
+
     // Add event listeners
     socket.on("new-message", handleNewMessage);
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+    socket.on("reconnect_attempt", handleReconnectAttempt);
 
     return () => {
       // Properly remove listeners before disconnecting
       socket.off("new-message", handleNewMessage);
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+      socket.off("reconnect_attempt", handleReconnectAttempt);
       socket.disconnect();
     };
   }, [token, user?._id, location.pathname, setUnreadCount]);
