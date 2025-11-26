@@ -195,36 +195,31 @@ export default function TeamChat() {
       const gainNode = audioContext.createGain();
       gainNode.connect(audioContext.destination);
 
-      // Play a double-tone notification sound
-      const frequencies = [800, 600]; // Two different tones for notification
-      const toneDuration = 0.15; // 150ms per tone
-      const gapDuration = 0.05; // 50ms gap between tones
+      // Modern notification sound: ascending musical chime
+      const notes = [523, 659, 784]; // C5, E5, G5 (pleasant chord)
+      const noteDuration = 0.12; // 120ms per note
+      const gapDuration = 0.04; // 40ms gap between notes
 
-      frequencies.forEach((freq, index) => {
+      notes.forEach((freq, index) => {
         const oscillator = audioContext.createOscillator();
         oscillator.connect(gainNode);
         oscillator.frequency.value = freq;
         oscillator.type = "sine";
 
         const startTime =
-          audioContext.currentTime + index * (toneDuration + gapDuration);
+          audioContext.currentTime + index * (noteDuration + gapDuration);
 
-        // Ramp up at start
+        // Smooth envelope with natural fade in/out
         gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.02);
-
-        // Hold
-        gainNode.gain.setValueAtTime(0.4, startTime + 0.02);
-        gainNode.gain.setValueAtTime(0.4, startTime + toneDuration - 0.02);
-
-        // Ramp down at end
-        gainNode.gain.linearRampToValueAtTime(0, startTime + toneDuration);
+        gainNode.gain.linearRampToValueAtTime(0.35, startTime + 0.01);
+        gainNode.gain.setValueAtTime(0.35, startTime + noteDuration - 0.03);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
 
         oscillator.start(startTime);
-        oscillator.stop(startTime + toneDuration);
+        oscillator.stop(startTime + noteDuration);
       });
 
-      console.log("[TeamChat] Notification sound played");
+      console.log("[TeamChat] Modern notification sound played");
     } catch (error) {
       console.error("Error playing notification sound:", error);
     }
