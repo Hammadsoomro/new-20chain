@@ -20,6 +20,8 @@ async function startServer() {
       },
     });
 
+    setIO(io);
+
     // Socket.io connection handling
     io.on("connection", (socket) => {
       console.log(`[Socket.IO] User connected: ${socket.id}`);
