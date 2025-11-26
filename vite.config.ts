@@ -108,7 +108,7 @@ function expressPlugin(): Plugin {
             "message-read",
             (data: { messageId: string; userId: string; chatId?: string }) => {
               // Broadcast to all users (they'll filter by messageId)
-              io!.emit("message-read", data);
+              io.emit("message-read", data);
               console.log(
                 `[Socket.IO] Message marked as read: ${data.messageId}`,
               );
@@ -119,7 +119,7 @@ function expressPlugin(): Plugin {
           socket.on(
             "edit-message",
             (data: { messageId: string; content: string; chatId: string }) => {
-              io!.to(data.chatId).emit("message-edited", data);
+              io.to(data.chatId).emit("message-edited", data);
             },
           );
 
@@ -127,7 +127,7 @@ function expressPlugin(): Plugin {
           socket.on(
             "delete-message",
             (data: { messageId: string; chatId: string }) => {
-              io!.to(data.chatId).emit("message-deleted", data);
+              io.to(data.chatId).emit("message-deleted", data);
             },
           );
 
