@@ -4,6 +4,7 @@ import { closeDB } from "./db";
 import * as express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import { setIO } from "./websocket-io";
 
 async function startServer() {
   try {
