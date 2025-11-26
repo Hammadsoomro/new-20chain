@@ -107,7 +107,7 @@ export default function TeamChat() {
         socket.disconnect();
       }
     };
-  }, [token, user?._id]);
+  }, [token, user?._id, location.pathname]);
 
   // Join all chat rooms when conversations load
   useEffect(() => {
