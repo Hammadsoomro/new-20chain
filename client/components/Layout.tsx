@@ -168,6 +168,9 @@ export const Layout = ({ children }: LayoutProps) => {
           <nav className="flex-1 space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
+              const isTeamChat = item.path === "/chat";
+              const hasUnread = isTeamChat && totalUnread > 0;
+
               return (
                 <Link
                   key={item.path}
@@ -182,10 +185,23 @@ export const Layout = ({ children }: LayoutProps) => {
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
                   {!sidebarCollapsed && (
-                    <span className="transition-all duration-300 whitespace-nowrap overflow-hidden">
+                    <span className="transition-all duration-300 whitespace-nowrap overflow-hidden flex-1">
                       {item.label}
                     </span>
                   )}
+
+                  {/* Red dot indicator for unread messages */}
+                  {hasUnread && (
+                    <div className="flex items-center gap-2">
+                      {!sidebarCollapsed && totalUnread > 0 && (
+                        <span className="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
+                          {totalUnread > 99 ? "99+" : totalUnread}
+                        </span>
+                      )}
+                      <div className="h-2.5 w-2.5 rounded-full bg-red-500 flex-shrink-0 animate-pulse" />
+                    </div>
+                  )}
+
                   {sidebarCollapsed && (
                     <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                       {item.label}
