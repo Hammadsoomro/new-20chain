@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import { getCollections } from "../db";
+import { getIO } from "../websocket-io";
 import { ObjectId } from "mongodb";
 
 // Get or create claim settings for team
