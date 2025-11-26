@@ -28,7 +28,9 @@ async function startServer() {
 
       socket.on("join-chat", (data: { chatId: string; userId: string }) => {
         socket.join(data.chatId);
-        console.log(`[Socket.IO] User ${data.userId} joined chat ${data.chatId}`);
+        console.log(
+          `[Socket.IO] User ${data.userId} joined chat ${data.chatId}`,
+        );
         socket.broadcast.to(data.chatId).emit("user-joined", {
           userId: data.userId,
           timestamp: new Date().toISOString(),
@@ -45,13 +47,15 @@ async function startServer() {
           content: string;
           timestamp: string;
         }) => {
-          console.log(`[Socket.IO] Message from ${data.sender} in ${data.chatId}`);
+          console.log(
+            `[Socket.IO] Message from ${data.sender} in ${data.chatId}`,
+          );
           const messageToEmit = {
             ...data,
             chatId: data.chatId, // Ensure chatId is included
           };
           io.to(data.chatId).emit("new-message", messageToEmit);
-        }
+        },
       );
 
       socket.on(
@@ -67,29 +71,28 @@ async function startServer() {
             senderName: data.senderName,
             isTyping: data.isTyping,
           });
-        }
+        },
       );
 
-      socket.on("message-read", (data: { messageId: string; userId: string }) => {
-        io.emit("message-read", data);
-      });
+      socket.on(
+        "message-read",
+        (data: { messageId: string; userId: string }) => {
+          io.emit("message-read", data);
+        },
+      );
 
       socket.on(
         "edit-message",
-        (data: {
-          messageId: string;
-          content: string;
-          chatId: string;
-        }) => {
+        (data: { messageId: string; content: string; chatId: string }) => {
           io.to(data.chatId).emit("message-edited", data);
-        }
+        },
       );
 
       socket.on(
         "delete-message",
         (data: { messageId: string; chatId: string }) => {
           io.to(data.chatId).emit("message-deleted", data);
-        }
+        },
       );
 
       socket.on("leave-chat", (data: { chatId: string }) => {

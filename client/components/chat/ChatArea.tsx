@@ -341,8 +341,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         content: messageContent,
         createdAt: new Date().toISOString(),
         groupId: selectedChat.type === "group" ? selectedChat.id : undefined,
-        recipient:
-          selectedChat.type === "direct" ? selectedChat.id : undefined,
+        recipient: selectedChat.type === "direct" ? selectedChat.id : undefined,
         readBy: [user?._id || ""],
       };
       setMessages((prev) => [...prev, tempMsg]);

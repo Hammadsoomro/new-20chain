@@ -169,23 +169,29 @@ export default function Dashboard() {
         setStats((prev) =>
           prev.map((stat) =>
             stat.label === "Team Members"
-              ? { ...stat, value: Math.max(0, parseInt(stat.value) - 1).toString() }
+              ? {
+                  ...stat,
+                  value: Math.max(0, parseInt(stat.value) - 1).toString(),
+                }
               : stat,
           ),
         );
       });
 
       // Listen for queued lines updates
-      socketRef.current.on("lines-queued-updated", (data: { count: number }) => {
-        console.log("[Dashboard] Lines queued updated:", data.count);
-        setStats((prev) =>
-          prev.map((stat) =>
-            stat.label === "Lines Queued"
-              ? { ...stat, value: data.count.toString() }
-              : stat,
-          ),
-        );
-      });
+      socketRef.current.on(
+        "lines-queued-updated",
+        (data: { count: number }) => {
+          console.log("[Dashboard] Lines queued updated:", data.count);
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Lines Queued"
+                ? { ...stat, value: data.count.toString() }
+                : stat,
+            ),
+          );
+        },
+      );
 
       // Listen for claimed today updates
       socketRef.current.on(

@@ -126,23 +126,21 @@ export const getTeamMembers: RequestHandler = async (req: AuthRequest, res) => {
         const userId = member._id.toString();
 
         // Get total claims
-        const totalClaims = await collections.history
-          .countDocuments({
-            teamId: req.teamId,
-            claimedByUserId: userId,
-          });
+        const totalClaims = await collections.history.countDocuments({
+          teamId: req.teamId,
+          claimedByUserId: userId,
+        });
 
         // Get claims today
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
-        const claimsToday = await collections.history
-          .countDocuments({
-            teamId: req.teamId,
-            claimedByUserId: userId,
-            claimedAt: {
-              $gte: startOfToday.toISOString(),
-            },
-          });
+        const claimsToday = await collections.history.countDocuments({
+          teamId: req.teamId,
+          claimedByUserId: userId,
+          claimedAt: {
+            $gte: startOfToday.toISOString(),
+          },
+        });
 
         return {
           _id: userId,

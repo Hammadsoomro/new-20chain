@@ -39,9 +39,7 @@ export const addToQueue: RequestHandler = async (req, res) => {
     // Emit real-time update for queued lines
     const io = getIO();
     if (io) {
-      const allLines = await collections.queuedLines
-        .find({ teamId })
-        .toArray();
+      const allLines = await collections.queuedLines.find({ teamId }).toArray();
       io.emit("lines-queued-updated", {
         count: allLines.length,
         teamId,
@@ -111,9 +109,7 @@ export const clearQueuedLine: RequestHandler = async (req, res) => {
     // Emit real-time update for queued lines
     const io = getIO();
     if (io) {
-      const allLines = await collections.queuedLines
-        .find({ teamId })
-        .toArray();
+      const allLines = await collections.queuedLines.find({ teamId }).toArray();
       io.emit("lines-queued-updated", {
         count: allLines.length,
         teamId,
