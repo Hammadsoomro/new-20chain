@@ -82,7 +82,7 @@ function expressPlugin(): Plugin {
                 ...data,
                 chatId: data.chatId, // Ensure chatId is included
               };
-              io!.to(data.chatId).emit("new-message", messageToEmit);
+              io.to(data.chatId).emit("new-message", messageToEmit);
             },
           );
 
