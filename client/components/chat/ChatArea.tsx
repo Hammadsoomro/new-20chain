@@ -280,7 +280,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Use requestAnimationFrame for smoother scrolling
+    const scrollTimer = requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(scrollTimer);
   }, [messages, typingUsers]);
 
   const handleTyping = () => {
