@@ -167,6 +167,37 @@ export const claimNumbers: RequestHandler = async (req, res) => {
       _id: { $in: claimedLineIds },
     });
 
+    // Emit real-time update for claimed today count
+    const io = getIO();
+    if (io) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayString = today.toISOString();
+
+      const claimedToday = await collections.claimedNumbers
+        .find({
+          teamId,
+          claimedBy: userId,
+          claimedAt: { $gte: todayString },
+        })
+        .toArray();
+
+      io.emit("claimed-today-updated", {
+        count: claimedToday.length,
+        teamId,
+        userId,
+      });
+
+      // Also emit update for queued lines count (since lines were removed)
+      const queuedLines = await collections.queuedLines
+        .find({ teamId })
+        .toArray();
+      io.emit("lines-queued-updated", {
+        count: queuedLines.length,
+        teamId,
+      });
+    }
+
     const response = {
       success: true,
       claimedCount: availableLines.length,
