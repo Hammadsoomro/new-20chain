@@ -108,6 +108,18 @@ export const clearQueuedLine: RequestHandler = async (req, res) => {
       return;
     }
 
+    // Emit real-time update for queued lines
+    const io = getIO();
+    if (io) {
+      const allLines = await collections.queuedLines
+        .find({ teamId })
+        .toArray();
+      io.emit("lines-queued-updated", {
+        count: allLines.length,
+        teamId,
+      });
+    }
+
     res.json({ success: true });
   } catch (error) {
     console.error("Clear queued line error:", error);
