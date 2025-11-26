@@ -174,6 +174,8 @@ export default function Dashboard() {
         socketRef.current.off("member-added");
         socketRef.current.off("member-updated");
         socketRef.current.off("member-removed");
+        socketRef.current.off("lines-queued-updated");
+        socketRef.current.off("claimed-today-updated");
       }
     };
   }, [token]);
