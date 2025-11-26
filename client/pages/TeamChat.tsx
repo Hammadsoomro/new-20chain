@@ -7,6 +7,7 @@ import { ChatArea } from "@/components/chat/ChatArea";
 import type { User, ChatGroup } from "@shared/api";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
 interface ChatConversation {
   type: "group" | "direct";
