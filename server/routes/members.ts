@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { z } from "zod";
 import { AuthRequest } from "../middleware/auth";
 import { getCollections } from "../db";
+import { getIO } from "../websocket-io";
 import { ObjectId } from "mongodb";
 import crypto from "crypto";
 import type { User } from "@shared/api";
