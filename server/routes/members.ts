@@ -91,6 +91,12 @@ export const createTeamMember: RequestHandler = async (
       );
     }
 
+    // Emit real-time update for member added
+    const io = getIO();
+    if (io) {
+      io.emit("member-added", newUser);
+    }
+
     res.status(201).json(newUser);
   } catch (error) {
     console.error("Error creating team member:", error);
