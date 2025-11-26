@@ -105,6 +105,15 @@ export default function Dashboard() {
       socketRef.current.on("member-added", (newMember: User) => {
         console.log("[Dashboard] New member added:", newMember.name);
         setTeamMembers((prev) => [...prev, newMember]);
+
+        // Update team members count in stats
+        setStats((prev) =>
+          prev.map((stat) =>
+            stat.label === "Team Members"
+              ? { ...stat, value: (parseInt(stat.value) + 1).toString() }
+              : stat,
+          ),
+        );
       });
 
       socketRef.current.on("member-updated", (updatedMember: User) => {
@@ -117,7 +126,43 @@ export default function Dashboard() {
       socketRef.current.on("member-removed", (memberId: string) => {
         console.log("[Dashboard] Member removed:", memberId);
         setTeamMembers((prev) => prev.filter((m) => m._id !== memberId));
+
+        // Update team members count in stats
+        setStats((prev) =>
+          prev.map((stat) =>
+            stat.label === "Team Members"
+              ? { ...stat, value: Math.max(0, parseInt(stat.value) - 1).toString() }
+              : stat,
+          ),
+        );
       });
+
+      // Listen for queued lines updates
+      socketRef.current.on("lines-queued-updated", (data: { count: number }) => {
+        console.log("[Dashboard] Lines queued updated:", data.count);
+        setStats((prev) =>
+          prev.map((stat) =>
+            stat.label === "Lines Queued"
+              ? { ...stat, value: data.count.toString() }
+              : stat,
+          ),
+        );
+      });
+
+      // Listen for claimed today updates
+      socketRef.current.on(
+        "claimed-today-updated",
+        (data: { count: number }) => {
+          console.log("[Dashboard] Claimed today updated:", data.count);
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Claimed Today"
+                ? { ...stat, value: data.count.toString() }
+                : stat,
+            ),
+          );
+        },
+      );
     }
 
     // Set up polling for fallback real-time updates (every 30 seconds)
