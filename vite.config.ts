@@ -38,13 +38,15 @@ function expressPlugin(): Plugin {
       server.middlewares.use(app);
 
       // Setup Socket.io on Vite's httpServer
-      if (!io && server.httpServer) {
-        io = new Server(server.httpServer, {
+      if (server.httpServer) {
+        const io = new Server(server.httpServer, {
           cors: {
             origin: "*",
             methods: ["GET", "POST"],
           },
         });
+
+        setIO(io);
 
         // Socket.io connection handling
         io.on("connection", (socket) => {
