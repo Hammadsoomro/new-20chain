@@ -47,8 +47,8 @@ export default function TeamChat() {
 
     socketRef.current = socket;
 
-    // Listen for new messages from other users
-    socket.on("new-message", (data: any) => {
+    // Handler for new messages
+    const handleNewMessage = (data: any) => {
       console.log("[TeamChat] Received message:", data);
 
       const isUserOnChatPage = location.pathname === "/chat";
@@ -92,22 +92,29 @@ export default function TeamChat() {
 
         return updated;
       });
-    });
+    };
 
-    socket.on("connect", () => {
+    const handleConnect = () => {
       console.log("[TeamChat] Socket connected:", socket.id);
-    });
+    };
 
-    socket.on("disconnect", () => {
+    const handleDisconnect = () => {
       console.log("[TeamChat] Socket disconnected");
-    });
+    };
+
+    // Add event listeners
+    socket.on("new-message", handleNewMessage);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
 
     return () => {
-      if (socket) {
-        socket.disconnect();
-      }
+      // Properly remove listeners before disconnecting
+      socket.off("new-message", handleNewMessage);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.disconnect();
     };
-  }, [token, user?._id, location.pathname]);
+  }, [token, user?._id, location.pathname, setUnreadCount]);
 
   // Join all chat rooms when conversations load
   useEffect(() => {
