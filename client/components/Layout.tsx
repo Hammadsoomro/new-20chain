@@ -34,8 +34,15 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout, isAdmin } = useAuth();
+  const { unreadCounts } = useChat();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Calculate total unread messages for Team Chat
+  const totalUnread = Array.from(unreadCounts.values()).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("sidebarCollapsed") === "true";
