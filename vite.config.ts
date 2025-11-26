@@ -3,8 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { createServer } from "./server";
 import { Server } from "socket.io";
-
-let io: Server | null = null;
+import { setIO } from "./server/websocket-io";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
