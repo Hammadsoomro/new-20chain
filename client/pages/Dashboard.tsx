@@ -65,12 +65,12 @@ export default function Dashboard() {
 
       try {
         // Fetch team members
-        const response = await fetch("/api/members", {
+        const membersResponse = await fetch("/api/members", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.ok) {
-          const members = await response.json();
+        if (membersResponse.ok) {
+          const members = await membersResponse.json();
           setTeamMembers(members);
 
           // Update team members count in stats
@@ -78,6 +78,44 @@ export default function Dashboard() {
             prev.map((stat) =>
               stat.label === "Team Members"
                 ? { ...stat, value: members.length.toString() }
+                : stat,
+            ),
+          );
+        }
+
+        // Fetch queued lines count
+        const queuedResponse = await fetch("/api/queued", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (queuedResponse.ok) {
+          const data = await queuedResponse.json();
+          const count = data.lines ? data.lines.length : 0;
+
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Lines Queued"
+                ? { ...stat, value: count.toString() }
+                : stat,
+            ),
+          );
+        }
+
+        // Fetch claimed numbers count for today
+        const claimedResponse = await fetch("/api/claim/numbers", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (claimedResponse.ok) {
+          const claimedNumbers = await claimedResponse.json();
+          const count = Array.isArray(claimedNumbers)
+            ? claimedNumbers.length
+            : 0;
+
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Claimed Today"
+                ? { ...stat, value: count.toString() }
                 : stat,
             ),
           );
