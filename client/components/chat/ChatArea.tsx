@@ -74,28 +74,42 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       selectedChat.id,
     );
 
+    // Leave previous chat room if switching chats
+    socket.emit("leave-chat", { chatId: selectedChat.id });
+
     // Join the chat room
     socket.emit("join-chat", {
       chatId: selectedChat.id,
       userId: user._id,
     });
 
-    // Listen for new messages
+    // Listen for new messages - only add messages from OTHER users
     const handleNewMessage = (data: any) => {
       console.log("[ChatArea] New message received:", data);
+      // Only add messages from other users in the current chat
       if (data.chatId === selectedChat.id && data.sender !== user._id) {
-        const newMsg: ChatMessage = {
-          _id: data.messageId || data._id,
-          sender: data.sender,
-          senderName: data.senderName,
-          senderPicture: data.senderPicture,
-          content: data.content,
-          createdAt: data.timestamp || data.createdAt,
-          groupId: data.groupId,
-          recipient: data.recipient,
-          readBy: data.readBy || [],
-        };
-        setMessages((prev) => [...prev, newMsg]);
+        setMessages((prev) => {
+          // Check if message already exists (prevent duplicates)
+          const messageId = data.messageId || data._id;
+          if (prev.some((msg) => msg._id === messageId)) {
+            console.log("[ChatArea] Message already exists:", messageId);
+            return prev;
+          }
+
+          const newMsg: ChatMessage = {
+            _id: messageId,
+            sender: data.sender,
+            senderName: data.senderName,
+            senderPicture: data.senderPicture,
+            content: data.content,
+            createdAt: data.timestamp || data.createdAt,
+            groupId: data.groupId,
+            recipient: data.recipient,
+            readBy: data.readBy || [],
+          };
+          console.log("[ChatArea] Adding new message:", messageId);
+          return [...prev, newMsg];
+        });
       }
     };
 
@@ -167,6 +181,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       );
     };
 
+    // Setup all listeners
     socket.on("new-message", handleNewMessage);
     socket.on("message-edited", handleMessageEdited);
     socket.on("message-deleted", handleMessageDeleted);
@@ -177,11 +192,13 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     fetchInitialMessages();
 
     return () => {
+      // Remove all listeners
       socket.off("new-message", handleNewMessage);
       socket.off("message-edited", handleMessageEdited);
       socket.off("message-deleted", handleMessageDeleted);
       socket.off("user-typing", handleUserTyping);
       socket.off("message-read", handleMessageRead);
+      // Leave the chat room
       socket.emit("leave-chat", { chatId: selectedChat.id });
     };
   }, [socket, selectedChat.id, user?._id]);
@@ -263,7 +280,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Use requestAnimationFrame for smoother scrolling
+    const scrollTimer = requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    });
+    return () => cancelAnimationFrame(scrollTimer);
   }, [messages, typingUsers]);
 
   const handleTyping = () => {
@@ -305,10 +326,29 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
     if (!newMessage.trim() || !token || !socket) return;
 
+    const tempMessageId = `temp_${Date.now()}_${Math.random()}`;
+    const messageContent = newMessage;
+
     try {
       setSending(true);
+
+      // Add optimistic message to UI immediately
+      const tempMsg: ChatMessage = {
+        _id: tempMessageId,
+        sender: user?._id || "",
+        senderName: user?.name || "Unknown",
+        senderPicture: user?.profilePictureUrl || user?.profilePicture,
+        content: messageContent,
+        createdAt: new Date().toISOString(),
+        groupId: selectedChat.type === "group" ? selectedChat.id : undefined,
+        recipient: selectedChat.type === "direct" ? selectedChat.id : undefined,
+        readBy: [user?._id || ""],
+      };
+      setMessages((prev) => [...prev, tempMsg]);
+      setNewMessage("");
+
       const payload: any = {
-        content: newMessage,
+        content: messageContent,
       };
 
       if (selectedChat.type === "group") {
@@ -334,38 +374,34 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
 
       if (response.ok) {
         const sentMessage = await response.json();
-        const messageId = sentMessage._id || sentMessage.insertedId;
+        const actualMessageId = sentMessage._id || sentMessage.insertedId;
 
-        console.log("[ChatArea] Message sent:", messageId);
+        console.log("[ChatArea] Message sent:", actualMessageId);
 
-        // Add message to local state
-        const newMsg: ChatMessage = {
-          _id: messageId,
-          sender: user?._id || "",
-          senderName: user?.name || "Unknown",
-          senderPicture: user?.profilePictureUrl || user?.profilePicture,
-          content: newMessage,
-          createdAt: new Date().toISOString(),
-          groupId: selectedChat.type === "group" ? selectedChat.id : undefined,
-          recipient:
-            selectedChat.type === "direct" ? selectedChat.id : undefined,
-          readBy: [user?._id || ""],
-        };
-        setMessages((prev) => [...prev, newMsg]);
+        // Update the temp message with the real ID from server
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === tempMessageId
+              ? {
+                  ...msg,
+                  _id: actualMessageId,
+                  createdAt: sentMessage.createdAt || msg.createdAt,
+                }
+              : msg,
+          ),
+        );
 
         // Emit the message through WebSocket so all users see it in real-time
         const messageData = {
-          messageId,
+          messageId: actualMessageId,
           sender: user?._id,
           senderName: user?.name || "Unknown",
           chatId: selectedChat.id,
-          content: newMessage,
-          timestamp: new Date().toISOString(),
+          content: messageContent,
+          timestamp: sentMessage.createdAt || new Date().toISOString(),
         };
 
         socket.emit("send-message", messageData);
-
-        setNewMessage("");
 
         // Clear typing indicator
         socket.emit("typing", {
@@ -376,8 +412,15 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
         });
 
         setIsTyping(false);
+      } else {
+        // Remove optimistic message if send failed
+        setMessages((prev) => prev.filter((msg) => msg._id !== tempMessageId));
+        console.error("[ChatArea] Failed to send message:", response.status);
       }
     } catch (error) {
+      // Remove optimistic message if error occurred
+      setMessages((prev) => prev.filter((msg) => msg._id !== tempMessageId));
+
       if (error instanceof DOMException && error.name === "AbortError") {
         console.error("[ChatArea] Send message timeout");
       } else {

@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { z } from "zod";
 import { AuthRequest } from "../middleware/auth";
 import { getCollections } from "../db";
+import { getIO } from "../websocket-io";
 import { ObjectId } from "mongodb";
 import crypto from "crypto";
 import type { User } from "@shared/api";
@@ -90,6 +91,12 @@ export const createTeamMember: RequestHandler = async (
       );
     }
 
+    // Emit real-time update for member added
+    const io = getIO();
+    if (io) {
+      io.emit("member-added", newUser);
+    }
+
     res.status(201).json(newUser);
   } catch (error) {
     console.error("Error creating team member:", error);
@@ -119,23 +126,21 @@ export const getTeamMembers: RequestHandler = async (req: AuthRequest, res) => {
         const userId = member._id.toString();
 
         // Get total claims
-        const totalClaims = await collections.history
-          .countDocuments({
-            teamId: req.teamId,
-            claimedByUserId: userId,
-          });
+        const totalClaims = await collections.history.countDocuments({
+          teamId: req.teamId,
+          claimedByUserId: userId,
+        });
 
         // Get claims today
         const startOfToday = new Date();
         startOfToday.setHours(0, 0, 0, 0);
-        const claimsToday = await collections.history
-          .countDocuments({
-            teamId: req.teamId,
-            claimedByUserId: userId,
-            claimedAt: {
-              $gte: startOfToday.toISOString(),
-            },
-          });
+        const claimsToday = await collections.history.countDocuments({
+          teamId: req.teamId,
+          claimedByUserId: userId,
+          claimedAt: {
+            $gte: startOfToday.toISOString(),
+          },
+        });
 
         return {
           _id: userId,
