@@ -22,6 +22,7 @@ interface ChatConversation {
 export default function TeamChat() {
   const { user, token } = useAuth();
   const { setUnreadCount } = useChat();
+  const location = useLocation();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedChat, setSelectedChat] = useState<{
     type: "group" | "direct";
@@ -50,6 +51,8 @@ export default function TeamChat() {
     socket.on("new-message", (data: any) => {
       console.log("[TeamChat] Received message:", data);
 
+      const isUserOnChatPage = location.pathname === "/chat";
+
       setConversations((prev) => {
         const updated = [...prev];
         const convIndex = updated.findIndex((c) => c.id === data.chatId);
@@ -60,23 +63,23 @@ export default function TeamChat() {
 
           // Only increment unread if this message is not from current user
           if (!isFromCurrentUser) {
-            // Check if this chat is currently selected
-            const isChatSelected = selectedChat?.id === data.chatId;
+            conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+            console.log(
+              `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
+            );
 
-            if (!isChatSelected) {
-              conversation.unreadCount = (conversation.unreadCount || 0) + 1;
-              console.log(
-                `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
-              );
+            // Update global unread count
+            setUnreadCount(data.chatId, conversation.unreadCount);
 
-              // Update global unread count
-              setUnreadCount(data.chatId, conversation.unreadCount);
-
-              // Show toast notification
+            // Show toast notification ONLY if user is NOT on the chat page
+            if (!isUserOnChatPage) {
               toast.success(`💬 New message from ${data.senderName}`, {
                 description: data.content.substring(0, 100),
                 duration: 4000,
               });
+
+              // Play notification sound when showing notification
+              playNotificationSound();
             }
           }
 
@@ -89,11 +92,6 @@ export default function TeamChat() {
 
         return updated;
       });
-
-      // Play notification sound if message is not from current user
-      if (data.sender !== user._id) {
-        playNotificationSound();
-      }
     });
 
     socket.on("connect", () => {
