@@ -270,6 +270,16 @@ export const releaseClaimedNumbers: RequestHandler = async (req, res) => {
       claimedBy: userId,
     });
 
+    // Emit real-time update for claimed today count
+    const io = getIO();
+    if (io) {
+      io.emit("claimed-today-updated", {
+        count: 0,
+        teamId,
+        userId,
+      });
+    }
+
     res.json({ success: true });
   } catch (error) {
     console.error("Release claimed numbers error:", error);
