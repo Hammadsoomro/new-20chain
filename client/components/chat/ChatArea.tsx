@@ -74,28 +74,42 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       selectedChat.id,
     );
 
+    // Leave previous chat room if switching chats
+    socket.emit("leave-chat", { chatId: selectedChat.id });
+
     // Join the chat room
     socket.emit("join-chat", {
       chatId: selectedChat.id,
       userId: user._id,
     });
 
-    // Listen for new messages
+    // Listen for new messages - only add messages from OTHER users
     const handleNewMessage = (data: any) => {
       console.log("[ChatArea] New message received:", data);
+      // Only add messages from other users in the current chat
       if (data.chatId === selectedChat.id && data.sender !== user._id) {
-        const newMsg: ChatMessage = {
-          _id: data.messageId || data._id,
-          sender: data.sender,
-          senderName: data.senderName,
-          senderPicture: data.senderPicture,
-          content: data.content,
-          createdAt: data.timestamp || data.createdAt,
-          groupId: data.groupId,
-          recipient: data.recipient,
-          readBy: data.readBy || [],
-        };
-        setMessages((prev) => [...prev, newMsg]);
+        setMessages((prev) => {
+          // Check if message already exists (prevent duplicates)
+          const messageId = data.messageId || data._id;
+          if (prev.some((msg) => msg._id === messageId)) {
+            console.log("[ChatArea] Message already exists:", messageId);
+            return prev;
+          }
+
+          const newMsg: ChatMessage = {
+            _id: messageId,
+            sender: data.sender,
+            senderName: data.senderName,
+            senderPicture: data.senderPicture,
+            content: data.content,
+            createdAt: data.timestamp || data.createdAt,
+            groupId: data.groupId,
+            recipient: data.recipient,
+            readBy: data.readBy || [],
+          };
+          console.log("[ChatArea] Adding new message:", messageId);
+          return [...prev, newMsg];
+        });
       }
     };
 
@@ -167,6 +181,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       );
     };
 
+    // Setup all listeners
     socket.on("new-message", handleNewMessage);
     socket.on("message-edited", handleMessageEdited);
     socket.on("message-deleted", handleMessageDeleted);
@@ -177,11 +192,13 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     fetchInitialMessages();
 
     return () => {
+      // Remove all listeners
       socket.off("new-message", handleNewMessage);
       socket.off("message-edited", handleMessageEdited);
       socket.off("message-deleted", handleMessageDeleted);
       socket.off("user-typing", handleUserTyping);
       socket.off("message-read", handleMessageRead);
+      // Leave the chat room
       socket.emit("leave-chat", { chatId: selectedChat.id });
     };
   }, [socket, selectedChat.id, user?._id]);
