@@ -81,6 +81,16 @@ export const updateClaimSettings: RequestHandler = async (req, res) => {
       { returnDocument: "after", upsert: true },
     );
 
+    // Emit real-time update for claim settings
+    const io = getIO();
+    if (io) {
+      io.emit("claim-settings-updated", {
+        teamId,
+        lineCount: result.value?.lineCount,
+        cooldownMinutes: result.value?.cooldownMinutes,
+      });
+    }
+
     res.json({
       _id: result.value?._id.toString(),
       teamId: result.value?.teamId,
