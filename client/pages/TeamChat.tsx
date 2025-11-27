@@ -36,6 +36,13 @@ export default function TeamChat() {
   useEffect(() => {
     if (!token || !user?._id) return;
 
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        console.log("[TeamChat] Notification permission:", permission);
+      });
+    }
+
     // Disconnect existing socket if any
     if (socketRef.current && socketRef.current.connected) {
       console.log("[TeamChat] Disconnecting previous socket");
