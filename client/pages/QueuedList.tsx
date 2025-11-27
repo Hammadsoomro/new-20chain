@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { List, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { io, Socket } from "socket.io-client";
 import type { QueuedLine } from "@shared/api";
 
 export default function QueuedList() {
