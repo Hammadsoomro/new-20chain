@@ -90,6 +90,16 @@ export default function TeamChat() {
 
               // Play notification sound when showing notification
               playNotificationSound();
+
+              // Show desktop notification
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(`New message from ${data.senderName}`, {
+                  body: data.content.substring(0, 100),
+                  icon: "/favicon.ico",
+                  tag: "message-notification",
+                  requireInteraction: false,
+                });
+              }
             }
           }
 
