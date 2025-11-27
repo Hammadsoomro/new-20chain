@@ -8,11 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Trash2, Plus, Copy, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
+import { io, Socket } from "socket.io-client";
 
 export default function NumbersSorter() {
   const { token, isAdmin } = useAuth();
