@@ -13,12 +13,24 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredEntries, setFilteredEntries] = useState<HistoryEntry[]>([]);
+  const socketRef = useRef<Socket | null>(null);
 
-  // Fetch history entries
+  // Initialize Socket.IO connection for real-time updates
   useEffect(() => {
-    const fetchHistory = async () => {
-      if (!token) return;
+    if (!token) return;
 
+    const socket = io(window.location.origin, {
+      auth: { token },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+    });
+
+    socketRef.current = socket;
+
+    // Fetch initial history entries
+    const fetchHistory = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/history", {
@@ -31,13 +43,26 @@ export default function History() {
           setFilteredEntries(data.entries || []);
         }
       } catch (error) {
-        console.error("Error fetching history:", error);
+        console.error("[History] Error fetching history:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchHistory();
+
+    // Listen for real-time updates when new lines are claimed
+    const handleClaimedTodayUpdated = () => {
+      console.log("[History] Claimed today updated, refreshing history");
+      fetchHistory();
+    };
+
+    socket.on("claimed-today-updated", handleClaimedTodayUpdated);
+
+    return () => {
+      socket.off("claimed-today-updated", handleClaimedTodayUpdated);
+      socket.disconnect();
+    };
   }, [token]);
 
   // Filter entries based on search
