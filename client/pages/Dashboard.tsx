@@ -220,66 +220,31 @@ export default function Dashboard() {
             })}
           </div>
 
-          {/* Quick Links */}
+          {/* Team Members Section */}
           <div>
             <h2 className="text-2xl font-bold text-foreground mb-6">
-              Quick Access
+              Team Members
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {quickLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link key={link.path} to={link.path}>
-                    <Card className="border-border/50 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group h-full">
-                      <CardContent className="pt-6">
-                        <div className="space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-                                {link.title}
-                              </h3>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {link.description}
-                              </p>
-                            </div>
-                            <Icon className="h-6 w-6 text-primary/50 group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                          </div>
-                          <div className="flex items-center gap-2 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Go to {link.title}
-                            <ArrowRight className="h-4 w-4" />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })}
-            </div>
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>Loading team members...</p>
+              </div>
+            ) : teamMembers.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>No team members yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {teamMembers.map((member, index) => (
+                  <TeamMemberCard
+                    key={member._id}
+                    member={member}
+                    index={index}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-
-          {/* Team Members Section */}
-          {isAdmin && (
-            <div>
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                Team Members
-              </h2>
-              {loading ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>Loading team members...</p>
-                </div>
-              ) : teamMembers.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No team members yet</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {teamMembers.map((member) => (
-                    <TeamMemberCard key={member._id} member={member} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </Layout>

@@ -21,6 +21,8 @@ export interface User {
   teamId: string;
   createdAt: string;
   updatedAt: string;
+  totalClaims?: number;
+  claimsToday?: number;
 }
 
 export interface AuthResponse {

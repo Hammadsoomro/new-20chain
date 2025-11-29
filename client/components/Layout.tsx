@@ -95,9 +95,9 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto md:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } md:relative md:translate-x-0 ${sidebarCollapsed ? "w-20" : "w-64"}`}
+        } ${sidebarCollapsed ? "w-20" : "w-64"}`}
       >
         {/* Fixed Header - Logo */}
         <div className="flex items-center p-6 border-b border-sidebar-border flex-shrink-0">
@@ -168,18 +168,16 @@ export const Layout = ({ children }: LayoutProps) => {
                     isActive(item.path)
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  } ${sidebarCollapsed ? "justify-start" : "gap-3"}`}
+                  } ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
                   onClick={() => setSidebarOpen(false)}
                   title={sidebarCollapsed ? item.label : ""}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
-                  <span
-                    className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                      sidebarCollapsed ? "w-0" : "w-auto"
-                    }`}
-                  >
-                    {item.label}
-                  </span>
+                  {!sidebarCollapsed && (
+                    <span className="transition-all duration-300 whitespace-nowrap overflow-hidden">
+                      {item.label}
+                    </span>
+                  )}
                   {sidebarCollapsed && (
                     <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                       {item.label}
@@ -198,17 +196,11 @@ export const Layout = ({ children }: LayoutProps) => {
                 isActive("/settings")
                   ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              } ${sidebarCollapsed ? "justify-start" : "gap-3"}`}
+              } ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
               title={sidebarCollapsed ? "Settings" : ""}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
-              <span
-                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                  sidebarCollapsed ? "w-0" : "w-auto"
-                }`}
-              >
-                Settings
-              </span>
+              {!sidebarCollapsed && <span>Settings</span>}
               {sidebarCollapsed && (
                 <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                   Settings
@@ -218,18 +210,12 @@ export const Layout = ({ children }: LayoutProps) => {
             <button
               onClick={logout}
               className={`w-full flex items-center px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group ${
-                sidebarCollapsed ? "justify-start" : "gap-3"
+                sidebarCollapsed ? "justify-center" : "gap-3"
               }`}
               title={sidebarCollapsed ? "Logout" : ""}
             >
               <LogOut className="h-5 w-5 flex-shrink-0" />
-              <span
-                className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${
-                  sidebarCollapsed ? "w-0" : "w-auto"
-                }`}
-              >
-                Logout
-              </span>
+              {!sidebarCollapsed && <span>Logout</span>}
               {sidebarCollapsed && (
                 <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                   Logout

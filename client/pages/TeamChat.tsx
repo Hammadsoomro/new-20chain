@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useChat } from "@/context/ChatContext";
 import { Layout } from "@/components/Layout";
 import { ChatContactList } from "@/components/chat/ChatContactList";
 import { ChatArea } from "@/components/chat/ChatArea";
@@ -19,6 +20,7 @@ interface ChatConversation {
 
 export default function TeamChat() {
   const { user, token } = useAuth();
+  const { setUnreadCount } = useChat();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedChat, setSelectedChat] = useState<{
     type: "group" | "direct";
@@ -53,19 +55,28 @@ export default function TeamChat() {
 
         if (convIndex !== -1) {
           const conversation = updated[convIndex];
+          const isFromCurrentUser = data.sender === user._id;
 
-          // Only increment unread if this message is not from current user and chat is not selected
-          if (data.sender !== user._id && selectedChat?.id !== data.chatId) {
-            conversation.unreadCount = (conversation.unreadCount || 0) + 1;
-            console.log(
-              `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
-            );
+          // Only increment unread if this message is not from current user
+          if (!isFromCurrentUser) {
+            // Check if this chat is currently selected
+            const isChatSelected = selectedChat?.id === data.chatId;
 
-            // Show toast notification
-            toast.success(`💬 New message from ${data.senderName}`, {
-              description: data.content.substring(0, 100),
-              duration: 4000,
-            });
+            if (!isChatSelected) {
+              conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+              console.log(
+                `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
+              );
+
+              // Update global unread count
+              setUnreadCount(data.chatId, conversation.unreadCount);
+
+              // Show toast notification
+              toast.success(`💬 New message from ${data.senderName}`, {
+                description: data.content.substring(0, 100),
+                duration: 4000,
+              });
+            }
           }
 
           conversation.lastMessageTime = data.timestamp;
