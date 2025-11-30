@@ -233,6 +233,90 @@
     --ring: 280 100% 56%;
     --sidebar-ring: 280 100% 56%;
   }
+
+  /* Blue Theme - Animated Gradients */
+  :root[data-color-scheme="blue"] {
+    --bg-gradient: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%);
+    --bg-gradient-dark: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #1a3a52 50%, #0d47a1 75%);
+    --sidebar-width: 280px;
+    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    --spacing-scale: 1;
+    --font-scale: 1;
+  }
+
+  :root[data-color-scheme="blue"].dark {
+    --bg-gradient: var(--bg-gradient-dark);
+  }
+
+  /* Green Theme - Animated Gradients */
+  :root[data-color-scheme="green"] {
+    --bg-gradient: linear-gradient(-45deg, #84fab0 0%, #8fd3f4 25%, #a6d0dd 50%, #56ab2f 75%);
+    --bg-gradient-dark: linear-gradient(-45deg, #2d5016 0%, #1f3a1f 25%, #0a2f0a 50%, #1a5f1a 75%);
+    --sidebar-width: 320px;
+    --sidebar-shadow: 0 12px 40px rgba(132, 250, 176, 0.08);
+    --spacing-scale: 1.1;
+    --font-scale: 1.05;
+  }
+
+  :root[data-color-scheme="green"].dark {
+    --bg-gradient: var(--bg-gradient-dark);
+  }
+
+  /* Orange Theme - Animated Gradients */
+  :root[data-color-scheme="orange"] {
+    --bg-gradient: linear-gradient(-45deg, #fa709a 0%, #fee140 25%, #ffa400 50%, #ff6b35 75%);
+    --bg-gradient-dark: linear-gradient(-45deg, #663b0f 0%, #8b4513 25%, #3d2817 50%, #5c2e0f 75%);
+    --sidebar-width: 260px;
+    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.12);
+    --spacing-scale: 0.95;
+    --font-scale: 1.02;
+  }
+
+  :root[data-color-scheme="orange"].dark {
+    --bg-gradient: var(--bg-gradient-dark);
+  }
+
+  /* Red Theme - Animated Gradients */
+  :root[data-color-scheme="red"] {
+    --bg-gradient: linear-gradient(-45deg, #ee7752 0%, #e73c7e 25%, #23a6d5 50%, #23d5ab 75%);
+    --bg-gradient-dark: linear-gradient(-45deg, #4a1a1a 0%, #6b2e2e 25%, #1a3a4a 50%, #1a4a3a 75%);
+    --sidebar-width: 275px;
+    --sidebar-shadow: 0 9px 30px rgba(238, 119, 82, 0.1);
+    --spacing-scale: 1.05;
+    --font-scale: 1.08;
+  }
+
+  :root[data-color-scheme="red"].dark {
+    --bg-gradient: var(--bg-gradient-dark);
+  }
+
+  /* Purple Theme - Animated Gradients */
+  :root[data-color-scheme="purple"] {
+    --bg-gradient: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%);
+    --bg-gradient-dark: linear-gradient(-45deg, #3d2645 0%, #2d1b4e 25%, #1a1a3e 50%, #1a2e4a 75%);
+    --sidebar-width: 290px;
+    --sidebar-shadow: 0 11px 38px rgba(102, 126, 234, 0.12);
+    --spacing-scale: 1.08;
+    --font-scale: 1.06;
+  }
+
+  :root[data-color-scheme="purple"].dark {
+    --bg-gradient: var(--bg-gradient-dark);
+  }
+
+  /* Default (Original Purple) Theme */
+  :root[data-color-scheme="default"] {
+    --bg-gradient: linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%);
+    --bg-gradient-dark: linear-gradient(-45deg, #3d2645 0%, #2d1b4e 25%, #1a1a3e 50%, #1a2e4a 75%);
+    --sidebar-width: 280px;
+    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    --spacing-scale: 1;
+    --font-scale: 1;
+  }
+
+  :root[data-color-scheme="default"].dark {
+    --bg-gradient: var(--bg-gradient-dark);
+  }
 }
 
 @layer base {
