@@ -52,12 +52,6 @@ export const Layout = ({ children }: LayoutProps) => {
     }
     return false;
   });
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
-    }
-    return false;
-  });
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Toggle sidebar collapse and save to localStorage
