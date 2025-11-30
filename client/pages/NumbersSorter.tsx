@@ -261,7 +261,7 @@ export default function NumbersSorter() {
 
   return (
     <Layout>
-      <div className="min-h-screen p-6 md:p-8 bg-gradient-to-br from-background via-background to-primary/5">
+      <div className="min-h-screen p-6 md:p-8 bg-transparent">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="space-y-2">
