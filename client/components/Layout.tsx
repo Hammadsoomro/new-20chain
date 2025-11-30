@@ -276,13 +276,16 @@ export const Layout = ({ children }: LayoutProps) => {
 
             {/* Right */}
             <div className="flex items-center gap-3">
+              {/* Theme Selector */}
+              <ThemeSelector />
+
               {/* Theme Toggle */}
               <button
-                onClick={toggleDarkMode}
+                onClick={toggleTheme}
                 className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Toggle theme"
+                aria-label="Toggle light/dark theme"
               >
-                {isDark ? (
+                {theme === "dark" ? (
                   <Sun className="h-5 w-5 text-yellow-500" />
                 ) : (
                   <Moon className="h-5 w-5 text-slate-400" />
