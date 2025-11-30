@@ -28,9 +28,10 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <ChatProvider>
-          <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <ChatProvider>
+            <BrowserRouter>
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
@@ -106,9 +107,10 @@ const App = () => (
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </ChatProvider>
-      </AuthProvider>
+            </BrowserRouter>
+          </ChatProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
