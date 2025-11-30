@@ -28,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { ThemeSelector } from "@/components/ThemeSelector";
 
 interface LayoutProps {
   children: React.ReactNode;
