@@ -331,7 +331,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto bg-gradient-to-b from-transparent to-transparent">{children}</main>
       </div>
 
       {/* Mobile Overlay */}
