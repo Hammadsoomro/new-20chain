@@ -67,20 +67,6 @@ export const Layout = ({ children }: LayoutProps) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const root = document.documentElement;
-    if (root.classList.contains("dark")) {
-      root.classList.remove("dark");
-      setIsDark(false);
-      localStorage.setItem("theme", "light");
-    } else {
-      root.classList.add("dark");
-      setIsDark(true);
-      localStorage.setItem("theme", "dark");
-    }
-  };
-
   const isActive = (path: string) => location.pathname === path;
 
   const menuItems = [
