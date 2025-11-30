@@ -87,7 +87,7 @@ export default function History() {
 
   return (
     <Layout>
-      <div className="min-h-screen p-6 md:p-8 bg-gradient-to-br from-background to-muted/30">
+      <div className="min-h-screen p-6 md:p-8 bg-transparent">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
