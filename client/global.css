@@ -362,17 +362,22 @@
     animation: gradient 15s ease infinite;
   }
 
-  /* Apply gradient to main content areas */
-  main, [role="main"] {
+  /* Apply gradient backgrounds - fixed positioning for full coverage */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background: var(--bg-gradient, linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%));
     background-size: 400% 400%;
     animation: gradient 15s ease infinite;
+    z-index: -1;
   }
 
-  .dark main, .dark [role="main"] {
+  body.dark::before {
     background: var(--bg-gradient-dark, linear-gradient(-45deg, #3d2645 0%, #2d1b4e 25%, #1a1a3e 50%, #1a2e4a 75%));
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
