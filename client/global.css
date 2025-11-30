@@ -98,6 +98,141 @@
     --warning: 38 92% 50%;
     --info: 259 100% 51%;
   }
+
+  /* Blue Theme */
+  :root[data-color-scheme="blue"] {
+    --primary: 217 100% 51%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 217 100% 51%;
+    --accent-foreground: 0 0% 100%;
+    --sidebar-primary: 217 100% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 100% 51%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --ring: 217 100% 51%;
+    --sidebar-ring: 217 100% 51%;
+  }
+
+  :root[data-color-scheme="blue"].dark {
+    --primary: 217 100% 51%;
+    --primary-foreground: 217.2 32.6% 11%;
+    --accent: 217 100% 51%;
+    --accent-foreground: 217.2 32.6% 11%;
+    --sidebar-primary: 217 100% 51%;
+    --sidebar-primary-foreground: 217.2 32.6% 11%;
+    --sidebar-accent: 217 100% 51%;
+    --sidebar-accent-foreground: 217.2 32.6% 11%;
+    --ring: 217 100% 51%;
+    --sidebar-ring: 217 100% 51%;
+  }
+
+  /* Green Theme */
+  :root[data-color-scheme="green"] {
+    --primary: 132 54% 52%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 132 54% 52%;
+    --accent-foreground: 0 0% 100%;
+    --sidebar-primary: 132 54% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 132 54% 52%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --ring: 132 54% 52%;
+    --sidebar-ring: 132 54% 52%;
+  }
+
+  :root[data-color-scheme="green"].dark {
+    --primary: 132 54% 52%;
+    --primary-foreground: 217.2 32.6% 11%;
+    --accent: 132 54% 52%;
+    --accent-foreground: 217.2 32.6% 11%;
+    --sidebar-primary: 132 54% 52%;
+    --sidebar-primary-foreground: 217.2 32.6% 11%;
+    --sidebar-accent: 132 54% 52%;
+    --sidebar-accent-foreground: 217.2 32.6% 11%;
+    --ring: 132 54% 52%;
+    --sidebar-ring: 132 54% 52%;
+  }
+
+  /* Orange Theme */
+  :root[data-color-scheme="orange"] {
+    --primary: 38 92% 50%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 38 92% 50%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --ring: 38 92% 50%;
+    --sidebar-ring: 38 92% 50%;
+  }
+
+  :root[data-color-scheme="orange"].dark {
+    --primary: 38 92% 50%;
+    --primary-foreground: 217.2 32.6% 11%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 217.2 32.6% 11%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 217.2 32.6% 11%;
+    --sidebar-accent: 38 92% 50%;
+    --sidebar-accent-foreground: 217.2 32.6% 11%;
+    --ring: 38 92% 50%;
+    --sidebar-ring: 38 92% 50%;
+  }
+
+  /* Red Theme */
+  :root[data-color-scheme="red"] {
+    --primary: 0 84.2% 60.2%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 0 84.2% 60.2%;
+    --accent-foreground: 0 0% 100%;
+    --sidebar-primary: 0 84.2% 60.2%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 84.2% 60.2%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --ring: 0 84.2% 60.2%;
+    --sidebar-ring: 0 84.2% 60.2%;
+  }
+
+  :root[data-color-scheme="red"].dark {
+    --primary: 0 84.2% 60.2%;
+    --primary-foreground: 217.2 32.6% 11%;
+    --accent: 0 84.2% 60.2%;
+    --accent-foreground: 217.2 32.6% 11%;
+    --sidebar-primary: 0 84.2% 60.2%;
+    --sidebar-primary-foreground: 217.2 32.6% 11%;
+    --sidebar-accent: 0 84.2% 60.2%;
+    --sidebar-accent-foreground: 217.2 32.6% 11%;
+    --ring: 0 84.2% 60.2%;
+    --sidebar-ring: 0 84.2% 60.2%;
+  }
+
+  /* Purple Theme */
+  :root[data-color-scheme="purple"] {
+    --primary: 280 100% 56%;
+    --primary-foreground: 0 0% 100%;
+    --accent: 280 100% 56%;
+    --accent-foreground: 0 0% 100%;
+    --sidebar-primary: 280 100% 56%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 280 100% 56%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --ring: 280 100% 56%;
+    --sidebar-ring: 280 100% 56%;
+  }
+
+  :root[data-color-scheme="purple"].dark {
+    --primary: 280 100% 56%;
+    --primary-foreground: 217.2 32.6% 11%;
+    --accent: 280 100% 56%;
+    --accent-foreground: 217.2 32.6% 11%;
+    --sidebar-primary: 280 100% 56%;
+    --sidebar-primary-foreground: 217.2 32.6% 11%;
+    --sidebar-accent: 280 100% 56%;
+    --sidebar-accent-foreground: 217.2 32.6% 11%;
+    --ring: 280 100% 56%;
+    --sidebar-ring: 280 100% 56%;
+  }
 }
 
 @layer base {
