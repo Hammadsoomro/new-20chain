@@ -37,6 +37,7 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout, isAdmin } = useAuth();
   const { unreadCounts } = useChat();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
