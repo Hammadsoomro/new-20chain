@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { LogIn, AlertCircle } from "lucide-react";
+import { LogIn, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
