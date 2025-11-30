@@ -418,4 +418,139 @@
   .glass-card-dark {
     @apply rounded-lg border border-white/10 bg-black/20 backdrop-blur-md;
   }
+
+  /* Theme-specific Sidebar Styling */
+  :root[data-color-scheme="blue"] aside {
+    width: var(--sidebar-width);
+    box-shadow: var(--sidebar-shadow);
+    background: linear-gradient(135deg, #1a2744 0%, #263d5c 100%);
+    border-right: 2px solid rgba(102, 126, 234, 0.2);
+  }
+
+  :root[data-color-scheme="green"] aside {
+    width: var(--sidebar-width);
+    box-shadow: var(--sidebar-shadow);
+    background: linear-gradient(135deg, #1b3a1b 0%, #2d5a2d 100%);
+    border-right: 3px solid rgba(132, 250, 176, 0.3);
+  }
+
+  :root[data-color-scheme="orange"] aside {
+    width: var(--sidebar-width);
+    box-shadow: var(--sidebar-shadow);
+    background: linear-gradient(135deg, #3d2817 0%, #5c4a2f 100%);
+    border-right: 2px solid rgba(255, 107, 53, 0.25);
+  }
+
+  :root[data-color-scheme="red"] aside {
+    width: var(--sidebar-width);
+    box-shadow: var(--sidebar-shadow);
+    background: linear-gradient(135deg, #4a1a1a 0%, #6b3a2e 100%);
+    border-right: 2px solid rgba(238, 119, 82, 0.2);
+  }
+
+  :root[data-color-scheme="purple"] aside {
+    width: var(--sidebar-width);
+    box-shadow: var(--sidebar-shadow);
+    background: linear-gradient(135deg, #2d1b4e 0%, #42284d 100%);
+    border-right: 2px solid rgba(102, 126, 234, 0.25);
+  }
+
+  :root[data-color-scheme="default"] aside {
+    width: var(--sidebar-width);
+    box-shadow: var(--sidebar-shadow);
+    background: linear-gradient(135deg, #2d1b4e 0%, #42284d 100%);
+    border-right: 2px solid rgba(102, 126, 234, 0.25);
+  }
+
+  /* Theme-specific Typography & Spacing */
+  :root[data-color-scheme="blue"] {
+    --spacing-x: calc(1rem * var(--spacing-scale));
+    --spacing-y: calc(1rem * var(--spacing-scale));
+    font-size: calc(16px * var(--font-scale));
+  }
+
+  :root[data-color-scheme="green"] {
+    --spacing-x: calc(1.2rem * var(--spacing-scale));
+    --spacing-y: calc(1rem * var(--spacing-scale));
+    font-size: calc(16px * var(--font-scale));
+  }
+
+  :root[data-color-scheme="green"] h1 {
+    font-size: calc(2rem * var(--font-scale));
+    letter-spacing: -0.02em;
+  }
+
+  :root[data-color-scheme="green"] h2 {
+    font-size: calc(1.5rem * var(--font-scale));
+  }
+
+  :root[data-color-scheme="orange"] {
+    --spacing-x: calc(0.9rem * var(--spacing-scale));
+    --spacing-y: calc(0.9rem * var(--spacing-scale));
+    font-size: calc(15px * var(--font-scale));
+  }
+
+  :root[data-color-scheme="red"] {
+    --spacing-x: calc(1.1rem * var(--spacing-scale));
+    --spacing-y: calc(1.2rem * var(--spacing-scale));
+    font-size: calc(16px * var(--font-scale));
+  }
+
+  :root[data-color-scheme="red"] h1 {
+    font-size: calc(2.2rem * var(--font-scale));
+    font-weight: 800;
+  }
+
+  :root[data-color-scheme="purple"] {
+    --spacing-x: calc(1.15rem * var(--spacing-scale));
+    --spacing-y: calc(1.1rem * var(--spacing-scale));
+    font-size: calc(16px * var(--font-scale));
+  }
+
+  :root[data-color-scheme="default"] {
+    --spacing-x: calc(1rem * var(--spacing-scale));
+    --spacing-y: calc(1rem * var(--spacing-scale));
+    font-size: calc(16px * var(--font-scale));
+  }
+
+  /* Theme-specific Card Styling */
+  :root[data-color-scheme="blue"] [role="region"] > div > div {
+    background: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  :root[data-color-scheme="blue"].dark [role="region"] > div > div {
+    background: rgba(26, 39, 68, 0.95) !important;
+  }
+
+  :root[data-color-scheme="green"] [role="region"] > div > div {
+    background: rgba(255, 255, 255, 0.9) !important;
+  }
+
+  :root[data-color-scheme="green"].dark [role="region"] > div > div {
+    background: rgba(27, 58, 27, 0.95) !important;
+  }
+
+  :root[data-color-scheme="orange"] [role="region"] > div > div {
+    background: rgba(255, 255, 255, 0.8) !important;
+  }
+
+  :root[data-color-scheme="orange"].dark [role="region"] > div > div {
+    background: rgba(61, 40, 23, 0.95) !important;
+  }
+
+  :root[data-color-scheme="red"] [role="region"] > div > div {
+    background: rgba(255, 255, 255, 0.88) !important;
+  }
+
+  :root[data-color-scheme="red"].dark [role="region"] > div > div {
+    background: rgba(74, 26, 26, 0.95) !important;
+  }
+
+  :root[data-color-scheme="purple"] [role="region"] > div > div {
+    background: rgba(255, 255, 255, 0.87) !important;
+  }
+
+  :root[data-color-scheme="purple"].dark [role="region"] > div > div {
+    background: rgba(45, 27, 78, 0.95) !important;
+  }
 }
