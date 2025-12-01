@@ -294,26 +294,28 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Orange Theme - Animated Gradients */
+  /* Orange Theme - Warm Gradient Flows */
   :root[data-color-scheme="orange"] {
     --bg-gradient: linear-gradient(
       135deg,
       #ff6b35 0%,
-      #ffa500 25%,
-      #ff8c00 50%,
-      #ff7f50 75%,
+      #ffa500 20%,
+      #ff8c00 40%,
+      #ffb347 60%,
+      #ffd700 80%,
       #ff6b35 100%
     );
     --bg-gradient-dark: linear-gradient(
       135deg,
       #331a00 0%,
-      #663300 25%,
-      #4d2600 50%,
-      #663300 75%,
+      #663300 20%,
+      #4d2600 40%,
+      #664d00 60%,
+      #663300 80%,
       #331a00 100%
     );
     --sidebar-width: 260px;
-    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.15);
+    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.18);
     --spacing-scale: 0.95;
     --font-scale: 1.02;
   }
