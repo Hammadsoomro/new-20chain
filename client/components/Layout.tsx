@@ -141,9 +141,9 @@ export const Layout = ({ children }: LayoutProps) => {
             {!sidebarCollapsed && (
               <div className="space-y-1 text-xs text-sidebar-foreground/70">
                 <p className="font-mono font-semibold">
-                  {currentTime.toLocaleTimeString()}
+                  {formatTime(currentTime.toISOString())}
                 </p>
-                <p>{currentTime.toLocaleDateString()}</p>
+                <p>{formatDateOnly(currentTime.toISOString())}</p>
               </div>
             )}
           </div>
