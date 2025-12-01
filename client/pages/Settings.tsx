@@ -793,7 +793,7 @@ function TeamMembersPanel() {
                       {member.role}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(member.createdAt).toLocaleDateString()}
+                      {formatDateOnly(member.createdAt)}
                     </p>
                   </div>
                 </div>
