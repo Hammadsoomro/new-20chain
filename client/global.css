@@ -322,26 +322,28 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Red Theme - Animated Gradients */
+  /* Red Theme - Neon Pink/Blue Cyberpunk */
   :root[data-color-scheme="red"] {
     --bg-gradient: linear-gradient(
       135deg,
-      #ff3366 0%,
-      #ff1493 25%,
-      #ff6b9d 50%,
-      #ff4757 75%,
-      #ff3366 100%
+      #ff0080 0%,
+      #ff1493 20%,
+      #0099ff 40%,
+      #00ffff 60%,
+      #ff0080 80%,
+      #ff1493 100%
     );
     --bg-gradient-dark: linear-gradient(
       135deg,
-      #330011 0%,
-      #660033 25%,
-      #4d001a 50%,
-      #660033 75%,
-      #330011 100%
+      #1a0011 0%,
+      #330033 20%,
+      #001133 40%,
+      #003333 60%,
+      #1a0011 80%,
+      #330033 100%
     );
     --sidebar-width: 275px;
-    --sidebar-shadow: 0 9px 30px rgba(255, 51, 102, 0.15);
+    --sidebar-shadow: 0 9px 30px rgba(255, 0, 128, 0.25);
     --spacing-scale: 1.05;
     --font-scale: 1.08;
   }
