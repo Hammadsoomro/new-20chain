@@ -102,7 +102,6 @@ export function ChatViewFixed({ contact, token, socket }: ChatViewProps) {
           sender: data.sender,
           senderName: data.senderName,
           content: data.content,
-          chatId: data.chatId,
           createdAt: data.timestamp,
           readBy: [data.sender],
         };
