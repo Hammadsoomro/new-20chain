@@ -57,9 +57,22 @@ export default function TeamChat() {
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 10,
       transports: ["websocket", "polling"],
+      forceNew: false,
     });
 
     socketRef.current = socket;
+
+    // Handle socket connection errors
+    const handleConnectionError = (error: any) => {
+      console.error("[TeamChat] Socket connection error:", error);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.warn("[TeamChat] Socket disconnected:", reason);
+    };
+
+    socket.on("connect_error", handleConnectionError);
+    socket.on("disconnect", handleDisconnect);
 
     // Handler for new messages
     const handleNewMessage = (data: any) => {
