@@ -39,11 +39,6 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
         transition: "all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       }}
     >
-      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-primary to-primary/80 shadow-lg border-2 border-white/20">
-        <span className="text-xs font-bold text-white">
-          {userName?.[0]?.toUpperCase() || "U"}
-        </span>
-      </div>
       <style>{`
         @keyframes spin {
           from {
@@ -54,12 +49,17 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
           }
         }
       `}</style>
-      <div
-        className="absolute inset-0 rounded-full border-2 border-transparent border-t-white/40 border-r-white/40"
-        style={{
-          animation: "spin 3s linear infinite",
-        }}
-      />
+      <div className="relative w-16 h-16 flex items-center justify-center">
+        <div
+          className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary border-r-primary"
+          style={{
+            animation: "spin 2s linear infinite",
+          }}
+        />
+        <span className="text-xs font-bold text-primary whitespace-nowrap">
+          {userName?.split(" ")[0] || "U"}
+        </span>
+      </div>
     </div>
   );
 };
