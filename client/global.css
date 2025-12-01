@@ -262,26 +262,30 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Green Theme - Animated Gradients */
+  /* Green Theme - Pastel Rainbow Waves */
   :root[data-color-scheme="green"] {
     --bg-gradient: linear-gradient(
       135deg,
-      #00ff88 0%,
-      #00ffbb 25%,
-      #00ff99 50%,
-      #00ffcc 75%,
-      #00ff88 100%
+      #ffc0e0 0%,
+      #c0e0ff 15%,
+      #c0ffe0 30%,
+      #ffffc0 45%,
+      #ffe0c0 60%,
+      #e0c0ff 75%,
+      #c0e0ff 100%
     );
     --bg-gradient-dark: linear-gradient(
       135deg,
-      #001a0f 0%,
-      #003322 25%,
-      #00331a 50%,
-      #004d33 75%,
-      #001a0f 100%
+      #2d1a1f 0%,
+      #1a2d33 15%,
+      #1a332d 30%,
+      #333322 45%,
+      #332d1a 60%,
+      #2d1a33 75%,
+      #1a2d33 100%
     );
     --sidebar-width: 320px;
-    --sidebar-shadow: 0 12px 40px rgba(0, 255, 136, 0.12);
+    --sidebar-shadow: 0 12px 40px rgba(192, 224, 255, 0.15);
     --spacing-scale: 1.1;
     --font-scale: 1.05;
   }
