@@ -30,7 +30,28 @@ export default function TeamChat() {
     name: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
+
+  // Check API health on mount
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch("/api/health");
+        if (!res.ok) {
+          console.warn("[TeamChat] API health check failed:", res.status);
+          setError(
+            "Backend service is temporarily unavailable. Please refresh the page.",
+          );
+        }
+      } catch (err) {
+        console.warn("[TeamChat] API health check error:", err);
+        setError("Cannot connect to backend. Please check your connection.");
+      }
+    };
+
+    checkHealth();
+  }, []);
 
   // Initialize socket connection and listen for messages
   useEffect(() => {
