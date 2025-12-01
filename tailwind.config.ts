@@ -95,7 +95,7 @@ export default {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
-        "gradient": {
+        gradient: {
           "0%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
           "100%": { backgroundPosition: "0% 50%" },

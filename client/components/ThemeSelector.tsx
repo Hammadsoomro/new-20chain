@@ -10,7 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Palette } from "lucide-react";
 
-const colorSchemes: Array<{ value: ColorScheme; label: string; color: string }> = [
+const colorSchemes: Array<{
+  value: ColorScheme;
+  label: string;
+  color: string;
+}> = [
   { value: "default", label: "Default (Purple)", color: "bg-purple-500" },
   { value: "blue", label: "Blue", color: "bg-blue-500" },
   { value: "green", label: "Green", color: "bg-green-500" },

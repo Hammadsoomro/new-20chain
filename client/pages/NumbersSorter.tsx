@@ -124,7 +124,9 @@ export default function NumbersSorter() {
 
       const queuedData = queuedResponse.ok ? await queuedResponse.json() : {};
       const queuedLines = new Set(
-        (queuedData.lines || []).map((line: any) => line.content.trim().toLowerCase())
+        (queuedData.lines || []).map((line: any) =>
+          line.content.trim().toLowerCase(),
+        ),
       );
 
       // Fetch history entries
@@ -137,8 +139,8 @@ export default function NumbersSorter() {
         : {};
       const historyLines = new Set(
         (historyData.entries || []).map((entry: any) =>
-          entry.content.trim().toLowerCase()
-        )
+          entry.content.trim().toLowerCase(),
+        ),
       );
 
       // Get first 15 words of each line for comparison

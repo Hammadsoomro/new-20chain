@@ -1,7 +1,13 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 export type Theme = "light" | "dark";
-export type ColorScheme = "default" | "blue" | "green" | "orange" | "red" | "purple";
+export type ColorScheme =
+  | "default"
+  | "blue"
+  | "green"
+  | "orange"
+  | "red"
+  | "purple";
 
 interface ThemeContextType {
   theme: Theme;
@@ -29,13 +35,13 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const root = document.documentElement;
-    
+
     if (theme === "dark") {
       root.classList.add("dark");
     } else {
       root.classList.remove("dark");
     }
-    
+
     root.setAttribute("data-color-scheme", colorScheme);
     localStorage.setItem("theme", theme);
     localStorage.setItem("colorScheme", colorScheme);
@@ -50,7 +56,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, colorScheme, toggleTheme, setColorScheme }}>
+    <ThemeContext.Provider
+      value={{ theme, colorScheme, toggleTheme, setColorScheme }}
+    >
       {children}
     </ThemeContext.Provider>
   );
