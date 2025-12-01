@@ -30,7 +30,7 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
   if (!isVisible || !userName) return null;
 
   const letters = userName.toUpperCase().replace(/\s/g, "").split("");
-  const radius = 32;
+  const radius = 56;
 
   return (
     <div
@@ -51,10 +51,19 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
             transform: rotate(360deg);
           }
         }
+
+        @keyframes neonGlow {
+          0%, 100% {
+            text-shadow: 0 0 7px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00;
+          }
+          50% {
+            text-shadow: 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00;
+          }
+        }
       `}</style>
 
       <div
-        className="relative w-32 h-32"
+        className="relative w-56 h-56"
         style={{
           animation: "orbit 8s linear infinite",
         }}
@@ -67,11 +76,16 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
           return (
             <div
               key={index}
-              className="absolute text-sm font-bold text-primary"
+              className="absolute text-lg font-bold"
               style={{
                 left: "50%",
                 top: "50%",
                 transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+                color: "#00ff00",
+                textShadow: "0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00",
+                animation: "neonGlow 2s ease-in-out infinite",
+                fontFamily: "monospace",
+                letterSpacing: "0.05em",
               }}
             >
               {letter}
