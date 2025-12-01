@@ -349,21 +349,23 @@
   /* Purple Theme - Animated Gradients */
   :root[data-color-scheme="purple"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #667eea 0%,
-      #764ba2 25%,
-      #f093fb 50%,
-      #4facfe 75%
+      135deg,
+      #b324ff 0%,
+      #9d4edd 25%,
+      #c77dff 50%,
+      #e0aaff 75%,
+      #b324ff 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #3d2645 0%,
-      #2d1b4e 25%,
-      #1a1a3e 50%,
-      #1a2e4a 75%
+      135deg,
+      #220033 0%,
+      #330066 25%,
+      #330099 50%,
+      #3d2645 75%,
+      #220033 100%
     );
     --sidebar-width: 290px;
-    --sidebar-shadow: 0 11px 38px rgba(102, 126, 234, 0.12);
+    --sidebar-shadow: 0 11px 38px rgba(179, 36, 255, 0.15);
     --spacing-scale: 1.08;
     --font-scale: 1.06;
   }
