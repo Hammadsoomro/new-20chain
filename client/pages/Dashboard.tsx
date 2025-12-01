@@ -349,7 +349,7 @@ export default function Dashboard() {
 
           {/* Team Members Section */}
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">
               Team Members
             </h2>
             {loading ? (
