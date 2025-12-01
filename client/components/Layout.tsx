@@ -120,12 +120,12 @@ export const Layout = ({ children }: LayoutProps) => {
         }`}>
           {/* User Info Card */}
           <div
-            className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 ${
-              sidebarCollapsed ? "p-2" : "p-4"
+            className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 overflow-hidden ${
+              sidebarCollapsed ? "p-1" : "p-4"
             }`}
           >
             <div
-              className={`flex items-center ${sidebarCollapsed ? "" : "gap-3"} mb-3`}
+              className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} mb-3`}
             >
               <div className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center flex-shrink-0">
                 <div className="text-sidebar-primary-foreground font-bold">
