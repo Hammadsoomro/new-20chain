@@ -265,21 +265,23 @@
   /* Green Theme - Animated Gradients */
   :root[data-color-scheme="green"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #84fab0 0%,
-      #8fd3f4 25%,
-      #a6d0dd 50%,
-      #56ab2f 75%
+      135deg,
+      #00ff88 0%,
+      #00ffbb 25%,
+      #00ff99 50%,
+      #00ffcc 75%,
+      #00ff88 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #2d5016 0%,
-      #1f3a1f 25%,
-      #0a2f0a 50%,
-      #1a5f1a 75%
+      135deg,
+      #001a0f 0%,
+      #003322 25%,
+      #00331a 50%,
+      #004d33 75%,
+      #001a0f 100%
     );
     --sidebar-width: 320px;
-    --sidebar-shadow: 0 12px 40px rgba(132, 250, 176, 0.08);
+    --sidebar-shadow: 0 12px 40px rgba(0, 255, 136, 0.12);
     --spacing-scale: 1.1;
     --font-scale: 1.05;
   }
