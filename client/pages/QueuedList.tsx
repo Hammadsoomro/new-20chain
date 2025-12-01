@@ -85,14 +85,6 @@ export default function QueuedList() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
-
   return (
     <Layout>
       <div className="min-h-screen p-6 md:p-8 bg-transparent">
