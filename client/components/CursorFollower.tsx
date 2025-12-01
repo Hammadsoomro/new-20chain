@@ -27,7 +27,10 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
     };
   }, []);
 
-  if (!isVisible) return null;
+  if (!isVisible || !userName) return null;
+
+  const letters = userName.toUpperCase().replace(/\s/g, "").split("");
+  const radius = 32;
 
   return (
     <div
@@ -40,7 +43,7 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
       }}
     >
       <style>{`
-        @keyframes spin {
+        @keyframes orbit {
           from {
             transform: rotate(0deg);
           }
@@ -49,16 +52,32 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
           }
         }
       `}</style>
-      <div className="relative w-16 h-16 flex items-center justify-center">
-        <div
-          className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary border-r-primary"
-          style={{
-            animation: "spin 2s linear infinite",
-          }}
-        />
-        <span className="text-xs font-bold text-primary whitespace-nowrap">
-          {userName?.split(" ")[0] || "U"}
-        </span>
+
+      <div
+        className="relative w-32 h-32"
+        style={{
+          animation: "orbit 8s linear infinite",
+        }}
+      >
+        {letters.map((letter, index) => {
+          const angle = (index / letters.length) * 360;
+          const x = radius * Math.cos((angle * Math.PI) / 180);
+          const y = radius * Math.sin((angle * Math.PI) / 180);
+
+          return (
+            <div
+              key={index}
+              className="absolute text-sm font-bold text-primary"
+              style={{
+                left: "50%",
+                top: "50%",
+                transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
+              }}
+            >
+              {letter}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
