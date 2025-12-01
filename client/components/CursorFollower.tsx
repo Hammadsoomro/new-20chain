@@ -82,7 +82,8 @@ export const CursorFollower = ({ userName }: CursorFollowerProps) => {
                 top: "50%",
                 transform: `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`,
                 color: "#00ff00",
-                textShadow: "0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00",
+                textShadow:
+                  "0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00, 0 0 40px #00ff00",
                 animation: "neonGlow 2s ease-in-out infinite",
                 fontFamily: "monospace",
                 letterSpacing: "0.05em",
