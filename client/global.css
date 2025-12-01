@@ -377,21 +377,23 @@
   /* Default (Original Purple) Theme */
   :root[data-color-scheme="default"] {
     --bg-gradient: linear-gradient(
-      -45deg,
+      135deg,
       #667eea 0%,
       #764ba2 25%,
       #f093fb 50%,
-      #4facfe 75%
+      #4facfe 75%,
+      #667eea 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
+      135deg,
       #3d2645 0%,
       #2d1b4e 25%,
       #1a1a3e 50%,
-      #1a2e4a 75%
+      #1a2e4a 75%,
+      #3d2645 100%
     );
     --sidebar-width: 280px;
-    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
     --spacing-scale: 1;
     --font-scale: 1;
   }
