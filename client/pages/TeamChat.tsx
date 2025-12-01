@@ -167,10 +167,6 @@ export default function TeamChat() {
       });
     };
 
-    const handleDisconnect = () => {
-      console.log("[TeamChat] Socket disconnected");
-    };
-
     const handleConnectError = (error: any) => {
       console.error("[TeamChat] Socket connection error:", error);
     };
