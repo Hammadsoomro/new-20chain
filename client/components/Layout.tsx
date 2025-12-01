@@ -204,14 +204,16 @@ export const Layout = ({ children }: LayoutProps) => {
           </nav>
 
           {/* Footer */}
-          <div className="space-y-3 pt-4 border-t border-sidebar-border">
+          <div className={`space-y-3 pt-4 border-t border-sidebar-border transition-all duration-300 flex flex-col ${
+            sidebarCollapsed ? "items-center" : ""
+          }`}>
             <Link
               to="/settings"
-              className={`flex items-center px-4 py-3 rounded-lg transition-all relative group ${
+              className={`flex items-center px-4 py-3 rounded-lg transition-all relative group w-full ${
                 isActive("/settings")
                   ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                   : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-              } ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+              } ${sidebarCollapsed ? "justify-center px-2" : "gap-3"}`}
               title={sidebarCollapsed ? "Settings" : ""}
             >
               <Settings className="h-5 w-5 flex-shrink-0" />
@@ -224,8 +226,8 @@ export const Layout = ({ children }: LayoutProps) => {
             </Link>
             <button
               onClick={logout}
-              className={`w-full flex items-center px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group ${
-                sidebarCollapsed ? "justify-center" : "gap-3"
+              className={`flex items-center px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-all relative group w-full ${
+                sidebarCollapsed ? "justify-center px-2" : "gap-3"
               }`}
               title={sidebarCollapsed ? "Logout" : ""}
             >
