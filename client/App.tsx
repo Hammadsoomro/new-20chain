@@ -118,15 +118,17 @@ const App = () => (
   </QueryClientProvider>
 );
 
+// Store root globally to prevent createRoot from being called multiple times during HMR
+declare global {
+  interface Window {
+    __reactRoot?: ReturnType<typeof createRoot>;
+  }
+}
+
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  const root = createRoot(rootElement);
-  root.render(<App />);
-
-  // Handle HMR updates in development
-  if (import.meta.hot) {
-    import.meta.hot.accept(() => {
-      root.render(<App />);
-    });
+  if (!window.__reactRoot) {
+    window.__reactRoot = createRoot(rootElement);
   }
+  window.__reactRoot.render(<App />);
 }
