@@ -135,7 +135,6 @@ export function ChatViewFixed({ contact, token, socket }: ChatViewProps) {
         sender: user._id,
         senderName: user.name,
         content: newMessage.trim(),
-        chatId: contact.id,
         createdAt: new Date().toISOString(),
         readBy: [user._id],
       };
