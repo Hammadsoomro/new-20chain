@@ -69,7 +69,7 @@ export default function History() {
     };
   }, [token]);
 
-  // Filter entries based on search
+  // Filter entries based on search (searches ALL entries, not just current page)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredEntries(entries);
@@ -79,6 +79,8 @@ export default function History() {
       );
       setFilteredEntries(filtered);
     }
+    // Reset to first page when search query changes
+    setCurrentPage(1);
   }, [searchQuery, entries]);
 
   const formatDate = (dateString: string) => {
