@@ -357,11 +357,26 @@ export default function TeamChat() {
 
   return (
     <Layout>
-      {loading ? (
+      {error && (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">⚠️ Connection Error</div>
+            <p className="text-muted-foreground max-w-md">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )}
+      {loading && !error && (
         <div className="flex items-center justify-center h-full">
           <div className="text-muted-foreground">Loading chat...</div>
         </div>
-      ) : (
+      )}
+      {!loading && !error && (
         <div className="flex h-full gap-4 p-6">
           {/* Contact List */}
           <div className="w-80 border-r border-border">
