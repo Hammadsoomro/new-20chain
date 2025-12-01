@@ -61,6 +61,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const markedAsReadRef = useRef<Set<string>>(new Set());
+  const previousChatIdRef = useRef<string | null>(null);
 
   // Setup socket listeners for this chat
   useEffect(() => {
@@ -75,7 +76,15 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     );
 
     // Leave previous chat room if switching chats
-    socket.emit("leave-chat", { chatId: selectedChat.id });
+    if (previousChatIdRef.current && previousChatIdRef.current !== selectedChat.id) {
+      socket.emit("leave-chat", { chatId: previousChatIdRef.current });
+      console.log(
+        "[ChatArea] Left previous chat:",
+        previousChatIdRef.current,
+      );
+    }
+
+    previousChatIdRef.current = selectedChat.id;
 
     // Join the chat room
     socket.emit("join-chat", {
