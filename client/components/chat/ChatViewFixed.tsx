@@ -78,7 +78,10 @@ export function ChatViewFixed({ contact, token, socket }: ChatViewProps) {
           const data = await response.json();
           setMessages(data.messages || []);
         } else {
-          console.error("[ChatView] Failed to fetch messages:", response.status);
+          console.error(
+            "[ChatView] Failed to fetch messages:",
+            response.status,
+          );
         }
       } catch (error) {
         console.error("[ChatView] Error fetching messages:", error);
@@ -158,11 +161,15 @@ export function ChatViewFixed({ contact, token, socket }: ChatViewProps) {
       if (!response.ok) {
         console.error("[ChatView] Failed to send message:", response.status);
         // Remove optimistic message on error
-        setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+        setMessages((prev) =>
+          prev.filter((msg) => msg._id !== tempMessage._id),
+        );
         setNewMessage(newMessage);
       } else {
         // Remove temp message and it will be added via socket
-        setMessages((prev) => prev.filter((msg) => msg._id !== tempMessage._id));
+        setMessages((prev) =>
+          prev.filter((msg) => msg._id !== tempMessage._id),
+        );
       }
     } catch (error) {
       console.error("[ChatView] Error sending message:", error);

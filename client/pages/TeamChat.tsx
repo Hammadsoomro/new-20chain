@@ -133,7 +133,10 @@ export default function TeamChat() {
               playNotificationSound();
 
               // Show desktop notification
-              if ("Notification" in window && Notification.permission === "granted") {
+              if (
+                "Notification" in window &&
+                Notification.permission === "granted"
+              ) {
                 new Notification(`New message from ${data.senderName}`, {
                   body: data.content.substring(0, 100),
                   icon: "/favicon.ico",

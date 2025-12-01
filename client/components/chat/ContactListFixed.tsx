@@ -55,7 +55,8 @@ export function ContactListFixed({
             }
             className={cn(
               "flex items-center w-full p-3 rounded-lg text-left transition-colors",
-              selectedContact?.type === "group" && selectedContact?.id === "group-chat"
+              selectedContact?.type === "group" &&
+                selectedContact?.id === "group-chat"
                 ? "bg-muted"
                 : "hover:bg-muted/50",
             )}
