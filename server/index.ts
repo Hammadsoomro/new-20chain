@@ -47,7 +47,19 @@ export async function createServer() {
   const app = express();
 
   // Middleware
-  app.use(cors());
+  const corsOptions = {
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:8080",
+      process.env.FRONTEND_URL || "*",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
+
+  app.use(cors(corsOptions));
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
