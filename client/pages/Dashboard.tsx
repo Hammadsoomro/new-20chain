@@ -313,30 +313,30 @@ export default function Dashboard() {
 
           {/* Quick Links Section */}
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">
               Quick Links
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {quickLinks.map((link, index) => {
                 const Icon = link.icon;
                 return (
                   <Link key={index} to={link.path}>
                     <Card className="h-full border-border/50 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group">
-                      <CardContent className="pt-6">
-                        <div className="space-y-4">
+                      <CardContent className="pt-4 pb-4">
+                        <div className="space-y-2">
                           <div className="flex items-start justify-between">
-                            <div className="space-y-1 flex-1">
-                              <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                            <div className="space-y-0.5 flex-1">
+                              <CardTitle className="text-base group-hover:text-primary transition-colors">
                                 {link.title}
                               </CardTitle>
-                              <CardDescription className="text-sm">
+                              <CardDescription className="text-xs">
                                 {link.description}
                               </CardDescription>
                             </div>
-                            <Icon className="h-6 w-6 text-primary/60 group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                            <Icon className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
                           </div>
-                          <div className="flex items-center gap-1 text-primary text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                            Visit <ArrowRight className="h-4 w-4" />
+                          <div className="flex items-center gap-1 text-primary text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Visit <ArrowRight className="h-3 w-3" />
                           </div>
                         </div>
                       </CardContent>
