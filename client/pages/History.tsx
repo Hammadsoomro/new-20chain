@@ -199,7 +199,9 @@ export default function History() {
               {totalPages > 1 && (
                 <div className="mt-8 flex items-center justify-between">
                   <div className="text-sm text-muted-foreground">
-                    Showing {startIndex + 1} to {Math.min(endIndex, filteredEntries.length)} of {filteredEntries.length} results
+                    Showing {startIndex + 1} to{" "}
+                    {Math.min(endIndex, filteredEntries.length)} of{" "}
+                    {filteredEntries.length} results
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
@@ -211,22 +213,28 @@ export default function History() {
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                        <Button
-                          key={page}
-                          variant={currentPage === page ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setCurrentPage(page)}
-                          className="h-8 w-8 p-0"
-                        >
-                          {page}
-                        </Button>
-                      ))}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <Button
+                            key={page}
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="h-8 w-8 p-0"
+                          >
+                            {page}
+                          </Button>
+                        ),
+                      )}
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
                       disabled={currentPage === totalPages}
                     >
                       <ChevronRight className="h-4 w-4" />

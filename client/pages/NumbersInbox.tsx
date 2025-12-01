@@ -163,7 +163,6 @@ export default function NumbersInbox() {
     }
   };
 
-
   const formatCooldownDuration = (minutes: number) => {
     if (minutes < 1) {
       return `${Math.round(minutes * 60)} seconds`;
