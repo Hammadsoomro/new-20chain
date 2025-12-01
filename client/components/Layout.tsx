@@ -113,7 +113,9 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex flex-col h-full overflow-y-auto p-6">
+        <div className={`flex flex-col h-full overflow-y-auto transition-all duration-300 ${
+          sidebarCollapsed ? "p-3" : "p-6"
+        }`}>
           {/* User Info Card */}
           <div
             className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 ${
