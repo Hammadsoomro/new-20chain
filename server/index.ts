@@ -134,9 +134,14 @@ export async function createServer() {
   app.get("/api/claim/numbers", getClaimedNumbers);
   app.post("/api/claim/release", releaseClaimedNumbers);
 
-  // 404 handler
-  app.use((_req, res) => {
-    res.status(404).json({ error: "Not found" });
+  // 404 handler - only for API routes
+  app.use((req, res) => {
+    if (req.path.startsWith("/api")) {
+      res.status(404).json({ error: "Not found" });
+    } else {
+      // For non-API routes, let Vite serve the index.html for SPA routing
+      res.status(404).send("Not found");
+    }
   });
 
   // Global error handler
