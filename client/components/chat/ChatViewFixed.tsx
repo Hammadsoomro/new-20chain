@@ -28,17 +28,6 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
-const formatTime = (timestamp: string) => {
-  try {
-    return new Date(timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-};
-
 export function ChatViewFixed({ contact, token, socket }: ChatViewProps) {
   const { user } = useAuth();
   const [newMessage, setNewMessage] = useState("");
