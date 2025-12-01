@@ -30,6 +30,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ThemeSelector } from "@/components/ThemeSelector";
+import { CursorFollower } from "@/components/CursorFollower";
 
 interface LayoutProps {
   children: React.ReactNode;
