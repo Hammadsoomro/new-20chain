@@ -321,21 +321,23 @@
   /* Red Theme - Animated Gradients */
   :root[data-color-scheme="red"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #ee7752 0%,
-      #e73c7e 25%,
-      #23a6d5 50%,
-      #23d5ab 75%
+      135deg,
+      #ff3366 0%,
+      #ff1493 25%,
+      #ff6b9d 50%,
+      #ff4757 75%,
+      #ff3366 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #4a1a1a 0%,
-      #6b2e2e 25%,
-      #1a3a4a 50%,
-      #1a4a3a 75%
+      135deg,
+      #330011 0%,
+      #660033 25%,
+      #4d001a 50%,
+      #660033 75%,
+      #330011 100%
     );
     --sidebar-width: 275px;
-    --sidebar-shadow: 0 9px 30px rgba(238, 119, 82, 0.1);
+    --sidebar-shadow: 0 9px 30px rgba(255, 51, 102, 0.15);
     --spacing-scale: 1.05;
     --font-scale: 1.08;
   }
