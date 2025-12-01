@@ -76,12 +76,12 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     );
 
     // Leave previous chat room if switching chats
-    if (previousChatIdRef.current && previousChatIdRef.current !== selectedChat.id) {
+    if (
+      previousChatIdRef.current &&
+      previousChatIdRef.current !== selectedChat.id
+    ) {
       socket.emit("leave-chat", { chatId: previousChatIdRef.current });
-      console.log(
-        "[ChatArea] Left previous chat:",
-        previousChatIdRef.current,
-      );
+      console.log("[ChatArea] Left previous chat:", previousChatIdRef.current);
     }
 
     previousChatIdRef.current = selectedChat.id;
@@ -131,7 +131,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
               },
               body: JSON.stringify({ messageId }),
             }).catch((err) => {
-              console.error("[ChatArea] Failed to mark received message as read:", messageId, err);
+              console.error(
+                "[ChatArea] Failed to mark received message as read:",
+                messageId,
+                err,
+              );
             });
 
             // Emit Socket.IO event to notify others
@@ -307,7 +311,11 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
               chatId: selectedChat.id,
             });
           } catch (err) {
-            console.error("[ChatArea] Failed to mark message as read:", msg._id, err);
+            console.error(
+              "[ChatArea] Failed to mark message as read:",
+              msg._id,
+              err,
+            );
           }
         });
 
