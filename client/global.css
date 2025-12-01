@@ -352,26 +352,28 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Purple Theme - Animated Gradients */
+  /* Purple Theme - Colorful Orbs */
   :root[data-color-scheme="purple"] {
     --bg-gradient: linear-gradient(
       135deg,
-      #b324ff 0%,
-      #9d4edd 25%,
-      #c77dff 50%,
-      #e0aaff 75%,
-      #b324ff 100%
+      #c77dff 0%,
+      #b324ff 20%,
+      #ff1493 40%,
+      #00d4ff 60%,
+      #ff8c00 80%,
+      #c77dff 100%
     );
     --bg-gradient-dark: linear-gradient(
       135deg,
-      #220033 0%,
-      #330066 25%,
-      #330099 50%,
-      #3d2645 75%,
-      #220033 100%
+      #1a0f2e 0%,
+      #220033 20%,
+      #330011 40%,
+      #001a33 60%,
+      #331a00 80%,
+      #1a0f2e 100%
     );
     --sidebar-width: 290px;
-    --sidebar-shadow: 0 11px 38px rgba(179, 36, 255, 0.15);
+    --sidebar-shadow: 0 11px 38px rgba(199, 125, 255, 0.18);
     --spacing-scale: 1.08;
     --font-scale: 1.06;
   }
