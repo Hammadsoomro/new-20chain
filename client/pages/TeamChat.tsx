@@ -180,46 +180,55 @@ export default function TeamChat() {
   // Fetch initial team members and group chat
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const [membersRes, groupRes] = await Promise.all([
-          fetch("/api/members", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("/api/chat/group", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
+        const headers = { Authorization: `Bearer ${token}` };
         const convs: ChatConversation[] = [];
 
-        // Add group chat
-        if (groupRes.ok) {
-          const group = await groupRes.json();
-          convs.push({
-            type: "group",
-            id: group._id,
-            name: group.name,
-            unreadCount: 0,
-            group,
-          });
+        // Fetch group chat
+        try {
+          const groupRes = await fetch("/api/chat/group", { headers });
+          if (!groupRes.ok) {
+            console.warn(`[TeamChat] Group chat request failed: ${groupRes.status}`);
+          } else {
+            const group = await groupRes.json();
+            convs.push({
+              type: "group",
+              id: group._id,
+              name: group.name,
+              unreadCount: 0,
+              group,
+            });
+          }
+        } catch (error) {
+          console.error("[TeamChat] Error fetching group chat:", error);
         }
 
-        // Add direct messages
-        if (membersRes.ok) {
-          const members = await membersRes.json();
-          members.forEach((member: User) => {
-            if (member._id !== user?._id) {
-              convs.push({
-                type: "direct",
-                id: member._id,
-                name: member.name,
-                unreadCount: 0,
-                member,
-              });
-            }
-          });
+        // Fetch team members
+        try {
+          const membersRes = await fetch("/api/members", { headers });
+          if (!membersRes.ok) {
+            console.warn(`[TeamChat] Members request failed: ${membersRes.status}`);
+          } else {
+            const members = await membersRes.json();
+            members.forEach((member: User) => {
+              if (member._id !== user?._id) {
+                convs.push({
+                  type: "direct",
+                  id: member._id,
+                  name: member.name,
+                  unreadCount: 0,
+                  member,
+                });
+              }
+            });
+          }
+        } catch (error) {
+          console.error("[TeamChat] Error fetching members:", error);
         }
 
         // Auto-select group chat if available
@@ -233,7 +242,7 @@ export default function TeamChat() {
 
         setConversations(convs);
       } catch (error) {
-        console.error("Error fetching chat data:", error);
+        console.error("[TeamChat] Error in fetchData:", error);
       } finally {
         setLoading(false);
       }
