@@ -171,7 +171,6 @@ export const Layout = ({ children }: LayoutProps) => {
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   } ${sidebarCollapsed ? "px-2 justify-center" : "px-4 gap-3"}`}
-                  onClick={() => setSidebarOpen(false)}
                   title={sidebarCollapsed ? item.label : ""}
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
