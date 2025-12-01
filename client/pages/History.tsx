@@ -5,6 +5,7 @@ import { Clock, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { formatDateTime } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
 import type { HistoryEntry } from "@shared/api";
 
