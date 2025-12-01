@@ -156,7 +156,7 @@ export default function QueuedList() {
                           Added by: {line.addedBy}
                         </p>
                         <p className="text-xs text-muted-foreground/70">
-                          {formatDate(line.addedAt)}
+                          {formatDateTime(line.addedAt)}
                         </p>
                       </div>
                     </div>
