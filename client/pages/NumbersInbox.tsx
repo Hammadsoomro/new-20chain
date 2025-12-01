@@ -163,13 +163,6 @@ export default function NumbersInbox() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
 
   const formatCooldownDuration = (minutes: number) => {
     if (minutes < 1) {
