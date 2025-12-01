@@ -235,7 +235,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       socket.off("user-typing", handleUserTyping);
       socket.off("message-read", handleMessageRead);
     };
-  }, [socket, selectedChat.id, user?._id]);
+  }, [socket, selectedChat.id, selectedChat.type, user?._id, token]);
 
   // Fetch initial messages and mark unread messages as read
   const fetchInitialMessages = async () => {
