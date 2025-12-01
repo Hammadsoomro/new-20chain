@@ -118,4 +118,15 @@ const App = () => (
   </QueryClientProvider>
 );
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  const root = createRoot(rootElement);
+  root.render(<App />);
+
+  // Handle HMR updates in development
+  if (import.meta.hot) {
+    import.meta.hot.accept(() => {
+      root.render(<App />);
+    });
+  }
+}
