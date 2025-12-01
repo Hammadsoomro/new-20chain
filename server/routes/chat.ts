@@ -35,16 +35,16 @@ export const getOrCreateGroupChat: RequestHandler = async (
       });
 
       group = {
-        _id: result.insertedId.toString(),
+        _id: result.insertedId,
         name: "Team Chat",
         teamId: req.teamId,
         members: [req.userId],
         createdAt: new Date().toISOString(),
-      };
+      } as any;
     }
 
     res.json({
-      _id: group._id.toString(),
+      _id: String(group._id),
       name: group.name,
       teamId: group.teamId,
       members: group.members,
