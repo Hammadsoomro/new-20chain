@@ -73,14 +73,14 @@ export const Layout = ({ children }: LayoutProps) => {
   const menuItems = [
     { label: "Dashboard", icon: Home, path: "/dashboard" },
     { label: "Team Chat", icon: MessageSquare, path: "/chat" },
+    { label: "Numbers Inbox", icon: Clock, path: "/inbox" },
+    { label: "History", icon: Clock, path: "/history" },
     ...(isAdmin
       ? [
           { label: "Numbers Sorter", icon: BarChart3, path: "/sorter" },
-          { label: "Numbers Inbox", icon: Clock, path: "/inbox" },
           { label: "Queued List", icon: List, path: "/queued" },
         ]
       : []),
-    { label: "History", icon: Clock, path: "/history" },
   ];
 
   return (
