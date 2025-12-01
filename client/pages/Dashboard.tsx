@@ -268,14 +268,14 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen p-6 md:p-8 bg-transparent">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="min-h-screen p-4 md:p-6 bg-transparent">
+        <div className="max-w-7xl mx-auto space-y-4">
           {/* Header */}
-          <div className="space-y-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+          <div className="space-y-1">
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
               Welcome back, {user?.name}! 👋
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {isAdmin
                 ? "Manage your team and track your numbers"
                 : "Check your inbox and collaborate with your team"}
@@ -283,7 +283,7 @@ export default function Dashboard() {
           </div>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {stats.map((stat, index) => {
               const Icon = stat.icon;
               return (
@@ -291,17 +291,17 @@ export default function Dashboard() {
                   key={index}
                   className="border-border/50 hover:shadow-md transition-shadow"
                 >
-                  <CardContent className="pt-6">
-                    <div className="space-y-2">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-muted-foreground">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {stat.label}
                         </span>
-                        <div className={`${stat.bgColor} p-2 rounded-lg`}>
-                          <Icon className={`h-4 w-4 ${stat.color}`} />
+                        <div className={`${stat.bgColor} p-1.5 rounded-lg`}>
+                          <Icon className={`h-3 w-3 ${stat.color}`} />
                         </div>
                       </div>
-                      <p className="text-2xl font-bold text-foreground">
+                      <p className="text-xl font-bold text-foreground">
                         {stat.value}
                       </p>
                     </div>
@@ -311,9 +311,45 @@ export default function Dashboard() {
             })}
           </div>
 
+          {/* Quick Links Section */}
+          <div>
+            <h2 className="text-lg font-bold text-foreground mb-3">
+              Quick Links
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {quickLinks.map((link, index) => {
+                const Icon = link.icon;
+                return (
+                  <Link key={index} to={link.path}>
+                    <Card className="h-full border-border/50 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer group">
+                      <CardContent className="pt-4 pb-4">
+                        <div className="space-y-2">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-0.5 flex-1">
+                              <CardTitle className="text-base group-hover:text-primary transition-colors">
+                                {link.title}
+                              </CardTitle>
+                              <CardDescription className="text-xs">
+                                {link.description}
+                              </CardDescription>
+                            </div>
+                            <Icon className="h-5 w-5 text-primary/60 group-hover:text-primary transition-colors flex-shrink-0 ml-2" />
+                          </div>
+                          <div className="flex items-center gap-1 text-primary text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                            Visit <ArrowRight className="h-3 w-3" />
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Team Members Section */}
           <div>
-            <h2 className="text-2xl font-bold text-foreground mb-6">
+            <h2 className="text-lg font-bold text-foreground mb-3">
               Team Members
             </h2>
             {loading ? (
@@ -325,7 +361,7 @@ export default function Dashboard() {
                 <p>No team members yet</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {teamMembers.map((member, index) => (
                   <TeamMemberCard
                     key={member._id}
