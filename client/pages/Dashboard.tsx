@@ -268,8 +268,8 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="min-h-screen p-6 md:p-8 bg-transparent">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="min-h-screen p-4 md:p-6 bg-transparent">
+        <div className="max-w-7xl mx-auto space-y-4">
           {/* Header */}
           <div className="space-y-2">
             <h1 className="text-3xl md:text-4xl font-bold text-foreground">
