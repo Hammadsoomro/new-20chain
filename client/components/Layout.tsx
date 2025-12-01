@@ -166,11 +166,11 @@ export const Layout = ({ children }: LayoutProps) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center px-4 py-3 rounded-lg transition-all relative group ${
+                  className={`flex items-center py-3 rounded-lg transition-all relative group w-full ${
                     isActive(item.path)
                       ? "bg-sidebar-primary text-sidebar-primary-foreground font-semibold"
                       : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  } ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+                  } ${sidebarCollapsed ? "px-2 justify-center" : "px-4 gap-3"}`}
                   onClick={() => setSidebarOpen(false)}
                   title={sidebarCollapsed ? item.label : ""}
                 >
@@ -183,7 +183,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
                   {/* Red dot indicator for unread messages */}
                   {hasUnread && (
-                    <div className="flex items-center gap-2">
+                    <div className={`flex items-center ${sidebarCollapsed ? "" : "gap-2"}`}>
                       {!sidebarCollapsed && totalUnread > 0 && (
                         <span className="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
                           {totalUnread > 99 ? "99+" : totalUnread}
