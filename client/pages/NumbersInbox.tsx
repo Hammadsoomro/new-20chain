@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { formatDateTime } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface ClaimedNumber {
