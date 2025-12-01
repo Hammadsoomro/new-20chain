@@ -293,21 +293,23 @@
   /* Orange Theme - Animated Gradients */
   :root[data-color-scheme="orange"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #fa709a 0%,
-      #fee140 25%,
-      #ffa400 50%,
-      #ff6b35 75%
+      135deg,
+      #ff6b35 0%,
+      #ffa500 25%,
+      #ff8c00 50%,
+      #ff7f50 75%,
+      #ff6b35 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #663b0f 0%,
-      #8b4513 25%,
-      #3d2817 50%,
-      #5c2e0f 75%
+      135deg,
+      #331a00 0%,
+      #663300 25%,
+      #4d2600 50%,
+      #663300 75%,
+      #331a00 100%
     );
     --sidebar-width: 260px;
-    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.12);
+    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.15);
     --spacing-scale: 0.95;
     --font-scale: 1.02;
   }
