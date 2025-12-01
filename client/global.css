@@ -234,13 +234,13 @@
     --sidebar-ring: 280 100% 56%;
   }
 
-  /* Blue Theme - Animated Gradients */
+  /* Blue Theme - Soft Blue Circles */
   :root[data-color-scheme="blue"] {
     --bg-gradient: linear-gradient(
       135deg,
       #00d4ff 0%,
       #0099ff 25%,
-      #00ccff 50%,
+      #66e6ff 50%,
       #00b8ff 75%,
       #00d4ff 100%
     );
