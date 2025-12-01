@@ -207,8 +207,6 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       socket.off("message-deleted", handleMessageDeleted);
       socket.off("user-typing", handleUserTyping);
       socket.off("message-read", handleMessageRead);
-      // Leave the chat room
-      socket.emit("leave-chat", { chatId: selectedChat.id });
     };
   }, [socket, selectedChat.id, user?._id]);
 
