@@ -330,7 +330,7 @@ export default function NumbersInbox() {
                             {number.content}
                           </p>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Claimed at: {formatDate(number.claimedAt)}
+                            Claimed at: {formatDateTime(number.claimedAt)}
                           </p>
                         </div>
                       </div>
