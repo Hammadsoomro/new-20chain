@@ -69,6 +69,20 @@ export async function createServer() {
     next();
   });
 
+  // Health check endpoint (no auth required)
+  app.get("/api/health", (_req, res) => {
+    try {
+      const collections = getCollections();
+      res.json({ status: "ok", database: "connected" });
+    } catch (error) {
+      res.status(503).json({
+        status: "error",
+        database: "disconnected",
+        error: String(error),
+      });
+    }
+  });
+
   // Example API routes
   app.get("/api/ping", (_req, res) => {
     const ping = process.env.PING_MESSAGE ?? "ping";
