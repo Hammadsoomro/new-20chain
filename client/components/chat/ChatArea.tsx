@@ -117,6 +117,33 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
             readBy: data.readBy || [],
           };
           console.log("[ChatArea] Adding new message:", messageId);
+
+          // Auto-mark received message as read
+          if (!markedAsReadRef.current.has(messageId) && token) {
+            markedAsReadRef.current.add(messageId);
+
+            // Call REST API to mark as read
+            fetch("/api/chat/mark-read", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messageId }),
+            }).catch((err) => {
+              console.error("[ChatArea] Failed to mark received message as read:", messageId, err);
+            });
+
+            // Emit Socket.IO event to notify others
+            if (socket) {
+              socket.emit("message-read", {
+                messageId,
+                userId: user?._id,
+                chatId: selectedChat.id,
+              });
+            }
+          }
+
           return [...prev, newMsg];
         });
       }
