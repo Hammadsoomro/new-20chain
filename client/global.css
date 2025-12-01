@@ -236,14 +236,7 @@
 
   /* Blue Theme - Soft Blue Circles */
   :root[data-color-scheme="blue"] {
-    --bg-gradient: linear-gradient(
-      135deg,
-      #00d4ff 0%,
-      #0099ff 25%,
-      #66e6ff 50%,
-      #00b8ff 75%,
-      #00d4ff 100%
-    );
+    --bg-gradient: url('https://cdn.builder.io/api/v1/image/assets%2F319f361a407a4ec49a906f125cbb8712%2F26df7da5540e4425a0c7630a25d4ff94?format=webp&width=1200');
     --bg-gradient-dark: linear-gradient(
       135deg,
       #001a33 0%,
