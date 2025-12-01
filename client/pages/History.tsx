@@ -84,14 +84,6 @@ export default function History() {
     setCurrentPage(1);
   }, [searchQuery, entries]);
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
-
   // Calculate pagination
   const totalPages = Math.ceil(filteredEntries.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
