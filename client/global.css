@@ -539,22 +539,22 @@
     width: 200%;
     height: 200%;
     background:
-      radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 40% 20%, rgba(79, 172, 254, 0.15) 0%, transparent 50%),
-      radial-gradient(circle at 90% 10%, rgba(118, 75, 162, 0.15) 0%, transparent 50%);
+      radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(79, 172, 254, 0.2) 0%, transparent 50%),
+      radial-gradient(circle at 90% 10%, rgba(118, 75, 162, 0.2) 0%, transparent 50%);
     background-size: 400% 400%;
-    animation: gradient 20s ease infinite;
+    animation: gradient 15s ease infinite;
     z-index: -1;
     pointer-events: none;
   }
 
   body.dark::after {
     background:
-      radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 40% 20%, rgba(79, 172, 254, 0.08) 0%, transparent 50%),
-      radial-gradient(circle at 90% 10%, rgba(118, 75, 162, 0.08) 0%, transparent 50%);
+      radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(240, 147, 251, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 20%, rgba(79, 172, 254, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 90% 10%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
