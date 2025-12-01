@@ -47,7 +47,19 @@ export async function createServer() {
   const app = express();
 
   // Middleware
-  app.use(cors());
+  const corsOptions = {
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:5173",
+      "http://localhost:8080",
+      process.env.FRONTEND_URL || "*",
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
+
+  app.use(cors(corsOptions));
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
@@ -55,6 +67,20 @@ export async function createServer() {
   app.use((req, res, next) => {
     // This will be set by authMiddleware, we just ensure it's available
     next();
+  });
+
+  // Health check endpoint (no auth required)
+  app.get("/api/health", (_req, res) => {
+    try {
+      const collections = getCollections();
+      res.json({ status: "ok", database: "connected" });
+    } catch (error) {
+      res.status(503).json({
+        status: "error",
+        database: "disconnected",
+        error: String(error),
+      });
+    }
   });
 
   // Example API routes
@@ -107,6 +133,20 @@ export async function createServer() {
   app.post("/api/claim", claimNumbers);
   app.get("/api/claim/numbers", getClaimedNumbers);
   app.post("/api/claim/release", releaseClaimedNumbers);
+
+  // 404 handler
+  app.use((_req, res) => {
+    res.status(404).json({ error: "Not found" });
+  });
+
+  // Global error handler
+  app.use((err: any, _req: any, res: any, _next: any) => {
+    console.error("[Server] Unhandled error:", err);
+    res.status(500).json({
+      error: "Internal server error",
+      message: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  });
 
   return app;
 }

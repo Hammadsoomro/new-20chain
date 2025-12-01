@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useChat } from "@/context/ChatContext";
+import { useTheme } from "@/context/ThemeContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,6 +28,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { ThemeSelector } from "@/components/ThemeSelector";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,6 +37,7 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout, isAdmin } = useAuth();
   const { unreadCounts } = useChat();
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -46,12 +49,6 @@ export const Layout = ({ children }: LayoutProps) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("sidebarCollapsed") === "true";
-    }
-    return false;
-  });
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== "undefined") {
-      return document.documentElement.classList.contains("dark");
     }
     return false;
   });
@@ -70,37 +67,23 @@ export const Layout = ({ children }: LayoutProps) => {
     return () => clearInterval(timer);
   }, []);
 
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const root = document.documentElement;
-    if (root.classList.contains("dark")) {
-      root.classList.remove("dark");
-      setIsDark(false);
-      localStorage.setItem("theme", "light");
-    } else {
-      root.classList.add("dark");
-      setIsDark(true);
-      localStorage.setItem("theme", "dark");
-    }
-  };
-
   const isActive = (path: string) => location.pathname === path;
 
   const menuItems = [
     { label: "Dashboard", icon: Home, path: "/dashboard" },
+    { label: "Team Chat", icon: MessageSquare, path: "/chat" },
     ...(isAdmin
       ? [
           { label: "Numbers Sorter", icon: BarChart3, path: "/sorter" },
+          { label: "Numbers Inbox", icon: Clock, path: "/inbox" },
           { label: "Queued List", icon: List, path: "/queued" },
         ]
       : []),
-    { label: "Numbers Inbox", icon: Clock, path: "/inbox" },
-    { label: "Team Chat", icon: MessageSquare, path: "/chat" },
     { label: "History", icon: Clock, path: "/history" },
   ];
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-transparent">
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto md:translate-x-0 ${
@@ -293,13 +276,16 @@ export const Layout = ({ children }: LayoutProps) => {
 
             {/* Right */}
             <div className="flex items-center gap-3">
+              {/* Theme Selector */}
+              <ThemeSelector />
+
               {/* Theme Toggle */}
               <button
-                onClick={toggleDarkMode}
+                onClick={toggleTheme}
                 className="p-2 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Toggle theme"
+                aria-label="Toggle light/dark theme"
               >
-                {isDark ? (
+                {theme === "dark" ? (
                   <Sun className="h-5 w-5 text-yellow-500" />
                 ) : (
                   <Moon className="h-5 w-5 text-slate-400" />
@@ -345,7 +331,9 @@ export const Layout = ({ children }: LayoutProps) => {
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">{children}</main>
+        <main className="flex-1 overflow-auto bg-gradient-to-b from-transparent to-transparent">
+          {children}
+        </main>
       </div>
 
       {/* Mobile Overlay */}

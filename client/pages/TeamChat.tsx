@@ -30,7 +30,28 @@ export default function TeamChat() {
     name: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
+
+  // Check API health on mount
+  useEffect(() => {
+    const checkHealth = async () => {
+      try {
+        const res = await fetch("/api/health");
+        if (!res.ok) {
+          console.warn("[TeamChat] API health check failed:", res.status);
+          setError(
+            "Backend service is temporarily unavailable. Please refresh the page.",
+          );
+        }
+      } catch (err) {
+        console.warn("[TeamChat] API health check error:", err);
+        setError("Cannot connect to backend. Please check your connection.");
+      }
+    };
+
+    checkHealth();
+  }, []);
 
   // Initialize socket connection and listen for messages
   useEffect(() => {
@@ -57,9 +78,22 @@ export default function TeamChat() {
       reconnectionDelayMax: 5000,
       reconnectionAttempts: 10,
       transports: ["websocket", "polling"],
+      forceNew: false,
     });
 
     socketRef.current = socket;
+
+    // Handle socket connection errors
+    const handleConnectionError = (error: any) => {
+      console.error("[TeamChat] Socket connection error:", error);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.warn("[TeamChat] Socket disconnected:", reason);
+    };
+
+    socket.on("connect_error", handleConnectionError);
+    socket.on("disconnect", handleDisconnect);
 
     // Handler for new messages
     const handleNewMessage = (data: any) => {
@@ -99,7 +133,10 @@ export default function TeamChat() {
               playNotificationSound();
 
               // Show desktop notification
-              if ("Notification" in window && Notification.permission === "granted") {
+              if (
+                "Notification" in window &&
+                Notification.permission === "granted"
+              ) {
                 new Notification(`New message from ${data.senderName}`, {
                   body: data.content.substring(0, 100),
                   icon: "/favicon.ico",
@@ -131,10 +168,6 @@ export default function TeamChat() {
         });
         return prev;
       });
-    };
-
-    const handleDisconnect = () => {
-      console.log("[TeamChat] Socket disconnected");
     };
 
     const handleConnectError = (error: any) => {
@@ -180,46 +213,71 @@ export default function TeamChat() {
   // Fetch initial team members and group chat
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       try {
-        const [membersRes, groupRes] = await Promise.all([
-          fetch("/api/members", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("/api/chat/group", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
+        const headers = { Authorization: `Bearer ${token}` };
         const convs: ChatConversation[] = [];
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-        // Add group chat
-        if (groupRes.ok) {
-          const group = await groupRes.json();
-          convs.push({
-            type: "group",
-            id: group._id,
-            name: group.name,
-            unreadCount: 0,
-            group,
-          });
-        }
-
-        // Add direct messages
-        if (membersRes.ok) {
-          const members = await membersRes.json();
-          members.forEach((member: User) => {
-            if (member._id !== user?._id) {
+        try {
+          // Fetch group chat
+          try {
+            const groupRes = await fetch("/api/chat/group", {
+              headers,
+              signal: controller.signal,
+            });
+            if (!groupRes.ok) {
+              console.warn(
+                `[TeamChat] Group chat request failed: ${groupRes.status}`,
+              );
+            } else {
+              const group = await groupRes.json();
               convs.push({
-                type: "direct",
-                id: member._id,
-                name: member.name,
+                type: "group",
+                id: group._id,
+                name: group.name,
                 unreadCount: 0,
-                member,
+                group,
               });
             }
-          });
+          } catch (error) {
+            console.error("[TeamChat] Error fetching group chat:", error);
+          }
+
+          // Fetch team members
+          try {
+            const membersRes = await fetch("/api/members", {
+              headers,
+              signal: controller.signal,
+            });
+            if (!membersRes.ok) {
+              console.warn(
+                `[TeamChat] Members request failed: ${membersRes.status}`,
+              );
+            } else {
+              const members = await membersRes.json();
+              members.forEach((member: User) => {
+                if (member._id !== user?._id) {
+                  convs.push({
+                    type: "direct",
+                    id: member._id,
+                    name: member.name,
+                    unreadCount: 0,
+                    member,
+                  });
+                }
+              });
+            }
+          } catch (error) {
+            console.error("[TeamChat] Error fetching members:", error);
+          }
+        } finally {
+          clearTimeout(timeout);
         }
 
         // Auto-select group chat if available
@@ -233,7 +291,7 @@ export default function TeamChat() {
 
         setConversations(convs);
       } catch (error) {
-        console.error("Error fetching chat data:", error);
+        console.error("[TeamChat] Error in fetchData:", error);
       } finally {
         setLoading(false);
       }
@@ -298,11 +356,26 @@ export default function TeamChat() {
 
   return (
     <Layout>
-      {loading ? (
+      {error && (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">⚠️ Connection Error</div>
+            <p className="text-muted-foreground max-w-md">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Refresh Page
+            </button>
+          </div>
+        </div>
+      )}
+      {loading && !error && (
         <div className="flex items-center justify-center h-full">
           <div className="text-muted-foreground">Loading chat...</div>
         </div>
-      ) : (
+      )}
+      {!loading && !error && (
         <div className="flex h-full gap-4 p-6">
           {/* Contact List */}
           <div className="w-80 border-r border-border">

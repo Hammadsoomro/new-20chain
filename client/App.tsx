@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/context/AuthContext";
 import { ChatProvider } from "@/context/ChatContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -27,89 +28,107 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
-        <ChatProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
+      <ThemeProvider>
+        <AuthProvider>
+          <ChatProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
 
-              {/* Protected Routes */}
-              <Route
-                path="/dashboard"
-                element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Protected Routes */}
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Admin Only Routes */}
-              <Route
-                path="/sorter"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <NumbersSorter />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/queued"
-                element={
-                  <ProtectedRoute adminOnly>
-                    <QueuedList />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Admin Only Routes */}
+                <Route
+                  path="/sorter"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <NumbersSorter />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/queued"
+                  element={
+                    <ProtectedRoute adminOnly>
+                      <QueuedList />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Member Routes */}
-              <Route
-                path="/inbox"
-                element={
-                  <ProtectedRoute>
-                    <NumbersInbox />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Member Routes */}
+                <Route
+                  path="/inbox"
+                  element={
+                    <ProtectedRoute>
+                      <NumbersInbox />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Team Routes */}
-              <Route
-                path="/chat"
-                element={
-                  <ProtectedRoute>
-                    <TeamChat />
-                  </ProtectedRoute>
-                }
-              />
+                {/* Team Routes */}
+                <Route
+                  path="/chat"
+                  element={
+                    <ProtectedRoute>
+                      <TeamChat />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/history"
-                element={
-                  <ProtectedRoute>
-                    <History />
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/history"
+                  element={
+                    <ProtectedRoute>
+                      <History />
+                    </ProtectedRoute>
+                  }
+                />
 
-              <Route
-                path="/settings"
-                element={
-                  <ProtectedRoute>
-                    <Settings />
-                  </ProtectedRoute>
-                }
-              />
+                <Route
+                  path="/settings"
+                  element={
+                    <ProtectedRoute>
+                      <Settings />
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Catch All */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </ChatProvider>
-      </AuthProvider>
+                {/* Catch All */}
+                <Route
+                  path="/"
+                  element={<Navigate to="/dashboard" replace />}
+                />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </ChatProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
 
-createRoot(document.getElementById("root")!).render(<App />);
+// Store root globally to prevent createRoot from being called multiple times during HMR
+declare global {
+  interface Window {
+    __reactRoot?: ReturnType<typeof createRoot>;
+  }
+}
+
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  if (!window.__reactRoot) {
+    window.__reactRoot = createRoot(rootElement);
+  }
+  window.__reactRoot.render(<App />);
+}
