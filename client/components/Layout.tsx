@@ -86,6 +86,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="flex h-screen bg-transparent">
+      <CursorFollower userName={user?.name} />
       {/* Sidebar */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto md:translate-x-0 ${
