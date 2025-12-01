@@ -237,21 +237,23 @@
   /* Blue Theme - Animated Gradients */
   :root[data-color-scheme="blue"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #667eea 0%,
-      #764ba2 25%,
-      #f093fb 50%,
-      #4facfe 75%
+      135deg,
+      #00d4ff 0%,
+      #0099ff 25%,
+      #00ccff 50%,
+      #00b8ff 75%,
+      #00d4ff 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #667eea 0%,
-      #764ba2 25%,
-      #1a3a52 50%,
-      #0d47a1 75%
+      135deg,
+      #001a33 0%,
+      #003366 25%,
+      #004d99 50%,
+      #0033cc 75%,
+      #001a33 100%
     );
     --sidebar-width: 280px;
-    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    --sidebar-shadow: 0 8px 32px rgba(0, 212, 255, 0.15);
     --spacing-scale: 1;
     --font-scale: 1;
   }
