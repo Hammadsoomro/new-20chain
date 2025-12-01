@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
-import { Clock, Search } from "lucide-react";
+import { Clock, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { io, Socket } from "socket.io-client";
 import type { HistoryEntry } from "@shared/api";
+
+const ITEMS_PER_PAGE = 50;
 
 export default function History() {
   const { token, user, isAdmin } = useAuth();
@@ -13,6 +16,7 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredEntries, setFilteredEntries] = useState<HistoryEntry[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const socketRef = useRef<Socket | null>(null);
 
   // Initialize Socket.IO connection for real-time updates
