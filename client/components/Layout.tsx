@@ -90,9 +90,9 @@ export const Layout = ({ children }: LayoutProps) => {
       <div className="flex h-screen bg-transparent">
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto md:translate-x-0 md:overflow-hidden ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        } ${sidebarCollapsed ? "md:w-20 w-64" : "md:w-64 w-64"}`}
+        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto md:translate-x-0 ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-64`}
       >
         {/* Fixed Header - Logo */}
         <div className={`flex items-center justify-center border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
