@@ -257,16 +257,34 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           msg.sender !== user?._id && !msg.readBy?.includes(user?._id || ""),
       );
 
-      if (unreadMessages.length > 0 && socket) {
-        // Use WebSocket to mark as read instead of individual API calls
-        unreadMessages.forEach((msg) => {
+      if (unreadMessages.length > 0 && socket && token) {
+        // Mark messages as read via REST API and WebSocket
+        const markAsReadPromises = unreadMessages.map(async (msg) => {
           markedAsReadRef.current.add(msg._id);
-          socket.emit("message-read", {
-            messageId: msg._id,
-            userId: user?._id,
-            chatId: selectedChat.id,
-          });
+
+          try {
+            // Call REST API to persist read status in database
+            await fetch("/api/chat/mark-read", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messageId: msg._id }),
+            });
+
+            // Broadcast via WebSocket to update other clients
+            socket.emit("message-read", {
+              messageId: msg._id,
+              userId: user?._id,
+              chatId: selectedChat.id,
+            });
+          } catch (err) {
+            console.error("[ChatArea] Failed to mark message as read:", msg._id, err);
+          }
         });
+
+        await Promise.all(markAsReadPromises);
         console.log(
           "[ChatArea] Marked",
           unreadMessages.length,
