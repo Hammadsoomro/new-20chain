@@ -134,11 +134,6 @@ export async function createServer() {
   app.get("/api/claim/numbers", getClaimedNumbers);
   app.post("/api/claim/release", releaseClaimedNumbers);
 
-  // 404 handler
-  app.use((_req, res) => {
-    res.status(404).json({ error: "Not found" });
-  });
-
   // Global error handler
   app.use((err: any, _req: any, res: any, _next: any) => {
     console.error("[Server] Unhandled error:", err);
