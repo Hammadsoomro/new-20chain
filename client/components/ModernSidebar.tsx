@@ -20,6 +20,8 @@ import {
 interface ModernSidebarProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  isCollapsed: boolean;
+  onCollapsedChange: (collapsed: boolean) => void;
 }
 
 export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
