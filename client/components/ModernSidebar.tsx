@@ -24,16 +24,15 @@ interface ModernSidebarProps {
   onCollapsedChange: (collapsed: boolean) => void;
 }
 
-export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
+export const ModernSidebar = ({
+  isOpen,
+  onOpenChange,
+  isCollapsed,
+  onCollapsedChange,
+}: ModernSidebarProps) => {
   const { user, logout, isAdmin } = useAuth();
   const { unreadCounts } = useChat();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sidebarCollapsed") === "true";
-    }
-    return false;
-  });
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -47,9 +46,7 @@ export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
   );
 
   const toggleCollapse = () => {
-    const newValue = !isCollapsed;
-    setIsCollapsed(newValue);
-    localStorage.setItem("sidebarCollapsed", String(newValue));
+    onCollapsedChange(!isCollapsed);
   };
 
   const isActive = (path: string) => location.pathname === path;
