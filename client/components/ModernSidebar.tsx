@@ -72,10 +72,23 @@ export const ModernSidebar = ({
       <aside
         className={`fixed inset-y-0 left-0 md:sticky md:top-0 z-40 h-screen md:h-auto bg-sidebar border-r border-sidebar-border transform flex flex-col overflow-hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 w-72 md:w-80 transition-[width] duration-300 ${
-          isCollapsed ? "md:w-24" : ""
-        }`}
+        } md:translate-x-0 w-72`}
+        style={{
+          width: "18rem",
+          transition: "width 0.3s ease-in-out",
+        } as React.CSSProperties & { [key: string]: any}
+        }
       >
+        <style>{`
+          @media (min-width: 768px) {
+            aside[data-collapsed="false"] {
+              width: 20rem;
+            }
+            aside[data-collapsed="true"] {
+              width: 6rem;
+            }
+          }
+        `}</style>
         {/* Header with Logo */}
         <div className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
           isCollapsed ? "justify-center" : "justify-start"
