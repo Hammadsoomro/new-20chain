@@ -39,47 +39,12 @@ export const Layout = ({ children }: LayoutProps) => {
         <ModernSidebar isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden transition-all duration-300">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Top Navbar */}
           <nav className="sticky top-0 z-30 h-16 border-b border-border bg-card/80 backdrop-blur-sm">
             <div className="px-4 md:px-6 h-full flex items-center justify-between">
-              {/* Left */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="md:hidden p-2 hover:bg-secondary rounded-lg transition-colors"
-                >
-                  {sidebarOpen ? (
-                    <X className="h-5 w-5" />
-                  ) : (
-                    <Menu className="h-5 w-5" />
-                  )}
-                </button>
-
-                {/* Desktop Sidebar Collapse Button */}
-                <button
-                  onClick={toggleSidebarCollapse}
-                  className="hidden md:flex p-2 hover:bg-secondary rounded-lg transition-colors"
-                  aria-label="Toggle sidebar"
-                  title={
-                    sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"
-                  }
-                >
-                  {sidebarCollapsed ? (
-                    <ChevronRight className="h-5 w-5" />
-                  ) : (
-                    <ChevronLeft className="h-5 w-5" />
-                  )}
-                </button>
-
-                {/* Breadcrumb */}
-                <div className="hidden sm:flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">
-                    {menuItems.find((item) => isActive(item.path))?.label ||
-                      "Dashboard"}
-                  </span>
-                </div>
-              </div>
+              {/* Left - Empty for spacing */}
+              <div className="w-0"></div>
 
               {/* Right */}
               <div className="flex items-center gap-3">
