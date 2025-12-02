@@ -70,22 +70,22 @@ export const ModernSidebar = ({
 
       {/* Sidebar */}
       <aside
+        data-collapsed={isCollapsed}
         className={`fixed inset-y-0 left-0 md:sticky md:top-0 z-40 h-screen md:h-auto bg-sidebar border-r border-sidebar-border transform flex flex-col overflow-hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 w-72`}
+        } md:translate-x-0`}
         style={{
           width: "18rem",
           transition: "width 0.3s ease-in-out",
-        } as React.CSSProperties & { [key: string]: any}
-        }
+        }}
       >
         <style>{`
           @media (min-width: 768px) {
-            aside[data-collapsed="false"] {
-              width: 20rem;
-            }
             aside[data-collapsed="true"] {
-              width: 6rem;
+              width: 6rem !important;
+            }
+            aside[data-collapsed="false"] {
+              width: 20rem !important;
             }
           }
         `}</style>
