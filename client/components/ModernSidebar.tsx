@@ -70,9 +70,11 @@ export const ModernSidebar = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 md:sticky md:top-0 z-40 h-screen md:h-auto bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col ${
+        className={`fixed inset-y-0 left-0 md:sticky md:top-0 z-40 h-screen md:h-auto bg-sidebar border-r border-sidebar-border transform flex flex-col overflow-hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0 ${isCollapsed ? "md:w-24" : "md:w-80"} w-72`}
+        } md:translate-x-0 w-72 md:w-80 transition-[width] duration-300 ${
+          isCollapsed ? "md:w-24" : ""
+        }`}
       >
         {/* Header with Logo */}
         <div className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
