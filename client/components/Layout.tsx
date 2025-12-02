@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { useChat } from "@/context/ChatContext";
 import { useTheme } from "@/context/ThemeContext";
-import { formatTime, formatDateOnly } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,24 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Menu,
-  X,
-  Home,
-  MessageSquare,
   Settings,
   LogOut,
   Moon,
   Sun,
-  List,
-  Clock,
-  ArrowRight,
   ChevronDown,
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { CursorFollower } from "@/components/CursorFollower";
+import { ModernSidebar } from "@/components/ModernSidebar";
 
 interface LayoutProps {
   children: React.ReactNode;
