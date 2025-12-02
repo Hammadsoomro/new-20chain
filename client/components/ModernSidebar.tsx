@@ -107,25 +107,6 @@ export const ModernSidebar = ({
             </Link>
           )}
 
-          {/* Desktop Collapse Button */}
-          {!isCollapsed && (
-            <button
-              onClick={toggleCollapse}
-              className="hidden md:inline-flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
-              title={isCollapsed ? "Expand" : "Collapse"}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-          )}
-          {isCollapsed && (
-            <button
-              onClick={toggleCollapse}
-              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden md:inline-flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
-              title="Expand"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
-          )}
         </div>
 
         {/* Scrollable Content */}
