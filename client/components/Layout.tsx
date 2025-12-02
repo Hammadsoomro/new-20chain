@@ -50,7 +50,12 @@ export const Layout = ({ children }: LayoutProps) => {
       <CursorFollower userName={user?.name} />
       <div className="flex h-screen bg-transparent">
         {/* Modern Sidebar */}
-        <ModernSidebar isOpen={sidebarOpen} onOpenChange={setSidebarOpen} />
+        <ModernSidebar
+          isOpen={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          isCollapsed={isCollapsed}
+          onCollapsedChange={setIsCollapsed}
+        />
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col overflow-hidden">
