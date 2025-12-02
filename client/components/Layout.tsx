@@ -27,52 +27,9 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { user, logout, isAdmin } = useAuth();
-  const { unreadCounts } = useChat();
+  const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  // Calculate total unread messages for Team Chat
-  const totalUnread = Array.from(unreadCounts.values()).reduce(
-    (sum, count) => sum + count,
-    0,
-  );
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("sidebarCollapsed") === "true";
-    }
-    return false;
-  });
-  const [currentTime, setCurrentTime] = useState(new Date());
-
-  // Toggle sidebar collapse and save to localStorage
-  const toggleSidebarCollapse = () => {
-    const newValue = !sidebarCollapsed;
-    setSidebarCollapsed(newValue);
-    localStorage.setItem("sidebarCollapsed", String(newValue));
-  };
-
-  // Update time every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const isActive = (path: string) => location.pathname === path;
-
-  const menuItems = [
-    { label: "Dashboard", icon: Home, path: "/dashboard" },
-    { label: "Team Chat", icon: MessageSquare, path: "/chat" },
-    { label: "Numbers Inbox", icon: Clock, path: "/inbox" },
-    { label: "History", icon: Clock, path: "/history" },
-    ...(isAdmin
-      ? [
-          { label: "Numbers Sorter", icon: BarChart3, path: "/sorter" },
-          { label: "Queued List", icon: List, path: "/queued" },
-        ]
-      : []),
-  ];
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <>
