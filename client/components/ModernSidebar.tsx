@@ -76,7 +76,7 @@ export const ModernSidebar = ({
       >
         {/* Header with Logo */}
         <div className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
-          isCollapsed ? "justify-center" : "justify-between"
+          isCollapsed ? "justify-center" : "justify-start"
         }`}>
           {!isCollapsed && (
             <Link to="/dashboard" className="flex items-center gap-3 group">
