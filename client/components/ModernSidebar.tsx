@@ -82,7 +82,9 @@ export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
         } md:translate-x-0 ${isCollapsed ? "md:w-24" : "md:w-80"} w-72`}
       >
         {/* Header with Logo and Collapse Button */}
-        <div className="flex items-center justify-between px-4 h-20 border-b border-sidebar-border flex-shrink-0">
+        <div className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
+          isCollapsed ? "justify-center" : "justify-between"
+        }`}>
           {!isCollapsed && (
             <Link to="/dashboard" className="flex items-center gap-3 group">
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 flex items-center justify-center group-hover:shadow-lg transition-all">
@@ -98,7 +100,7 @@ export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
           {isCollapsed && (
             <Link
               to="/dashboard"
-              className="flex justify-center h-10 w-10 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 items-center group-hover:shadow-lg transition-all"
+              className="flex justify-center items-center h-10 w-10 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 group-hover:shadow-lg transition-all"
             >
               <span className="text-sidebar-primary-foreground font-bold text-lg">
                 ◆
@@ -107,17 +109,24 @@ export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
           )}
 
           {/* Desktop Collapse Button */}
-          <button
-            onClick={toggleCollapse}
-            className="hidden md:inline-flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
-            title={isCollapsed ? "Expand" : "Collapse"}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="h-5 w-5" />
-            ) : (
+          {!isCollapsed && (
+            <button
+              onClick={toggleCollapse}
+              className="hidden md:inline-flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
+              title={isCollapsed ? "Expand" : "Collapse"}
+            >
               <ChevronLeft className="h-5 w-5" />
-            )}
-          </button>
+            </button>
+          )}
+          {isCollapsed && (
+            <button
+              onClick={toggleCollapse}
+              className="absolute bottom-4 left-1/2 transform -translate-x-1/2 hidden md:inline-flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
+              title="Expand"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Scrollable Content */}
