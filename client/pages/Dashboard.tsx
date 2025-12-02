@@ -115,13 +115,15 @@ export default function Dashboard() {
               ),
             );
           } else {
-            console.warn(
-              "Queued fetch returned non-ok status:",
+            const errorText = await queuedResponse.text();
+            console.error(
+              "Queued fetch error:",
               queuedResponse.status,
+              errorText,
             );
           }
         } catch (err) {
-          console.warn("Queued fetch failed:", err);
+          console.error("Queued fetch failed:", err);
         }
 
         // Fetch claimed numbers count for today
@@ -144,13 +146,15 @@ export default function Dashboard() {
               ),
             );
           } else {
-            console.warn(
-              "Claimed fetch returned non-ok status:",
+            const errorText = await claimedResponse.text();
+            console.error(
+              "Claimed fetch error:",
               claimedResponse.status,
+              errorText,
             );
           }
         } catch (err) {
-          console.warn("Claimed fetch failed:", err);
+          console.error("Claimed fetch failed:", err);
         }
       } catch (error) {
         console.error("Error in fetchData:", error);
