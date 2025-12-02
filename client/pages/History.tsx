@@ -46,6 +46,13 @@ export default function History() {
           const data = await response.json();
           setEntries(data.entries || []);
           setFilteredEntries(data.entries || []);
+        } else {
+          const errorText = await response.text();
+          console.error(
+            "[History] Fetch error:",
+            response.status,
+            errorText,
+          );
         }
       } catch (error) {
         console.error("[History] Error fetching history:", error);
