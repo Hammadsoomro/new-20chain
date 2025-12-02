@@ -61,67 +61,97 @@ export default function Dashboard() {
   // Fetch real-time stats and team members with WebSocket support
   useEffect(() => {
     const fetchData = async () => {
-      if (!token) return;
+      if (!token) {
+        setLoading(false);
+        return;
+      }
 
       try {
         // Fetch team members
-        const membersResponse = await fetch("/api/members", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+          const membersResponse = await fetch("/api/members", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        if (membersResponse.ok) {
-          const members = await membersResponse.json();
-          setTeamMembers(members);
+          if (membersResponse.ok) {
+            const members = await membersResponse.json();
+            setTeamMembers(members);
 
-          // Update team members count in stats
-          setStats((prev) =>
-            prev.map((stat) =>
-              stat.label === "Team Members"
-                ? { ...stat, value: members.length.toString() }
-                : stat,
-            ),
-          );
+            // Update team members count in stats
+            setStats((prev) =>
+              prev.map((stat) =>
+                stat.label === "Team Members"
+                  ? { ...stat, value: members.length.toString() }
+                  : stat,
+              ),
+            );
+          } else {
+            console.warn(
+              "Members fetch returned non-ok status:",
+              membersResponse.status,
+            );
+          }
+        } catch (err) {
+          console.warn("Members fetch failed:", err);
         }
 
         // Fetch queued lines count
-        const queuedResponse = await fetch("/api/queued", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+          const queuedResponse = await fetch("/api/queued", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        if (queuedResponse.ok) {
-          const data = await queuedResponse.json();
-          const count = data.lines ? data.lines.length : 0;
+          if (queuedResponse.ok) {
+            const data = await queuedResponse.json();
+            const count = data.lines ? data.lines.length : 0;
 
-          setStats((prev) =>
-            prev.map((stat) =>
-              stat.label === "Lines Queued"
-                ? { ...stat, value: count.toString() }
-                : stat,
-            ),
-          );
+            setStats((prev) =>
+              prev.map((stat) =>
+                stat.label === "Lines Queued"
+                  ? { ...stat, value: count.toString() }
+                  : stat,
+              ),
+            );
+          } else {
+            console.warn(
+              "Queued fetch returned non-ok status:",
+              queuedResponse.status,
+            );
+          }
+        } catch (err) {
+          console.warn("Queued fetch failed:", err);
         }
 
         // Fetch claimed numbers count for today
-        const claimedResponse = await fetch("/api/claim/numbers", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+          const claimedResponse = await fetch("/api/claim/numbers", {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        if (claimedResponse.ok) {
-          const claimedNumbers = await claimedResponse.json();
-          const count = Array.isArray(claimedNumbers)
-            ? claimedNumbers.length
-            : 0;
+          if (claimedResponse.ok) {
+            const claimedNumbers = await claimedResponse.json();
+            const count = Array.isArray(claimedNumbers)
+              ? claimedNumbers.length
+              : 0;
 
-          setStats((prev) =>
-            prev.map((stat) =>
-              stat.label === "Claimed Today"
-                ? { ...stat, value: count.toString() }
-                : stat,
-            ),
-          );
+            setStats((prev) =>
+              prev.map((stat) =>
+                stat.label === "Claimed Today"
+                  ? { ...stat, value: count.toString() }
+                  : stat,
+              ),
+            );
+          } else {
+            console.warn(
+              "Claimed fetch returned non-ok status:",
+              claimedResponse.status,
+            );
+          }
+        } catch (err) {
+          console.warn("Claimed fetch failed:", err);
         }
       } catch (error) {
-        console.error("Error fetching team data:", error);
+        console.error("Error in fetchData:", error);
       } finally {
         setLoading(false);
       }
