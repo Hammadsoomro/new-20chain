@@ -90,9 +90,11 @@ export const ModernSidebar = ({
           }
         `}</style>
         {/* Header with Logo */}
-        <div className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
-          isCollapsed ? "justify-center" : "justify-start"
-        }`}>
+        <div
+          className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
+            isCollapsed ? "justify-center" : "justify-start"
+          }`}
+        >
           {!isCollapsed && (
             <Link to="/dashboard" className="flex items-center gap-3 group">
               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 flex items-center justify-center group-hover:shadow-lg transition-all">
@@ -115,7 +117,6 @@ export const ModernSidebar = ({
               </span>
             </Link>
           )}
-
         </div>
 
         {/* Scrollable Content */}
@@ -159,7 +160,9 @@ export const ModernSidebar = ({
           )}
 
           {/* Navigation */}
-          <nav className={`space-y-1 px-4 py-2 ${isCollapsed ? "flex flex-col items-center" : ""}`}>
+          <nav
+            className={`space-y-1 px-4 py-2 ${isCollapsed ? "flex flex-col items-center" : ""}`}
+          >
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isTeamChat = item.path === "/chat";
@@ -222,7 +225,9 @@ export const ModernSidebar = ({
             title={isCollapsed ? "Settings" : ""}
           >
             <Settings className="h-5 w-5 flex-shrink-0" />
-            {!isCollapsed && <span className="text-sm font-medium">Settings</span>}
+            {!isCollapsed && (
+              <span className="text-sm font-medium">Settings</span>
+            )}
             {isCollapsed && (
               <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                 Settings
@@ -238,7 +243,9 @@ export const ModernSidebar = ({
             title={isCollapsed ? "Logout" : ""}
           >
             <LogOut className="h-5 w-5 flex-shrink-0" />
-            {!isCollapsed && <span className="text-sm font-medium">Logout</span>}
+            {!isCollapsed && (
+              <span className="text-sm font-medium">Logout</span>
+            )}
             {isCollapsed && (
               <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                 Logout
