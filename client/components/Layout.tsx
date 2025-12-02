@@ -46,7 +46,6 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <>
-      <CursorFollower userName={user?.name} />
       <div className="flex h-screen bg-transparent">
         {/* Modern Sidebar */}
         <ModernSidebar
