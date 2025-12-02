@@ -109,7 +109,7 @@ export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
           {/* Desktop Collapse Button */}
           <button
             onClick={toggleCollapse}
-            className="hidden md:flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors ml-auto"
+            className="hidden md:inline-flex p-2 hover:bg-sidebar-accent rounded-lg transition-colors"
             title={isCollapsed ? "Expand" : "Collapse"}
           >
             {isCollapsed ? (
