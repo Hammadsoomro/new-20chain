@@ -98,7 +98,7 @@ export const ModernSidebar = ({ isOpen, onOpenChange }: ModernSidebarProps) => {
           {isCollapsed && (
             <Link
               to="/dashboard"
-              className="w-full flex justify-center h-10 w-10 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 flex items-center justify-center group-hover:shadow-lg transition-all"
+              className="flex justify-center h-10 w-10 rounded-lg bg-gradient-to-br from-sidebar-primary to-sidebar-primary/70 items-center group-hover:shadow-lg transition-all"
             >
               <span className="text-sidebar-primary-foreground font-bold text-lg">
                 ◆
