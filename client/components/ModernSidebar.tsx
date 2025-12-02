@@ -11,8 +11,6 @@ import {
   List,
   Clock,
   BarChart3,
-  ChevronLeft,
-  ChevronRight,
   X,
   Menu,
 } from "lucide-react";
