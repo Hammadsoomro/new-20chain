@@ -89,16 +89,14 @@ export const Layout = ({ children }: LayoutProps) => {
       <CursorFollower userName={user?.name} />
       <div className="flex h-screen bg-transparent">
         {/* Sidebar */}
-        <aside
-          className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto md:translate-x-0 ${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-          } ${sidebarCollapsed ? "md:w-20" : "md:w-64"} w-64`}
-        >
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 bg-sidebar border-r border-sidebar-border transform transition-all duration-300 flex flex-col md:relative md:inset-auto ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 w-64 ${sidebarCollapsed ? "md:w-20" : "md:w-64"}`}
+      >
           {/* Fixed Header - Logo */}
           <div
-            className={`flex items-center justify-center border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
-              sidebarCollapsed ? "p-3" : "p-6"
-            }`}
+            className={`flex items-center border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? "p-2 justify-center" : "p-6"}`}
           >
             <Link
               to="/dashboard"
@@ -121,15 +119,11 @@ export const Layout = ({ children }: LayoutProps) => {
 
           {/* Scrollable Content */}
           <div
-            className={`flex flex-col h-full overflow-y-auto transition-all duration-300 ${
-              sidebarCollapsed ? "p-3" : "p-6"
-            }`}
+            className={`flex flex-col h-full overflow-y-auto transition-all duration-300 ${sidebarCollapsed ? "px-2 py-4" : "px-6 py-4"}`}
           >
             {/* User Info Card */}
             <div
-              className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg mb-6 transition-all duration-300 overflow-hidden ${
-                sidebarCollapsed ? "p-1" : "p-4"
-              }`}
+              className={`bg-sidebar-primary/10 border border-sidebar-border rounded-lg transition-all duration-300 overflow-hidden mb-4 ${sidebarCollapsed ? "p-2" : "p-4"}`}
             >
               <div
                 className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} mb-3`}
