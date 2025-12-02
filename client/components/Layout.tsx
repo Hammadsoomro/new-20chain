@@ -17,6 +17,8 @@ import {
   Moon,
   Sun,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { ThemeSelector } from "@/components/ThemeSelector";
 import { CursorFollower } from "@/components/CursorFollower";
@@ -30,6 +32,18 @@ export const Layout = ({ children }: LayoutProps) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sidebarCollapsed") === "true";
+    }
+    return false;
+  });
+
+  const toggleCollapse = () => {
+    const newValue = !isCollapsed;
+    setIsCollapsed(newValue);
+    localStorage.setItem("sidebarCollapsed", String(newValue));
+  };
 
   return (
     <>
