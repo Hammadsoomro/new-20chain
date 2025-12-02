@@ -21,7 +21,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { ThemeSelector } from "@/components/ThemeSelector";
-import { CursorFollower } from "@/components/CursorFollower";
 import { ModernSidebar } from "@/components/ModernSidebar";
 
 interface LayoutProps {
