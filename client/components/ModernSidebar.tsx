@@ -74,7 +74,7 @@ export const ModernSidebar = ({
           isOpen ? "translate-x-0" : "-translate-x-full"
         } md:translate-x-0 ${isCollapsed ? "md:w-24" : "md:w-80"} w-72`}
       >
-        {/* Header with Logo and Collapse Button */}
+        {/* Header with Logo */}
         <div className={`flex items-center px-4 h-20 border-b border-sidebar-border flex-shrink-0 transition-all duration-300 ${
           isCollapsed ? "justify-center" : "justify-between"
         }`}>
