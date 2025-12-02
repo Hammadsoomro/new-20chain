@@ -86,13 +86,15 @@ export default function Dashboard() {
               ),
             );
           } else {
+            const errorText = await membersResponse.text();
             console.warn(
-              "Members fetch returned non-ok status:",
+              "Members fetch error:",
               membersResponse.status,
+              errorText,
             );
           }
         } catch (err) {
-          console.warn("Members fetch failed:", err);
+          console.error("Members fetch failed:", err);
         }
 
         // Fetch queued lines count
