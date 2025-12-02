@@ -107,14 +107,6 @@ export const Layout = ({ children }: LayoutProps) => {
             {children}
           </main>
         </div>
-
-        {/* Mobile Overlay */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black/20 z-30 md:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
       </div>
     </>
   );
