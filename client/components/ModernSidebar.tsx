@@ -43,10 +43,6 @@ export const ModernSidebar = ({
     0,
   );
 
-  const toggleCollapse = () => {
-    onCollapsedChange(!isCollapsed);
-  };
-
   const isActive = (path: string) => location.pathname === path;
 
   const menuItems = [
