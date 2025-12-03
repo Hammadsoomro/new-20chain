@@ -37,6 +37,7 @@ export default function QueuedList() {
     const fetchQueued = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch("/api/queued", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -44,9 +45,23 @@ export default function QueuedList() {
         if (response.ok) {
           const data = await response.json();
           setLines(data.lines || []);
+          setError(null);
+        } else {
+          const errorText = await response.text();
+          console.error(
+            "[QueuedList] Fetch error:",
+            response.status,
+            errorText,
+          );
+          setError(
+            `Failed to load queued lines (${response.status}). Please try again.`,
+          );
         }
       } catch (error) {
         console.error("[QueuedList] Error fetching queued lines:", error);
+        setError(
+          "Failed to load queued lines. Please check your connection and try again.",
+        );
       } finally {
         setLoading(false);
       }
