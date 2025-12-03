@@ -1,6 +1,7 @@
 import { RequestHandler } from "express";
 import { z } from "zod";
 import { getCollections } from "../db";
+import { getIO } from "../websocket-io";
 import { ObjectId } from "mongodb";
 
 // Get or create claim settings for team
@@ -79,6 +80,16 @@ export const updateClaimSettings: RequestHandler = async (req, res) => {
       },
       { returnDocument: "after", upsert: true },
     );
+
+    // Emit real-time update for claim settings
+    const io = getIO();
+    if (io) {
+      io.emit("claim-settings-updated", {
+        teamId,
+        lineCount: result.value?.lineCount,
+        cooldownMinutes: result.value?.cooldownMinutes,
+      });
+    }
 
     res.json({
       _id: result.value?._id.toString(),
@@ -166,6 +177,37 @@ export const claimNumbers: RequestHandler = async (req, res) => {
       _id: { $in: claimedLineIds },
     });
 
+    // Emit real-time update for claimed today count
+    const io = getIO();
+    if (io) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayString = today.toISOString();
+
+      const claimedToday = await collections.claimedNumbers
+        .find({
+          teamId,
+          claimedBy: userId,
+          claimedAt: { $gte: todayString },
+        })
+        .toArray();
+
+      io.emit("claimed-today-updated", {
+        count: claimedToday.length,
+        teamId,
+        userId,
+      });
+
+      // Also emit update for queued lines count (since lines were removed)
+      const queuedLines = await collections.queuedLines
+        .find({ teamId })
+        .toArray();
+      io.emit("lines-queued-updated", {
+        count: queuedLines.length,
+        teamId,
+      });
+    }
+
     const response = {
       success: true,
       claimedCount: availableLines.length,
@@ -237,6 +279,16 @@ export const releaseClaimedNumbers: RequestHandler = async (req, res) => {
       teamId,
       claimedBy: userId,
     });
+
+    // Emit real-time update for claimed today count
+    const io = getIO();
+    if (io) {
+      io.emit("claimed-today-updated", {
+        count: 0,
+        teamId,
+        userId,
+      });
+    }
 
     res.json({ success: true });
   } catch (error) {

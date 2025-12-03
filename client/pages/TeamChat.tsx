@@ -7,6 +7,7 @@ import { ChatArea } from "@/components/chat/ChatArea";
 import type { User, ChatGroup } from "@shared/api";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
 interface ChatConversation {
   type: "group" | "direct";
@@ -21,6 +22,7 @@ interface ChatConversation {
 export default function TeamChat() {
   const { user, token } = useAuth();
   const { setUnreadCount } = useChat();
+  const location = useLocation();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selectedChat, setSelectedChat] = useState<{
     type: "group" | "direct";
@@ -34,20 +36,36 @@ export default function TeamChat() {
   useEffect(() => {
     if (!token || !user?._id) return;
 
-    // Create shared socket instance
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        console.log("[TeamChat] Notification permission:", permission);
+      });
+    }
+
+    // Disconnect existing socket if any
+    if (socketRef.current && socketRef.current.connected) {
+      console.log("[TeamChat] Disconnecting previous socket");
+      socketRef.current.disconnect();
+    }
+
+    // Create shared socket instance with optimized configuration
     const socket = io(window.location.origin, {
       auth: { token },
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      reconnectionAttempts: 5,
+      reconnectionAttempts: 10,
+      transports: ["websocket", "polling"],
     });
 
     socketRef.current = socket;
 
-    // Listen for new messages from other users
-    socket.on("new-message", (data: any) => {
+    // Handler for new messages
+    const handleNewMessage = (data: any) => {
       console.log("[TeamChat] Received message:", data);
+
+      const isUserOnChatPage = location.pathname === "/chat";
 
       setConversations((prev) => {
         const updated = [...prev];
@@ -57,29 +75,40 @@ export default function TeamChat() {
           const conversation = updated[convIndex];
           const isFromCurrentUser = data.sender === user._id;
 
+          // Update last message time for all messages
+          conversation.lastMessageTime = data.timestamp;
+
           // Only increment unread if this message is not from current user
           if (!isFromCurrentUser) {
-            // Check if this chat is currently selected
-            const isChatSelected = selectedChat?.id === data.chatId;
+            conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+            console.log(
+              `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
+            );
 
-            if (!isChatSelected) {
-              conversation.unreadCount = (conversation.unreadCount || 0) + 1;
-              console.log(
-                `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
-              );
+            // Update global unread count
+            setUnreadCount(data.chatId, conversation.unreadCount);
 
-              // Update global unread count
-              setUnreadCount(data.chatId, conversation.unreadCount);
-
-              // Show toast notification
+            // Show toast notification ONLY if user is NOT on the chat page
+            if (!isUserOnChatPage) {
               toast.success(`💬 New message from ${data.senderName}`, {
                 description: data.content.substring(0, 100),
                 duration: 4000,
               });
+
+              // Play notification sound when showing notification
+              playNotificationSound();
+
+              // Show desktop notification
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(`New message from ${data.senderName}`, {
+                  body: data.content.substring(0, 100),
+                  icon: "/favicon.ico",
+                  tag: "message-notification",
+                  requireInteraction: false,
+                });
+              }
             }
           }
-
-          conversation.lastMessageTime = data.timestamp;
 
           // Move conversation to top
           const [moved] = updated.splice(convIndex, 1);
@@ -88,27 +117,51 @@ export default function TeamChat() {
 
         return updated;
       });
+    };
 
-      // Play notification sound if message is not from current user
-      if (data.sender !== user._id) {
-        playNotificationSound();
-      }
-    });
-
-    socket.on("connect", () => {
+    const handleConnect = () => {
       console.log("[TeamChat] Socket connected:", socket.id);
-    });
+      // Re-join all active chat rooms after reconnection
+      setConversations((prev) => {
+        prev.forEach((conv) => {
+          socket.emit("join-chat", {
+            chatId: conv.id,
+            userId: user._id,
+          });
+        });
+        return prev;
+      });
+    };
 
-    socket.on("disconnect", () => {
+    const handleDisconnect = () => {
       console.log("[TeamChat] Socket disconnected");
-    });
+    };
+
+    const handleConnectError = (error: any) => {
+      console.error("[TeamChat] Socket connection error:", error);
+    };
+
+    const handleReconnectAttempt = () => {
+      console.log("[TeamChat] Attempting to reconnect...");
+    };
+
+    // Add event listeners
+    socket.on("new-message", handleNewMessage);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+    socket.on("reconnect_attempt", handleReconnectAttempt);
 
     return () => {
-      if (socket) {
-        socket.disconnect();
-      }
+      // Properly remove listeners before disconnecting
+      socket.off("new-message", handleNewMessage);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+      socket.off("reconnect_attempt", handleReconnectAttempt);
+      socket.disconnect();
     };
-  }, [token, user?._id]);
+  }, [token, user?._id, location.pathname, setUnreadCount]);
 
   // Join all chat rooms when conversations load
   useEffect(() => {
@@ -196,36 +249,31 @@ export default function TeamChat() {
       const gainNode = audioContext.createGain();
       gainNode.connect(audioContext.destination);
 
-      // Play a double-tone notification sound
-      const frequencies = [800, 600]; // Two different tones for notification
-      const toneDuration = 0.15; // 150ms per tone
-      const gapDuration = 0.05; // 50ms gap between tones
+      // Modern notification sound: ascending musical chime
+      const notes = [523, 659, 784]; // C5, E5, G5 (pleasant chord)
+      const noteDuration = 0.12; // 120ms per note
+      const gapDuration = 0.04; // 40ms gap between notes
 
-      frequencies.forEach((freq, index) => {
+      notes.forEach((freq, index) => {
         const oscillator = audioContext.createOscillator();
         oscillator.connect(gainNode);
         oscillator.frequency.value = freq;
         oscillator.type = "sine";
 
         const startTime =
-          audioContext.currentTime + index * (toneDuration + gapDuration);
+          audioContext.currentTime + index * (noteDuration + gapDuration);
 
-        // Ramp up at start
+        // Smooth envelope with natural fade in/out
         gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.02);
-
-        // Hold
-        gainNode.gain.setValueAtTime(0.4, startTime + 0.02);
-        gainNode.gain.setValueAtTime(0.4, startTime + toneDuration - 0.02);
-
-        // Ramp down at end
-        gainNode.gain.linearRampToValueAtTime(0, startTime + toneDuration);
+        gainNode.gain.linearRampToValueAtTime(0.35, startTime + 0.01);
+        gainNode.gain.setValueAtTime(0.35, startTime + noteDuration - 0.03);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
 
         oscillator.start(startTime);
-        oscillator.stop(startTime + toneDuration);
+        oscillator.stop(startTime + noteDuration);
       });
 
-      console.log("[TeamChat] Notification sound played");
+      console.log("[TeamChat] Modern notification sound played");
     } catch (error) {
       console.error("Error playing notification sound:", error);
     }

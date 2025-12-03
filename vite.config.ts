@@ -3,8 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { createServer } from "./server";
 import { Server } from "socket.io";
-
-let io: Server | null = null;
+import { setIO } from "./server/websocket-io";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -39,13 +38,15 @@ function expressPlugin(): Plugin {
       server.middlewares.use(app);
 
       // Setup Socket.io on Vite's httpServer
-      if (!io && server.httpServer) {
-        io = new Server(server.httpServer, {
+      if (server.httpServer) {
+        const io = new Server(server.httpServer, {
           cors: {
             origin: "*",
             methods: ["GET", "POST"],
           },
         });
+
+        setIO(io);
 
         // Socket.io connection handling
         io.on("connection", (socket) => {
@@ -81,7 +82,7 @@ function expressPlugin(): Plugin {
                 ...data,
                 chatId: data.chatId, // Ensure chatId is included
               };
-              io!.to(data.chatId).emit("new-message", messageToEmit);
+              io.to(data.chatId).emit("new-message", messageToEmit);
             },
           );
 
@@ -107,7 +108,7 @@ function expressPlugin(): Plugin {
             "message-read",
             (data: { messageId: string; userId: string; chatId?: string }) => {
               // Broadcast to all users (they'll filter by messageId)
-              io!.emit("message-read", data);
+              io.emit("message-read", data);
               console.log(
                 `[Socket.IO] Message marked as read: ${data.messageId}`,
               );
@@ -118,7 +119,7 @@ function expressPlugin(): Plugin {
           socket.on(
             "edit-message",
             (data: { messageId: string; content: string; chatId: string }) => {
-              io!.to(data.chatId).emit("message-edited", data);
+              io.to(data.chatId).emit("message-edited", data);
             },
           );
 
@@ -126,7 +127,7 @@ function expressPlugin(): Plugin {
           socket.on(
             "delete-message",
             (data: { messageId: string; chatId: string }) => {
-              io!.to(data.chatId).emit("message-deleted", data);
+              io.to(data.chatId).emit("message-deleted", data);
             },
           );
 

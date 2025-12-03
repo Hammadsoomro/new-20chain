@@ -8,11 +8,12 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Trash2, Plus, Copy, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
+import { io, Socket } from "socket.io-client";
 
 export default function NumbersSorter() {
   const { token, isAdmin } = useAuth();
@@ -25,6 +26,7 @@ export default function NumbersSorter() {
     cooldownMinutes: 30,
   });
   const [savingSettings, setSavingSettings] = useState(false);
+  const socketRef = useRef<Socket | null>(null);
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -41,11 +43,21 @@ export default function NumbersSorter() {
     }
   }, []);
 
-  // Load settings from server
+  // Load settings from server and initialize Socket.IO
   useEffect(() => {
-    const loadSettings = async () => {
-      if (!token) return;
+    if (!token) return;
 
+    const socket = io(window.location.origin, {
+      auth: { token },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+    });
+
+    socketRef.current = socket;
+
+    const loadSettings = async () => {
       try {
         const response = await fetch("/api/claim/settings", {
           headers: { Authorization: `Bearer ${token}` },
@@ -59,11 +71,24 @@ export default function NumbersSorter() {
           });
         }
       } catch (error) {
-        console.error("Error loading settings:", error);
+        console.error("[NumbersSorter] Error loading settings:", error);
       }
     };
 
     loadSettings();
+
+    // Listen for real-time claim settings updates
+    const handleClaimSettingsUpdated = () => {
+      console.log("[NumbersSorter] Claim settings updated, reloading");
+      loadSettings();
+    };
+
+    socket.on("claim-settings-updated", handleClaimSettingsUpdated);
+
+    return () => {
+      socket.off("claim-settings-updated", handleClaimSettingsUpdated);
+      socket.disconnect();
+    };
   }, [token]);
 
   // Save to localStorage when input changes

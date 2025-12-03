@@ -65,12 +65,12 @@ export default function Dashboard() {
 
       try {
         // Fetch team members
-        const response = await fetch("/api/members", {
+        const membersResponse = await fetch("/api/members", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.ok) {
-          const members = await response.json();
+        if (membersResponse.ok) {
+          const members = await membersResponse.json();
           setTeamMembers(members);
 
           // Update team members count in stats
@@ -78,6 +78,44 @@ export default function Dashboard() {
             prev.map((stat) =>
               stat.label === "Team Members"
                 ? { ...stat, value: members.length.toString() }
+                : stat,
+            ),
+          );
+        }
+
+        // Fetch queued lines count
+        const queuedResponse = await fetch("/api/queued", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (queuedResponse.ok) {
+          const data = await queuedResponse.json();
+          const count = data.lines ? data.lines.length : 0;
+
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Lines Queued"
+                ? { ...stat, value: count.toString() }
+                : stat,
+            ),
+          );
+        }
+
+        // Fetch claimed numbers count for today
+        const claimedResponse = await fetch("/api/claim/numbers", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (claimedResponse.ok) {
+          const claimedNumbers = await claimedResponse.json();
+          const count = Array.isArray(claimedNumbers)
+            ? claimedNumbers.length
+            : 0;
+
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Claimed Today"
+                ? { ...stat, value: count.toString() }
                 : stat,
             ),
           );
@@ -105,6 +143,15 @@ export default function Dashboard() {
       socketRef.current.on("member-added", (newMember: User) => {
         console.log("[Dashboard] New member added:", newMember.name);
         setTeamMembers((prev) => [...prev, newMember]);
+
+        // Update team members count in stats
+        setStats((prev) =>
+          prev.map((stat) =>
+            stat.label === "Team Members"
+              ? { ...stat, value: (parseInt(stat.value) + 1).toString() }
+              : stat,
+          ),
+        );
       });
 
       socketRef.current.on("member-updated", (updatedMember: User) => {
@@ -117,7 +164,49 @@ export default function Dashboard() {
       socketRef.current.on("member-removed", (memberId: string) => {
         console.log("[Dashboard] Member removed:", memberId);
         setTeamMembers((prev) => prev.filter((m) => m._id !== memberId));
+
+        // Update team members count in stats
+        setStats((prev) =>
+          prev.map((stat) =>
+            stat.label === "Team Members"
+              ? {
+                  ...stat,
+                  value: Math.max(0, parseInt(stat.value) - 1).toString(),
+                }
+              : stat,
+          ),
+        );
       });
+
+      // Listen for queued lines updates
+      socketRef.current.on(
+        "lines-queued-updated",
+        (data: { count: number }) => {
+          console.log("[Dashboard] Lines queued updated:", data.count);
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Lines Queued"
+                ? { ...stat, value: data.count.toString() }
+                : stat,
+            ),
+          );
+        },
+      );
+
+      // Listen for claimed today updates
+      socketRef.current.on(
+        "claimed-today-updated",
+        (data: { count: number }) => {
+          console.log("[Dashboard] Claimed today updated:", data.count);
+          setStats((prev) =>
+            prev.map((stat) =>
+              stat.label === "Claimed Today"
+                ? { ...stat, value: data.count.toString() }
+                : stat,
+            ),
+          );
+        },
+      );
     }
 
     // Set up polling for fallback real-time updates (every 30 seconds)
@@ -129,6 +218,8 @@ export default function Dashboard() {
         socketRef.current.off("member-added");
         socketRef.current.off("member-updated");
         socketRef.current.off("member-removed");
+        socketRef.current.off("lines-queued-updated");
+        socketRef.current.off("claimed-today-updated");
       }
     };
   }, [token]);

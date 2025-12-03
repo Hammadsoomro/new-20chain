@@ -2,6 +2,7 @@ import { RequestHandler } from "express";
 import { z } from "zod";
 import type { QueuedLine } from "@shared/api";
 import { getCollections } from "../db";
+import { getIO } from "../websocket-io";
 import { ObjectId } from "mongodb";
 
 export const addToQueue: RequestHandler = async (req, res) => {
@@ -34,6 +35,16 @@ export const addToQueue: RequestHandler = async (req, res) => {
       _id: result.insertedIds[idx].toString(),
       ...line,
     }));
+
+    // Emit real-time update for queued lines
+    const io = getIO();
+    if (io) {
+      const allLines = await collections.queuedLines.find({ teamId }).toArray();
+      io.emit("lines-queued-updated", {
+        count: allLines.length,
+        teamId,
+      });
+    }
 
     res.json({ success: true, lines: addedLines });
   } catch (error) {
@@ -93,6 +104,16 @@ export const clearQueuedLine: RequestHandler = async (req, res) => {
     if (result.deletedCount === 0) {
       res.status(404).json({ error: "Line not found or unauthorized" });
       return;
+    }
+
+    // Emit real-time update for queued lines
+    const io = getIO();
+    if (io) {
+      const allLines = await collections.queuedLines.find({ teamId }).toArray();
+      io.emit("lines-queued-updated", {
+        count: allLines.length,
+        teamId,
+      });
     }
 
     res.json({ success: true });

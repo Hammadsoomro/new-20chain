@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { List, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { io, Socket } from "socket.io-client";
 import type { QueuedLine } from "@shared/api";
 
 export default function QueuedList() {
@@ -11,12 +12,24 @@ export default function QueuedList() {
   const [lines, setLines] = useState<QueuedLine[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
-  // Fetch queued lines
+  // Initialize Socket.IO connection for real-time updates
   useEffect(() => {
-    const fetchQueued = async () => {
-      if (!token) return;
+    if (!token) return;
 
+    const socket = io(window.location.origin, {
+      auth: { token },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+    });
+
+    socketRef.current = socket;
+
+    // Fetch initial queued lines
+    const fetchQueued = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/queued", {
@@ -28,13 +41,27 @@ export default function QueuedList() {
           setLines(data.lines || []);
         }
       } catch (error) {
-        console.error("Error fetching queued lines:", error);
+        console.error("[QueuedList] Error fetching queued lines:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchQueued();
+
+    // Listen for real-time updates
+    const handleLinesQueued = (data: { count: number }) => {
+      console.log("[QueuedList] Lines queued updated:", data.count);
+      // Re-fetch the list to get the updated data
+      fetchQueued();
+    };
+
+    socket.on("lines-queued-updated", handleLinesQueued);
+
+    return () => {
+      socket.off("lines-queued-updated", handleLinesQueued);
+      socket.disconnect();
+    };
   }, [token]);
 
   const handleDeleteLine = async (lineId: string) => {

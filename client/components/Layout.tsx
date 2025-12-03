@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useChat } from "@/context/ChatContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -33,8 +34,15 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const { user, logout, isAdmin } = useAuth();
+  const { unreadCounts } = useChat();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Calculate total unread messages for Team Chat
+  const totalUnread = Array.from(unreadCounts.values()).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("sidebarCollapsed") === "true";
@@ -160,6 +168,9 @@ export const Layout = ({ children }: LayoutProps) => {
           <nav className="flex-1 space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
+              const isTeamChat = item.path === "/chat";
+              const hasUnread = isTeamChat && totalUnread > 0;
+
               return (
                 <Link
                   key={item.path}
@@ -174,10 +185,23 @@ export const Layout = ({ children }: LayoutProps) => {
                 >
                   <Icon className="h-5 w-5 flex-shrink-0" />
                   {!sidebarCollapsed && (
-                    <span className="transition-all duration-300 whitespace-nowrap overflow-hidden">
+                    <span className="transition-all duration-300 whitespace-nowrap overflow-hidden flex-1">
                       {item.label}
                     </span>
                   )}
+
+                  {/* Red dot indicator for unread messages */}
+                  {hasUnread && (
+                    <div className="flex items-center gap-2">
+                      {!sidebarCollapsed && totalUnread > 0 && (
+                        <span className="text-xs font-bold bg-red-500 text-white px-2 py-0.5 rounded-full">
+                          {totalUnread > 99 ? "99+" : totalUnread}
+                        </span>
+                      )}
+                      <div className="h-2.5 w-2.5 rounded-full bg-red-500 flex-shrink-0 animate-pulse" />
+                    </div>
+                  )}
+
                   {sidebarCollapsed && (
                     <div className="absolute left-full ml-2 bg-sidebar-accent text-sidebar-accent-foreground text-sm px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
                       {item.label}
