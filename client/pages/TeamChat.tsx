@@ -1,492 +1,407 @@
 import { useState, useEffect, useRef } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { useSocket } from "@/contexts/SocketContext";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  MessageCircle,
-  Phone,
-  Video,
-  MoreVertical,
-  Search,
-  Send,
-  Menu,
-  X,
-  Bell,
-  BellOff,
-} from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { useChat } from "@/context/ChatContext";
+import { Layout } from "@/components/Layout";
+import { ChatContactList } from "@/components/chat/ChatContactList";
+import { ChatArea } from "@/components/chat/ChatArea";
+import type { User, ChatGroup } from "@shared/api";
+import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
+import { useLocation } from "react-router-dom";
 
-interface Contact {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface ChatMessage {
+interface ChatConversation {
+  type: "group" | "direct";
   id: string;
-  senderId: string;
-  receiverId?: string;
-  groupId?: string;
-  content: string;
-  timestamp: Date;
-  senderName?: string;
+  name: string;
+  unreadCount: number;
+  lastMessageTime?: string;
+  member?: User;
+  group?: ChatGroup;
 }
 
-export default function Chat() {
-  const { user } = useAuth();
-  const { socket, isConnected } = useSocket();
-  const navigate = useNavigate();
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [messageInput, setMessageInput] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>(
-    {},
-  );
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+export default function TeamChat() {
+  const { user, token } = useAuth();
+  const { setUnreadCount } = useChat();
+  const location = useLocation();
+  const [conversations, setConversations] = useState<ChatConversation[]>([]);
+  const [selectedChat, setSelectedChat] = useState<{
+    type: "group" | "direct";
+    id: string;
+    name: string;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const socketRef = useRef<Socket | null>(null);
 
-  const filteredContacts = contacts.filter(
-    (contact) =>
-      contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
+  // Check API health on mount
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Request notification permission on mount
-  useEffect(() => {
-    if ("Notification" in window) {
-      console.log(
-        "Notification API available. Current permission:",
-        Notification.permission,
-      );
-      if (Notification.permission === "granted") {
-        setNotificationsEnabled(true);
-        console.log("Notifications already granted");
-      } else if (Notification.permission === "default") {
-        console.log(
-          "Notification permission is default, not requesting automatically",
-        );
-      } else if (Notification.permission === "denied") {
-        console.log("Notifications are denied by user");
-      }
-    } else {
-      console.log("Notification API not available in this browser");
-    }
-  }, []);
-
-  const showDesktopNotification = (
-    senderName: string,
-    messageContent: string,
-  ) => {
-    if ("Notification" in window) {
-      console.log("Checking notification permission:", Notification.permission);
-      if (Notification.permission === "granted") {
-        try {
-          const notification = new Notification(
-            "New Message from " + senderName,
-            {
-              body: messageContent,
-              icon: "/placeholder.svg",
-              badge: "/placeholder.svg",
-              tag: "message-notification",
-              requireInteraction: false,
-            },
-          );
-
-          notification.onclick = () => {
-            console.log("Notification clicked");
-            window.focus();
-            notification.close();
-          };
-
-          notification.onerror = (error) => {
-            console.error("Notification error:", error);
-          };
-
-          console.log("Desktop notification sent to:", senderName);
-        } catch (error) {
-          console.error("Failed to create notification:", error);
-        }
-      } else {
-        console.log(
-          "Notification permission not granted:",
-          Notification.permission,
-        );
-      }
-    } else {
-      console.log("Notification API not available");
-    }
-  };
-
-  useEffect(() => {
-    const loadContacts = async () => {
+    const checkHealth = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const response = await fetch("/api/team/info", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setContacts(data.contacts || []);
+        const res = await fetch("/api/health");
+        if (!res.ok) {
+          console.warn("[TeamChat] API health check failed:", res.status);
+          setError(
+            "Backend service is temporarily unavailable. Please refresh the page.",
+          );
         }
-      } catch (error) {
-        console.error("Failed to load contacts:", error);
-        toast.error("Failed to load contacts");
-      } finally {
-        setIsLoading(false);
+      } catch (err) {
+        console.warn("[TeamChat] API health check error:", err);
+        setError("Cannot connect to backend. Please check your connection.");
       }
     };
 
-    loadContacts();
+    checkHealth();
   }, []);
 
+  // Initialize socket connection and listen for messages
   useEffect(() => {
-    if (!socket || !user) return;
+    if (!token || !user?._id) return;
 
-    socket.on("new_message", (message: ChatMessage) => {
-      // Show desktop notification regardless of focused tab
-      showDesktopNotification(
-        message.senderName || "Team Member",
-        message.content,
-      );
+    // Request notification permission
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission().then((permission) => {
+        console.log("[TeamChat] Notification permission:", permission);
+      });
+    }
 
-      if (selectedContact && message.senderId === selectedContact._id) {
-        setMessages((prev) => [...prev, message]);
-        playNotificationSound();
-      } else {
-        setUnreadCounts((prev) => ({
-          ...prev,
-          [message.senderId]: (prev[message.senderId] || 0) + 1,
-        }));
-        playNotificationSound();
-        toast.custom(
-          (t) => (
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg shadow-2xl p-4 flex items-center gap-3 animate-in slide-in-from-top">
-              <div className="bg-white bg-opacity-20 rounded-full p-2">
-                <MessageCircle className="w-5 h-5" />
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold">
-                  {message.senderName || "New Message"}
-                </p>
-                <p className="text-sm text-blue-100 truncate">
-                  {message.content}
-                </p>
-              </div>
-              <button
-                onClick={() => toast.dismiss(t)}
-                className="text-blue-200 hover:text-white transition"
-              >
-                ✕
-              </button>
-            </div>
-          ),
-          {
-            duration: 4000,
-            position: "top-center",
-          },
-        );
-      }
+    // Disconnect existing socket if any
+    if (socketRef.current && socketRef.current.connected) {
+      console.log("[TeamChat] Disconnecting previous socket");
+      socketRef.current.disconnect();
+    }
+
+    // Create shared socket instance with optimized configuration
+    const socket = io(window.location.origin, {
+      auth: { token },
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+      transports: ["websocket", "polling"],
+      forceNew: false,
     });
 
-    socket.on("group_message", (message: ChatMessage) => {
-      setMessages((prev) => [...prev, message]);
-      playNotificationSound();
-    });
+    socketRef.current = socket;
+
+    // Handle socket connection errors
+    const handleConnectionError = (error: any) => {
+      console.error("[TeamChat] Socket connection error:", error);
+    };
+
+    const handleDisconnect = (reason: string) => {
+      console.warn("[TeamChat] Socket disconnected:", reason);
+    };
+
+    socket.on("connect_error", handleConnectionError);
+    socket.on("disconnect", handleDisconnect);
+
+    // Handler for new messages
+    const handleNewMessage = (data: any) => {
+      console.log("[TeamChat] Received message:", data);
+
+      const isUserOnChatPage = location.pathname === "/chat";
+
+      setConversations((prev) => {
+        const updated = [...prev];
+        const convIndex = updated.findIndex((c) => c.id === data.chatId);
+
+        if (convIndex !== -1) {
+          const conversation = updated[convIndex];
+          const isFromCurrentUser = data.sender === user._id;
+
+          // Update last message time for all messages
+          conversation.lastMessageTime = data.timestamp;
+
+          // Only increment unread if this message is not from current user
+          if (!isFromCurrentUser) {
+            conversation.unreadCount = (conversation.unreadCount || 0) + 1;
+            console.log(
+              `[TeamChat] Unread count updated for ${conversation.name}: ${conversation.unreadCount}`,
+            );
+
+            // Update global unread count
+            setUnreadCount(data.chatId, conversation.unreadCount);
+
+            // Show toast notification ONLY if user is NOT on the chat page
+            if (!isUserOnChatPage) {
+              toast.success(`💬 New message from ${data.senderName}`, {
+                description: data.content.substring(0, 100),
+                duration: 4000,
+              });
+
+              // Play notification sound when showing notification
+              playNotificationSound();
+
+              // Show desktop notification
+              if (
+                "Notification" in window &&
+                Notification.permission === "granted"
+              ) {
+                new Notification(`New message from ${data.senderName}`, {
+                  body: data.content.substring(0, 100),
+                  icon: "/favicon.ico",
+                  tag: "message-notification",
+                  requireInteraction: false,
+                });
+              }
+            }
+          }
+
+          // Move conversation to top
+          const [moved] = updated.splice(convIndex, 1);
+          updated.unshift(moved);
+        }
+
+        return updated;
+      });
+    };
+
+    const handleConnect = () => {
+      console.log("[TeamChat] Socket connected:", socket.id);
+      // Re-join all active chat rooms after reconnection
+      setConversations((prev) => {
+        prev.forEach((conv) => {
+          socket.emit("join-chat", {
+            chatId: conv.id,
+            userId: user._id,
+          });
+        });
+        return prev;
+      });
+    };
+
+    const handleConnectError = (error: any) => {
+      console.error("[TeamChat] Socket connection error:", error);
+    };
+
+    const handleReconnectAttempt = () => {
+      console.log("[TeamChat] Attempting to reconnect...");
+    };
+
+    // Add event listeners
+    socket.on("new-message", handleNewMessage);
+    socket.on("connect", handleConnect);
+    socket.on("disconnect", handleDisconnect);
+    socket.on("connect_error", handleConnectError);
+    socket.on("reconnect_attempt", handleReconnectAttempt);
 
     return () => {
-      socket.off("new_message");
-      socket.off("group_message");
+      // Properly remove listeners before disconnecting
+      socket.off("new-message", handleNewMessage);
+      socket.off("connect", handleConnect);
+      socket.off("disconnect", handleDisconnect);
+      socket.off("connect_error", handleConnectError);
+      socket.off("reconnect_attempt", handleReconnectAttempt);
+      socket.disconnect();
     };
-  }, [socket, user, selectedContact]);
+  }, [token, user?._id, location.pathname, setUnreadCount]);
+
+  // Join all chat rooms when conversations load
+  useEffect(() => {
+    if (!socketRef.current || conversations.length === 0 || !user?._id) return;
+
+    console.log(`[TeamChat] Joining ${conversations.length} chat rooms`);
+    conversations.forEach((conv) => {
+      socketRef.current?.emit("join-chat", {
+        chatId: conv.id,
+        userId: user._id,
+      });
+      console.log(`[TeamChat] Joined chat room: ${conv.id}`);
+    });
+  }, [conversations, user?._id]);
+
+  // Fetch initial team members and group chat
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const headers = { Authorization: `Bearer ${token}` };
+        const convs: ChatConversation[] = [];
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
+        try {
+          // Fetch group chat
+          try {
+            const groupRes = await fetch("/api/chat/group", {
+              headers,
+              signal: controller.signal,
+            });
+            if (!groupRes.ok) {
+              console.warn(
+                `[TeamChat] Group chat request failed: ${groupRes.status}`,
+              );
+            } else {
+              const group = await groupRes.json();
+              convs.push({
+                type: "group",
+                id: group._id,
+                name: group.name,
+                unreadCount: 0,
+                group,
+              });
+            }
+          } catch (error) {
+            console.error("[TeamChat] Error fetching group chat:", error);
+          }
+
+          // Fetch team members
+          try {
+            const membersRes = await fetch("/api/members", {
+              headers,
+              signal: controller.signal,
+            });
+            if (!membersRes.ok) {
+              console.warn(
+                `[TeamChat] Members request failed: ${membersRes.status}`,
+              );
+            } else {
+              const members = await membersRes.json();
+              members.forEach((member: User) => {
+                if (member._id !== user?._id) {
+                  convs.push({
+                    type: "direct",
+                    id: member._id,
+                    name: member.name,
+                    unreadCount: 0,
+                    member,
+                  });
+                }
+              });
+            }
+          } catch (error) {
+            console.error("[TeamChat] Error fetching members:", error);
+          }
+        } finally {
+          clearTimeout(timeout);
+        }
+
+        // Auto-select group chat if available
+        if (convs.length > 0) {
+          setSelectedChat({
+            type: convs[0].type,
+            id: convs[0].id,
+            name: convs[0].name,
+          });
+        }
+
+        setConversations(convs);
+      } catch (error) {
+        console.error("[TeamChat] Error in fetchData:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [token, user?._id]);
 
   const playNotificationSound = () => {
-    const audioContext = new (window.AudioContext ||
-      (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    try {
+      const audioContext = new (window.AudioContext ||
+        (window as any).webkitAudioContext)();
+      const gainNode = audioContext.createGain();
+      gainNode.connect(audioContext.destination);
 
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+      // Modern notification sound: ascending musical chime
+      const notes = [523, 659, 784]; // C5, E5, G5 (pleasant chord)
+      const noteDuration = 0.12; // 120ms per note
+      const gapDuration = 0.04; // 40ms gap between notes
 
-    oscillator.frequency.value = 800;
-    oscillator.type = "sine";
+      notes.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        oscillator.connect(gainNode);
+        oscillator.frequency.value = freq;
+        oscillator.type = "sine";
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioContext.currentTime + 0.1,
-    );
+        const startTime =
+          audioContext.currentTime + index * (noteDuration + gapDuration);
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+        // Smooth envelope with natural fade in/out
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.35, startTime + 0.01);
+        gainNode.gain.setValueAtTime(0.35, startTime + noteDuration - 0.03);
+        gainNode.gain.linearRampToValueAtTime(0, startTime + noteDuration);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + noteDuration);
+      });
+
+      console.log("[TeamChat] Modern notification sound played");
+    } catch (error) {
+      console.error("Error playing notification sound:", error);
+    }
   };
 
-  const handleSelectContact = (contact: Contact) => {
-    setSelectedContact(contact);
-    setMessages([]);
-    setUnreadCounts((prev) => ({
-      ...prev,
-      [contact._id]: 0,
-    }));
-  };
+  const handleSelectChat = (conversation: ChatConversation) => {
+    console.log("[TeamChat] Selected chat:", conversation.id);
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!messageInput.trim() || !socket || !selectedContact || !user) return;
-
-    socket.emit("send_message", {
-      senderId: user.id,
-      receiverId: selectedContact._id,
-      content: messageInput.trim(),
+    setSelectedChat({
+      type: conversation.type,
+      id: conversation.id,
+      name: conversation.name,
     });
 
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        senderId: user.id,
-        receiverId: selectedContact._id,
-        content: messageInput,
-        timestamp: new Date(),
-        senderName: user.name,
-      },
-    ]);
-
-    setMessageInput("");
+    // Mark as read - reset unread count
+    setConversations((prev) =>
+      prev.map((conv) =>
+        conv.id === conversation.id ? { ...conv, unreadCount: 0 } : conv,
+      ),
+    );
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <aside
-        className={`${
-          sidebarOpen ? "w-80" : "w-20"
-        } bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-lg`}
-      >
-        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          {sidebarOpen && (
-            <h2 className="text-lg font-bold text-gray-900">Messages</h2>
-          )}
-          <div className="flex items-center gap-2">
-            {sidebarOpen && "Notification" in window && (
-              <button
-                onClick={() => {
-                  if (Notification.permission === "default") {
-                    Notification.requestPermission().then((permission) => {
-                      if (permission === "granted") {
-                        setNotificationsEnabled(true);
-                        toast.success("Desktop notifications enabled! ✅");
-                      } else {
-                        toast.error("Notification permission was denied");
-                      }
-                    });
-                  } else if (Notification.permission === "granted") {
-                    toast.success("Desktop notifications are enabled ✅");
-                  } else {
-                    toast.error(
-                      "Notifications blocked in browser settings. Click the lock icon in the address bar, set Notifications to Allow, then refresh. 🔒",
-                      { duration: 5000 },
-                    );
-                  }
-                }}
-                className={`p-2 rounded-lg transition ${
-                  notificationsEnabled || Notification.permission === "granted"
-                    ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-                title="Toggle desktop notifications"
-              >
-                {notificationsEnabled ||
-                Notification.permission === "granted" ? (
-                  <Bell className="w-5 h-5" />
-                ) : (
-                  <BellOff className="w-5 h-5" />
-                )}
-              </button>
-            )}
+    <Layout>
+      {error && (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center">
+            <div className="text-red-500 mb-2">⚠️ Connection Error</div>
+            <p className="text-muted-foreground max-w-md">{error}</p>
             <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition"
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
             >
-              {sidebarOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              Refresh Page
             </button>
           </div>
         </div>
-
-        {sidebarOpen && (
-          <div className="p-4 border-b border-gray-200">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                placeholder="Search contacts..."
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
+      )}
+      {loading && !error && (
+        <div className="flex items-center justify-center h-full">
+          <div className="text-muted-foreground">Loading chat...</div>
+        </div>
+      )}
+      {!loading && !error && (
+        <div className="flex h-full gap-4 p-6">
+          {/* Contact List */}
+          <div className="w-80 border-r border-border">
+            <ChatContactList
+              conversations={conversations}
+              selectedChat={selectedChat}
+              onSelectChat={handleSelectChat}
+            />
           </div>
-        )}
 
-        <ScrollArea className="flex-1">
-          <div className="p-2 space-y-2">
-            {isLoading ? (
-              <div className="p-4 text-center text-gray-500">
-                Loading contacts...
-              </div>
-            ) : filteredContacts.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No contacts found
-              </div>
+          {/* Chat Area */}
+          <div className="flex-1 flex flex-col">
+            {selectedChat ? (
+              <ChatArea
+                selectedChat={selectedChat}
+                token={token}
+                socket={socketRef.current}
+              />
             ) : (
-              filteredContacts.map((contact) => (
-                <button
-                  key={contact._id}
-                  onClick={() => handleSelectContact(contact)}
-                  className={`w-full p-3 rounded-lg transition-all duration-200 text-left flex items-center justify-between ${
-                    selectedContact?._id === contact._id
-                      ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900 shadow-md border border-blue-200"
-                      : "hover:bg-gray-50 text-gray-900 border border-transparent hover:border-gray-300"
-                  }`}
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold truncate">{contact.name}</p>
-                    {sidebarOpen && (
-                      <p className="text-xs text-gray-500 truncate">
-                        {contact.email}
-                      </p>
-                    )}
-                  </div>
-                  {unreadCounts[contact._id] > 0 && (
-                    <div className="ml-2 flex items-center justify-center">
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-red-500 rounded-full animate-pulse"></div>
-                        <Badge className="relative ml-2 bg-red-500 text-white font-bold shadow-lg">
-                          {unreadCounts[contact._id]}
-                        </Badge>
-                      </div>
-                    </div>
-                  )}
-                </button>
-              ))
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                Select a chat to start messaging
+              </div>
             )}
           </div>
-        </ScrollArea>
-      </aside>
-
-      <main className="flex-1 flex flex-col">
-        {selectedContact ? (
-          <>
-            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between shadow-sm">
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  {selectedContact.name}
-                </h3>
-                <p className="text-sm text-gray-500">{selectedContact.email}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-                  <Phone className="w-5 h-5 text-gray-600" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-                  <Video className="w-5 h-5 text-gray-600" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 rounded-lg transition">
-                  <MoreVertical className="w-5 h-5 text-gray-600" />
-                </button>
-              </div>
-            </div>
-
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.senderId === user?.id
-                        ? "justify-end"
-                        : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`max-w-xs px-4 py-2 rounded-lg ${
-                        message.senderId === user?.id
-                          ? "bg-blue-600 text-white rounded-br-none"
-                          : "bg-gray-200 text-gray-900 rounded-bl-none"
-                      }`}
-                    >
-                      <p className="break-words">{message.content}</p>
-                      <p className="text-xs mt-1 opacity-70">
-                        {new Date(message.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-
-            <div className="bg-white border-t border-gray-200 p-4">
-              <form
-                onSubmit={handleSendMessage}
-                className="flex items-center gap-3"
-              >
-                <Input
-                  placeholder="Type a message..."
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                  disabled={!isConnected}
-                />
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!isConnected || !messageInput.trim()}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
-              </form>
-              {!isConnected && (
-                <p className="text-xs text-red-600 mt-2">
-                  Connecting to server...
-                </p>
-              )}
-            </div>
-          </>
-        ) : (
-          <div className="flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <MessageCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                No chat selected
-              </h3>
-              <p className="text-gray-600">
-                Select a contact to start messaging
-              </p>
-            </div>
-          </div>
-        )}
-      </main>
-    </div>
+        </div>
+      )}
+    </Layout>
   );
 }
