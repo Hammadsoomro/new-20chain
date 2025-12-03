@@ -97,6 +97,54 @@ export default function History() {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedEntries = filteredEntries.slice(startIndex, endIndex);
 
+  // Generate pagination numbers (show max 5 page buttons)
+  const getPaginationNumbers = () => {
+    const maxButtons = 5;
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= maxButtons) {
+      // Show all pages if total is less than or equal to maxButtons
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    // Always show first page
+    pages.push(1);
+
+    // Calculate range around current page
+    let startPage = Math.max(2, currentPage - 1);
+    let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+    // Adjust if we're at the beginning
+    if (currentPage <= 2) {
+      endPage = Math.min(totalPages - 1, 4);
+    }
+
+    // Adjust if we're at the end
+    if (currentPage >= totalPages - 1) {
+      startPage = Math.max(2, totalPages - 3);
+    }
+
+    // Add ellipsis if needed
+    if (startPage > 2) {
+      pages.push("...");
+    }
+
+    // Add page range
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    // Add ellipsis if needed
+    if (endPage < totalPages - 1) {
+      pages.push("...");
+    }
+
+    // Always show last page
+    pages.push(totalPages);
+
+    return pages;
+  };
+
   return (
     <Layout>
       <div className="min-h-screen p-6 md:p-8 bg-transparent">
