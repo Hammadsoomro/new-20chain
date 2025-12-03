@@ -202,7 +202,11 @@ export default function QueuedList() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive"
+            >
               <p className="font-medium">Error</p>
               <p className="text-sm mt-1">{error}</p>
             </div>
