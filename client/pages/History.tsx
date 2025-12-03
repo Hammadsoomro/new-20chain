@@ -9,7 +9,7 @@ import { formatDateTime } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
 import type { HistoryEntry } from "@shared/api";
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 100;
 
 export default function History() {
   const { token, user, isAdmin } = useAuth();
