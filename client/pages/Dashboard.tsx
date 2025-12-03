@@ -40,18 +40,11 @@ export default function Dashboard() {
       bgColor: "bg-purple-500/10",
     },
     {
-      label: "Claimed Today",
+      label: "Today's Claim",
       value: "0",
       icon: TrendingUp,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
-    },
-    {
-      label: "Claim Cooldown",
-      value: "5m",
-      icon: Clock,
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
     },
   ]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
