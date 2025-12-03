@@ -67,6 +67,7 @@ export default function Dashboard() {
         return;
       }
 
+      setError(null);
       try {
         // Fetch team members
         try {
