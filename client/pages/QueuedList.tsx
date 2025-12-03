@@ -3,10 +3,12 @@ import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/lib/utils";
-import { List, Trash2 } from "lucide-react";
+import { List, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { io, Socket } from "socket.io-client";
 import type { QueuedLine } from "@shared/api";
+
+const ITEMS_PER_PAGE = 100;
 
 export default function QueuedList() {
   const { token, isAdmin } = useAuth();
