@@ -276,8 +276,9 @@ export default function Chat() {
   return (
     <div className="flex h-screen bg-gray-100">
       <aside
-        className={`${sidebarOpen ? "w-80" : "w-20"
-          } bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-lg`}
+        className={`${
+          sidebarOpen ? "w-80" : "w-20"
+        } bg-white border-r border-gray-200 transition-all duration-300 flex flex-col shadow-lg`}
       >
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
           {sidebarOpen && (
@@ -305,14 +306,15 @@ export default function Chat() {
                     );
                   }
                 }}
-                className={`p-2 rounded-lg transition ${notificationsEnabled || Notification.permission === "granted"
+                className={`p-2 rounded-lg transition ${
+                  notificationsEnabled || Notification.permission === "granted"
                     ? "bg-blue-100 text-blue-600 hover:bg-blue-200"
                     : "text-gray-600 hover:bg-gray-100"
-                  }`}
+                }`}
                 title="Toggle desktop notifications"
               >
                 {notificationsEnabled ||
-                  Notification.permission === "granted" ? (
+                Notification.permission === "granted" ? (
                   <Bell className="w-5 h-5" />
                 ) : (
                   <BellOff className="w-5 h-5" />
@@ -361,10 +363,11 @@ export default function Chat() {
                 <button
                   key={contact._id}
                   onClick={() => handleSelectContact(contact)}
-                  className={`w-full p-3 rounded-lg transition-all duration-200 text-left flex items-center justify-between ${selectedContact?._id === contact._id
+                  className={`w-full p-3 rounded-lg transition-all duration-200 text-left flex items-center justify-between ${
+                    selectedContact?._id === contact._id
                       ? "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-900 shadow-md border border-blue-200"
                       : "hover:bg-gray-50 text-gray-900 border border-transparent hover:border-gray-300"
-                    }`}
+                  }`}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold truncate">{contact.name}</p>
@@ -419,16 +422,18 @@ export default function Chat() {
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.senderId === user?.id
+                    className={`flex ${
+                      message.senderId === user?.id
                         ? "justify-end"
                         : "justify-start"
-                      }`}
+                    }`}
                   >
                     <div
-                      className={`max-w-xs px-4 py-2 rounded-lg ${message.senderId === user?.id
+                      className={`max-w-xs px-4 py-2 rounded-lg ${
+                        message.senderId === user?.id
                           ? "bg-blue-600 text-white rounded-br-none"
                           : "bg-gray-200 text-gray-900 rounded-bl-none"
-                        }`}
+                      }`}
                     >
                       <p className="break-words">{message.content}</p>
                       <p className="text-xs mt-1 opacity-70">
