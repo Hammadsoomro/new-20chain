@@ -200,6 +200,14 @@ export default function QueuedList() {
             </Card>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
+              <p className="font-medium">Error</p>
+              <p className="text-sm mt-1">{error}</p>
+            </div>
+          )}
+
           {/* Content */}
           {loading ? (
             <Card className="p-8">
