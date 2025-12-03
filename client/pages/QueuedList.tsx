@@ -16,6 +16,7 @@ export default function QueuedList() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   // Initialize Socket.IO connection for real-time updates
