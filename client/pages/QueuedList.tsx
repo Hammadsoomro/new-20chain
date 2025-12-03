@@ -68,6 +68,11 @@ export default function QueuedList() {
     };
   }, [token]);
 
+  // Reset to first page when lines change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [lines]);
+
   const handleDeleteLine = async (lineId: string) => {
     if (!token) return;
 
