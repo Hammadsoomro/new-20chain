@@ -56,6 +56,7 @@ export default function Dashboard() {
   ]);
   const [teamMembers, setTeamMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   // Fetch real-time stats and team members with WebSocket support
