@@ -123,30 +123,46 @@ export default function Dashboard() {
 
         // Fetch claimed numbers count for today
         try {
-          const claimedResponse = await fetch("/api/claim/numbers", {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          if (claimedResponse.ok) {
-            const claimedNumbers = await claimedResponse.json();
-            const count = Array.isArray(claimedNumbers)
-              ? claimedNumbers.length
-              : 0;
+          if (isAdmin) {
+            // For admins: Calculate total claims from all team members today
+            const claimsToday = teamMembers.reduce((total, member) => {
+              return total + (member.claimsToday || 0);
+            }, 0);
 
             setStats((prev) =>
               prev.map((stat) =>
-                stat.label === "Claimed Today"
-                  ? { ...stat, value: count.toString() }
+                stat.label === "Today's Claim"
+                  ? { ...stat, value: claimsToday.toString() }
                   : stat,
               ),
             );
           } else {
-            const errorText = await claimedResponse.text();
-            console.error(
-              "Claimed fetch error:",
-              claimedResponse.status,
-              errorText,
-            );
+            // For team members: Show their own claims
+            const claimedResponse = await fetch("/api/claim/numbers", {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (claimedResponse.ok) {
+              const claimedNumbers = await claimedResponse.json();
+              const count = Array.isArray(claimedNumbers)
+                ? claimedNumbers.length
+                : 0;
+
+              setStats((prev) =>
+                prev.map((stat) =>
+                  stat.label === "Today's Claim"
+                    ? { ...stat, value: count.toString() }
+                    : stat,
+                ),
+              );
+            } else {
+              const errorText = await claimedResponse.text();
+              console.error(
+                "Claimed fetch error:",
+                claimedResponse.status,
+                errorText,
+              );
+            }
           }
         } catch (err) {
           console.error("Claimed fetch failed:", err);
