@@ -160,6 +160,7 @@ export default function Dashboard() {
         }
       } catch (error) {
         console.error("Error in fetchData:", error);
+        setError("Failed to load dashboard data. Please try again.");
       } finally {
         setLoading(false);
       }
