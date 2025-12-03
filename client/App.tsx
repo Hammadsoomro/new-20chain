@@ -32,7 +32,8 @@ const App = () => (
       <ThemeProvider>
         <AuthProvider>
           <ChatProvider>
-            <BrowserRouter>
+            <ErrorBoundary>
+              <BrowserRouter>
               <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
@@ -111,7 +112,8 @@ const App = () => (
                 />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
+              </BrowserRouter>
+            </ErrorBoundary>
           </ChatProvider>
         </AuthProvider>
       </ThemeProvider>
