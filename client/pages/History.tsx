@@ -18,6 +18,7 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredEntries, setFilteredEntries] = useState<HistoryEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   // Initialize Socket.IO connection for real-time updates
