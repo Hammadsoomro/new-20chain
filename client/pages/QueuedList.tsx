@@ -194,45 +194,97 @@ export default function QueuedList() {
               </div>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {lines.map((line, index) => (
-                <Card
-                  key={line._id}
-                  className="p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1">
-                      <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
-                        {index + 1}
+            <>
+              <div className="space-y-3">
+                {paginatedLines.map((line, index) => (
+                  <Card
+                    key={line._id}
+                    className="p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex items-start gap-4 flex-1">
+                        <div className="flex items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary text-sm font-semibold flex-shrink-0">
+                          {startIndex + index + 1}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground text-lg">
+                            {line.content}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Added by: {line.addedBy}
+                          </p>
+                          <p className="text-xs text-muted-foreground/70">
+                            {formatDateTime(line.addedAt)}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-semibold text-foreground text-lg">
-                          {line.content}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Added by: {line.addedBy}
-                        </p>
-                        <p className="text-xs text-muted-foreground/70">
-                          {formatDateTime(line.addedAt)}
-                        </p>
-                      </div>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteLine(line._id)}
+                          disabled={deletingId === line._id}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          {deletingId === line._id ? "Deleting..." : "Delete"}
+                        </Button>
+                      )}
                     </div>
-                    {isAdmin && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteLine(line._id)}
-                        disabled={deletingId === line._id}
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {deletingId === line._id ? "Deleting..." : "Delete"}
-                      </Button>
-                    )}
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {startIndex + 1} to{" "}
+                    {Math.min(endIndex, lines.length)} of {lines.length} results
                   </div>
-                </Card>
-              ))}
-            </div>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    {getPaginationNumbers().map((page, idx) => (
+                      <div key={idx}>
+                        {page === "..." ? (
+                          <span className="px-2 py-1 text-sm text-muted-foreground">
+                            ...
+                          </span>
+                        ) : (
+                          <Button
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(page as number)}
+                            className="h-8 w-8 p-0"
+                          >
+                            {page}
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
