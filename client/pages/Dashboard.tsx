@@ -321,6 +321,14 @@ export default function Dashboard() {
             </p>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
+              <p className="font-medium">Error</p>
+              <p className="text-sm mt-1">{error}</p>
+            </div>
+          )}
+
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
             {stats.map((stat, index) => {
