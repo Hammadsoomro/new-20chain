@@ -116,7 +116,10 @@ export default function Signup() {
                   aria-live="polite"
                   className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex gap-2"
                 >
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" aria-hidden="true" />
+                  <AlertCircle
+                    className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5"
+                    aria-hidden="true"
+                  />
                   <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}

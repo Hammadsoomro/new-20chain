@@ -51,11 +51,7 @@ export default function History() {
           setError(null);
         } else {
           const errorText = await response.text();
-          console.error(
-            "[History] Fetch error:",
-            response.status,
-            errorText,
-          );
+          console.error("[History] Fetch error:", response.status, errorText);
           setError(
             `Failed to load history (${response.status}). Please try again.`,
           );
