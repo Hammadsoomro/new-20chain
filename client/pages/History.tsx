@@ -252,13 +252,13 @@ export default function History() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-between">
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-sm text-muted-foreground">
                     Showing {startIndex + 1} to{" "}
                     {Math.min(endIndex, filteredEntries.length)} of{" "}
                     {filteredEntries.length} results
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="sm"
@@ -267,23 +267,26 @@ export default function History() {
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
+                    {getPaginationNumbers().map((page, idx) => (
+                      <div key={idx}>
+                        {page === "..." ? (
+                          <span className="px-2 py-1 text-sm text-muted-foreground">
+                            ...
+                          </span>
+                        ) : (
                           <Button
-                            key={page}
                             variant={
                               currentPage === page ? "default" : "outline"
                             }
                             size="sm"
-                            onClick={() => setCurrentPage(page)}
+                            onClick={() => setCurrentPage(page as number)}
                             className="h-8 w-8 p-0"
                           >
                             {page}
                           </Button>
-                        ),
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    ))}
                     <Button
                       variant="outline"
                       size="sm"
