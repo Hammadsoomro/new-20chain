@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { formatDateTime } from "@/lib/utils";
 import { List, Trash2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { io, Socket } from "socket.io-client";
@@ -84,14 +85,6 @@ export default function QueuedList() {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
-
   return (
     <Layout>
       <div className="min-h-screen p-6 md:p-8 bg-transparent">
@@ -163,7 +156,7 @@ export default function QueuedList() {
                           Added by: {line.addedBy}
                         </p>
                         <p className="text-xs text-muted-foreground/70">
-                          {formatDate(line.addedAt)}
+                          {formatDateTime(line.addedAt)}
                         </p>
                       </div>
                     </div>

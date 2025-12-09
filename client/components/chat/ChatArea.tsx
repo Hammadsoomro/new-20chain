@@ -61,6 +61,7 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
   const markedAsReadRef = useRef<Set<string>>(new Set());
+  const previousChatIdRef = useRef<string | null>(null);
 
   // Setup socket listeners for this chat
   useEffect(() => {
@@ -75,7 +76,15 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
     );
 
     // Leave previous chat room if switching chats
-    socket.emit("leave-chat", { chatId: selectedChat.id });
+    if (
+      previousChatIdRef.current &&
+      previousChatIdRef.current !== selectedChat.id
+    ) {
+      socket.emit("leave-chat", { chatId: previousChatIdRef.current });
+      console.log("[ChatArea] Left previous chat:", previousChatIdRef.current);
+    }
+
+    previousChatIdRef.current = selectedChat.id;
 
     // Join the chat room
     socket.emit("join-chat", {
@@ -108,6 +117,37 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
             readBy: data.readBy || [],
           };
           console.log("[ChatArea] Adding new message:", messageId);
+
+          // Auto-mark received message as read
+          if (!markedAsReadRef.current.has(messageId) && token) {
+            markedAsReadRef.current.add(messageId);
+
+            // Call REST API to mark as read
+            fetch("/api/chat/mark-read", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messageId }),
+            }).catch((err) => {
+              console.error(
+                "[ChatArea] Failed to mark received message as read:",
+                messageId,
+                err,
+              );
+            });
+
+            // Emit Socket.IO event to notify others
+            if (socket) {
+              socket.emit("message-read", {
+                messageId,
+                userId: user?._id,
+                chatId: selectedChat.id,
+              });
+            }
+          }
+
           return [...prev, newMsg];
         });
       }
@@ -198,10 +238,8 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
       socket.off("message-deleted", handleMessageDeleted);
       socket.off("user-typing", handleUserTyping);
       socket.off("message-read", handleMessageRead);
-      // Leave the chat room
-      socket.emit("leave-chat", { chatId: selectedChat.id });
     };
-  }, [socket, selectedChat.id, user?._id]);
+  }, [socket, selectedChat.id, selectedChat.type, user?._id, token]);
 
   // Fetch initial messages and mark unread messages as read
   const fetchInitialMessages = async () => {
@@ -250,16 +288,38 @@ export function ChatArea({ selectedChat, token, socket }: ChatAreaProps) {
           msg.sender !== user?._id && !msg.readBy?.includes(user?._id || ""),
       );
 
-      if (unreadMessages.length > 0 && socket) {
-        // Use WebSocket to mark as read instead of individual API calls
-        unreadMessages.forEach((msg) => {
+      if (unreadMessages.length > 0 && socket && token) {
+        // Mark messages as read via REST API and WebSocket
+        const markAsReadPromises = unreadMessages.map(async (msg) => {
           markedAsReadRef.current.add(msg._id);
-          socket.emit("message-read", {
-            messageId: msg._id,
-            userId: user?._id,
-            chatId: selectedChat.id,
-          });
+
+          try {
+            // Call REST API to persist read status in database
+            await fetch("/api/chat/mark-read", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ messageId: msg._id }),
+            });
+
+            // Broadcast via WebSocket to update other clients
+            socket.emit("message-read", {
+              messageId: msg._id,
+              userId: user?._id,
+              chatId: selectedChat.id,
+            });
+          } catch (err) {
+            console.error(
+              "[ChatArea] Failed to mark message as read:",
+              msg._id,
+              err,
+            );
+          }
         });
+
+        await Promise.all(markAsReadPromises);
         console.log(
           "[ChatArea] Marked",
           unreadMessages.length,

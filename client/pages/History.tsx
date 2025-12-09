@@ -1,11 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { Layout } from "@/components/Layout";
 import { Card } from "@/components/ui/card";
-import { Clock, Search } from "lucide-react";
+import { Clock, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
+import { formatDateTime } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
 import type { HistoryEntry } from "@shared/api";
+
+const ITEMS_PER_PAGE = 50;
 
 export default function History() {
   const { token, user, isAdmin } = useAuth();
@@ -13,6 +17,7 @@ export default function History() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredEntries, setFilteredEntries] = useState<HistoryEntry[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const socketRef = useRef<Socket | null>(null);
 
   // Initialize Socket.IO connection for real-time updates
@@ -65,7 +70,7 @@ export default function History() {
     };
   }, [token]);
 
-  // Filter entries based on search
+  // Filter entries based on search (searches ALL entries, not just current page)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setFilteredEntries(entries);
@@ -75,15 +80,15 @@ export default function History() {
       );
       setFilteredEntries(filtered);
     }
+    // Reset to first page when search query changes
+    setCurrentPage(1);
   }, [searchQuery, entries]);
 
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
-    }
-  };
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredEntries.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedEntries = filteredEntries.slice(startIndex, endIndex);
 
   return (
     <Layout>
@@ -166,28 +171,78 @@ export default function History() {
               </div>
             </Card>
           ) : (
-            <div className="space-y-3">
-              {filteredEntries.map((entry) => (
-                <Card
-                  key={entry._id}
-                  className="p-4 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                    <div className="flex-1">
-                      <p className="font-semibold text-foreground">
-                        {entry.content}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Claimed by: {entry.claimedBy}
-                      </p>
+            <>
+              <div className="space-y-3">
+                {paginatedEntries.map((entry) => (
+                  <Card
+                    key={entry._id}
+                    className="p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                      <div className="flex-1">
+                        <p className="font-semibold text-foreground">
+                          {entry.content}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          Claimed by: {entry.claimedBy}
+                        </p>
+                      </div>
+                      <div className="text-sm text-muted-foreground whitespace-nowrap">
+                        {formatDateTime(entry.claimedAt)}
+                      </div>
                     </div>
-                    <div className="text-sm text-muted-foreground whitespace-nowrap">
-                      {formatDate(entry.claimedAt)}
-                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {startIndex + 1} to{" "}
+                    {Math.min(endIndex, filteredEntries.length)} of{" "}
+                    {filteredEntries.length} results
                   </div>
-                </Card>
-              ))}
-            </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                        (page) => (
+                          <Button
+                            key={page}
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
+                            size="sm"
+                            onClick={() => setCurrentPage(page)}
+                            className="h-8 w-8 p-0"
+                          >
+                            {page}
+                          </Button>
+                        ),
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                      }
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

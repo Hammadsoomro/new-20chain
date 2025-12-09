@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { formatDateTime } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface ClaimedNumber {
@@ -159,14 +160,6 @@ export default function NumbersInbox() {
       toast.error("Failed to claim numbers");
     } finally {
       setClaiming(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    try {
-      return new Date(dateString).toLocaleString();
-    } catch {
-      return dateString;
     }
   };
 
@@ -336,7 +329,7 @@ export default function NumbersInbox() {
                             {number.content}
                           </p>
                           <p className="text-sm text-muted-foreground mt-1">
-                            Claimed at: {formatDate(number.claimedAt)}
+                            Claimed at: {formatDateTime(number.claimedAt)}
                           </p>
                         </div>
                       </div>

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatTime } from "@/lib/utils";
 import { Send, Users } from "lucide-react";
 import { Socket } from "socket.io-client";
 import type { ChatMessage } from "@shared/api";
@@ -25,17 +26,6 @@ const getInitials = (name: string) => {
     .join("")
     .toUpperCase()
     .slice(0, 2);
-};
-
-const formatTime = (timestamp: string) => {
-  try {
-    return new Date(timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
 };
 
 export function ChatViewFixed({ contact, token, socket }: ChatViewProps) {

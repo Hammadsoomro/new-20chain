@@ -7,6 +7,7 @@ import { setIO } from "./server/websocket-io";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  appType: "spa",
   server: {
     host: "::",
     port: 8080,
