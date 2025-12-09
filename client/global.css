@@ -234,50 +234,72 @@
     --sidebar-ring: 280 100% 56%;
   }
 
-  /* Blue Theme - Animated Gradients */
+  /* Blue Theme - Soft Blue Circles */
   :root[data-color-scheme="blue"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #667eea 0%,
-      #764ba2 25%,
-      #f093fb 50%,
-      #4facfe 75%
+      135deg,
+      #00d4ff 0%,
+      #0099ff 25%,
+      #66e6ff 50%,
+      #00b8ff 75%,
+      #00d4ff 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #667eea 0%,
-      #764ba2 25%,
-      #1a3a52 50%,
-      #0d47a1 75%
+      135deg,
+      #001a33 0%,
+      #003366 25%,
+      #004d99 50%,
+      #0033cc 75%,
+      #001a33 100%
     );
     --sidebar-width: 280px;
-    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    --sidebar-shadow: 0 8px 32px rgba(0, 212, 255, 0.15);
     --spacing-scale: 1;
     --font-scale: 1;
+  }
+
+  /* Blue Theme Background Image */
+  :root[data-color-scheme="blue"] body::before {
+    background: url("https://cdn.builder.io/api/v1/image/assets%2F319f361a407a4ec49a906f125cbb8712%2F26df7da5540e4425a0c7630a25d4ff94?format=webp&width=1200");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  :root[data-color-scheme="blue"].dark body::before {
+    background: var(--bg-gradient-dark);
+    background-size: 400% 400%;
+    animation: gradient 12s ease infinite;
   }
 
   :root[data-color-scheme="blue"].dark {
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Green Theme - Animated Gradients */
+  /* Green Theme - Pastel Rainbow Waves */
   :root[data-color-scheme="green"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #84fab0 0%,
-      #8fd3f4 25%,
-      #a6d0dd 50%,
-      #56ab2f 75%
+      135deg,
+      #ffc0e0 0%,
+      #c0e0ff 15%,
+      #c0ffe0 30%,
+      #ffffc0 45%,
+      #ffe0c0 60%,
+      #e0c0ff 75%,
+      #c0e0ff 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #2d5016 0%,
-      #1f3a1f 25%,
-      #0a2f0a 50%,
-      #1a5f1a 75%
+      135deg,
+      #2d1a1f 0%,
+      #1a2d33 15%,
+      #1a332d 30%,
+      #333322 45%,
+      #332d1a 60%,
+      #2d1a33 75%,
+      #1a2d33 100%
     );
     --sidebar-width: 320px;
-    --sidebar-shadow: 0 12px 40px rgba(132, 250, 176, 0.08);
+    --sidebar-shadow: 0 12px 40px rgba(192, 224, 255, 0.15);
     --spacing-scale: 1.1;
     --font-scale: 1.05;
   }
@@ -286,24 +308,28 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Orange Theme - Animated Gradients */
+  /* Orange Theme - Warm Gradient Flows */
   :root[data-color-scheme="orange"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #fa709a 0%,
-      #fee140 25%,
-      #ffa400 50%,
-      #ff6b35 75%
+      135deg,
+      #ff6b35 0%,
+      #ffa500 20%,
+      #ff8c00 40%,
+      #ffb347 60%,
+      #ffd700 80%,
+      #ff6b35 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #663b0f 0%,
-      #8b4513 25%,
-      #3d2817 50%,
-      #5c2e0f 75%
+      135deg,
+      #331a00 0%,
+      #663300 20%,
+      #4d2600 40%,
+      #664d00 60%,
+      #663300 80%,
+      #331a00 100%
     );
     --sidebar-width: 260px;
-    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.12);
+    --sidebar-shadow: 0 10px 35px rgba(255, 107, 53, 0.18);
     --spacing-scale: 0.95;
     --font-scale: 1.02;
   }
@@ -312,24 +338,28 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Red Theme - Animated Gradients */
+  /* Red Theme - Neon Pink/Blue Cyberpunk */
   :root[data-color-scheme="red"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #ee7752 0%,
-      #e73c7e 25%,
-      #23a6d5 50%,
-      #23d5ab 75%
+      135deg,
+      #ff0080 0%,
+      #ff1493 20%,
+      #0099ff 40%,
+      #00ffff 60%,
+      #ff0080 80%,
+      #ff1493 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #4a1a1a 0%,
-      #6b2e2e 25%,
-      #1a3a4a 50%,
-      #1a4a3a 75%
+      135deg,
+      #1a0011 0%,
+      #330033 20%,
+      #001133 40%,
+      #003333 60%,
+      #1a0011 80%,
+      #330033 100%
     );
     --sidebar-width: 275px;
-    --sidebar-shadow: 0 9px 30px rgba(238, 119, 82, 0.1);
+    --sidebar-shadow: 0 9px 30px rgba(255, 0, 128, 0.25);
     --spacing-scale: 1.05;
     --font-scale: 1.08;
   }
@@ -338,24 +368,28 @@
     --bg-gradient: var(--bg-gradient-dark);
   }
 
-  /* Purple Theme - Animated Gradients */
+  /* Purple Theme - Colorful Orbs */
   :root[data-color-scheme="purple"] {
     --bg-gradient: linear-gradient(
-      -45deg,
-      #667eea 0%,
-      #764ba2 25%,
-      #f093fb 50%,
-      #4facfe 75%
+      135deg,
+      #c77dff 0%,
+      #b324ff 20%,
+      #ff1493 40%,
+      #00d4ff 60%,
+      #ff8c00 80%,
+      #c77dff 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
-      #3d2645 0%,
-      #2d1b4e 25%,
-      #1a1a3e 50%,
-      #1a2e4a 75%
+      135deg,
+      #1a0f2e 0%,
+      #220033 20%,
+      #330011 40%,
+      #001a33 60%,
+      #331a00 80%,
+      #1a0f2e 100%
     );
     --sidebar-width: 290px;
-    --sidebar-shadow: 0 11px 38px rgba(102, 126, 234, 0.12);
+    --sidebar-shadow: 0 11px 38px rgba(199, 125, 255, 0.18);
     --spacing-scale: 1.08;
     --font-scale: 1.06;
   }
@@ -367,21 +401,23 @@
   /* Default (Original Purple) Theme */
   :root[data-color-scheme="default"] {
     --bg-gradient: linear-gradient(
-      -45deg,
+      135deg,
       #667eea 0%,
       #764ba2 25%,
       #f093fb 50%,
-      #4facfe 75%
+      #4facfe 75%,
+      #667eea 100%
     );
     --bg-gradient-dark: linear-gradient(
-      -45deg,
+      135deg,
       #3d2645 0%,
       #2d1b4e 25%,
       #1a1a3e 50%,
-      #1a2e4a 75%
+      #1a2e4a 75%,
+      #3d2645 100%
     );
     --sidebar-width: 280px;
-    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+    --sidebar-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
     --spacing-scale: 1;
     --font-scale: 1;
   }
@@ -416,6 +452,65 @@
     }
   }
 
+  @keyframes blob1 {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+  }
+
+  @keyframes blob2 {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(-40px, 30px) scale(0.9);
+    }
+    66% {
+      transform: translate(50px, -30px) scale(1.1);
+    }
+  }
+
+  @keyframes blob3 {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(20px, 50px) scale(1.05);
+    }
+    66% {
+      transform: translate(-30px, -20px) scale(0.95);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 0.5;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
   * {
     @apply border-border;
   }
@@ -427,7 +522,7 @@
       linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%)
     );
     background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
+    animation: gradient 12s ease infinite;
     min-height: 100vh;
   }
 
@@ -437,7 +532,7 @@
       linear-gradient(-45deg, #3d2645 0%, #2d1b4e 25%, #1a1a3e 50%, #1a2e4a 75%)
     );
     background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
+    animation: gradient 12s ease infinite;
   }
 
   /* Apply gradient backgrounds - fixed positioning for full coverage */
@@ -453,8 +548,8 @@
       linear-gradient(-45deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 75%)
     );
     background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
-    z-index: -1;
+    animation: gradient 12s ease infinite;
+    z-index: -2;
   }
 
   body.dark::before {
@@ -462,6 +557,310 @@
       --bg-gradient-dark,
       linear-gradient(-45deg, #3d2645 0%, #2d1b4e 25%, #1a1a3e 50%, #1a2e4a 75%)
     );
+  }
+
+  /* Animated blob background elements - theme specific */
+  body::after {
+    content: "";
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background:
+      radial-gradient(
+        circle at 20% 50%,
+        rgba(102, 126, 234, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(240, 147, 251, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 40% 20%,
+        rgba(79, 172, 254, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 90% 10%,
+        rgba(118, 75, 162, 0.25) 0%,
+        transparent 50%
+      );
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  body.dark::after {
+    background:
+      radial-gradient(
+        circle at 20% 50%,
+        rgba(102, 126, 234, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(240, 147, 251, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 40% 20%,
+        rgba(79, 172, 254, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 90% 10%,
+        rgba(118, 75, 162, 0.12) 0%,
+        transparent 50%
+      );
+  }
+
+  /* Blue Theme blob effects */
+  :root[data-color-scheme="blue"] body::after {
+    background:
+      radial-gradient(
+        circle at 30% 60%,
+        rgba(0, 212, 255, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 30%,
+        rgba(102, 230, 255, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 70%,
+        rgba(0, 153, 255, 0.2) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 50%,
+        rgba(0, 184, 255, 0.2) 0%,
+        transparent 50%
+      );
+  }
+
+  :root[data-color-scheme="blue"].dark body::after {
+    background:
+      radial-gradient(
+        circle at 30% 60%,
+        rgba(0, 212, 255, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 30%,
+        rgba(102, 230, 255, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 70%,
+        rgba(0, 153, 255, 0.1) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 50%,
+        rgba(0, 184, 255, 0.1) 0%,
+        transparent 50%
+      );
+  }
+
+  /* Green Theme blob effects - Pastel */
+  :root[data-color-scheme="green"] body::after {
+    background:
+      radial-gradient(
+        circle at 20% 40%,
+        rgba(255, 192, 224, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 60%,
+        rgba(192, 224, 255, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 80%,
+        rgba(192, 255, 224, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 20%,
+        rgba(255, 255, 192, 0.25) 0%,
+        transparent 50%
+      );
+  }
+
+  :root[data-color-scheme="green"].dark body::after {
+    background:
+      radial-gradient(
+        circle at 20% 40%,
+        rgba(255, 192, 224, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 60%,
+        rgba(192, 224, 255, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 80%,
+        rgba(192, 255, 224, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 20%,
+        rgba(255, 255, 192, 0.12) 0%,
+        transparent 50%
+      );
+  }
+
+  /* Red Theme blob effects - Neon */
+  :root[data-color-scheme="red"] body::after {
+    background:
+      radial-gradient(
+        circle at 25% 45%,
+        rgba(255, 0, 128, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 55%,
+        rgba(0, 153, 255, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 20%,
+        rgba(255, 20, 147, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 85% 80%,
+        rgba(0, 255, 255, 0.25) 0%,
+        transparent 50%
+      );
+  }
+
+  :root[data-color-scheme="red"].dark body::after {
+    background:
+      radial-gradient(
+        circle at 25% 45%,
+        rgba(255, 0, 128, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 75% 55%,
+        rgba(0, 153, 255, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 20%,
+        rgba(255, 20, 147, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 85% 80%,
+        rgba(0, 255, 255, 0.12) 0%,
+        transparent 50%
+      );
+  }
+
+  /* Purple Theme blob effects - Colorful Orbs */
+  :root[data-color-scheme="purple"] body::after {
+    background:
+      radial-gradient(
+        circle at 20% 30%,
+        rgba(199, 125, 255, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        rgba(255, 20, 147, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 60% 20%,
+        rgba(0, 212, 255, 0.28) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 40% 80%,
+        rgba(255, 140, 0, 0.25) 0%,
+        transparent 50%
+      );
+  }
+
+  :root[data-color-scheme="purple"].dark body::after {
+    background:
+      radial-gradient(
+        circle at 20% 30%,
+        rgba(199, 125, 255, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 70%,
+        rgba(255, 20, 147, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 60% 20%,
+        rgba(0, 212, 255, 0.14) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 40% 80%,
+        rgba(255, 140, 0, 0.12) 0%,
+        transparent 50%
+      );
+  }
+
+  /* Orange Theme blob effects */
+  :root[data-color-scheme="orange"] body::after {
+    background:
+      radial-gradient(
+        circle at 30% 50%,
+        rgba(255, 107, 53, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 40%,
+        rgba(255, 165, 0, 0.3) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 70%,
+        rgba(255, 140, 0, 0.25) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(255, 215, 0, 0.25) 0%,
+        transparent 50%
+      );
+  }
+
+  :root[data-color-scheme="orange"].dark body::after {
+    background:
+      radial-gradient(
+        circle at 30% 50%,
+        rgba(255, 107, 53, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 70% 40%,
+        rgba(255, 165, 0, 0.15) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 50% 70%,
+        rgba(255, 140, 0, 0.12) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        circle at 80% 20%,
+        rgba(255, 215, 0, 0.12) 0%,
+        transparent 50%
+      );
   }
 
   :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {

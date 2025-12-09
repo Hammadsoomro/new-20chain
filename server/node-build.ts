@@ -109,16 +109,17 @@ async function startServer() {
     const __dirname = import.meta.dirname;
     const distPath = path.join(__dirname, "../spa");
 
-    // Serve static files
-    app.use(express.static(distPath));
+    // Serve static files (but not index.html for API routes)
+    app.use((req, res, next) => {
+      // Skip static file serving for API routes
+      if (req.path.startsWith("/api/")) {
+        return next();
+      }
+      express.static(distPath)(req, res, next);
+    });
 
     // Handle React Router - serve index.html for all non-API routes
     app.get("*", (req, res) => {
-      // Don't serve index.html for API routes
-      if (req.path.startsWith("/api/") || req.path.startsWith("/health")) {
-        return res.status(404).json({ error: "API endpoint not found" });
-      }
-
       res.sendFile(path.join(distPath, "index.html"));
     });
 

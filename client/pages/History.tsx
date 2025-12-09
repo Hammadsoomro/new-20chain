@@ -9,7 +9,7 @@ import { formatDateTime } from "@/lib/utils";
 import { io, Socket } from "socket.io-client";
 import type { HistoryEntry } from "@shared/api";
 
-const ITEMS_PER_PAGE = 50;
+const ITEMS_PER_PAGE = 100;
 
 export default function History() {
   const { token, user, isAdmin } = useAuth();
@@ -18,6 +18,7 @@ export default function History() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredEntries, setFilteredEntries] = useState<HistoryEntry[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   // Initialize Socket.IO connection for real-time updates
@@ -38,6 +39,7 @@ export default function History() {
     const fetchHistory = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch("/api/history", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -46,9 +48,19 @@ export default function History() {
           const data = await response.json();
           setEntries(data.entries || []);
           setFilteredEntries(data.entries || []);
+          setError(null);
+        } else {
+          const errorText = await response.text();
+          console.error("[History] Fetch error:", response.status, errorText);
+          setError(
+            `Failed to load history (${response.status}). Please try again.`,
+          );
         }
       } catch (error) {
         console.error("[History] Error fetching history:", error);
+        setError(
+          "Failed to load history. Please check your connection and try again.",
+        );
       } finally {
         setLoading(false);
       }
@@ -89,6 +101,54 @@ export default function History() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedEntries = filteredEntries.slice(startIndex, endIndex);
+
+  // Generate pagination numbers (show max 5 page buttons)
+  const getPaginationNumbers = () => {
+    const maxButtons = 5;
+    const pages: (number | string)[] = [];
+
+    if (totalPages <= maxButtons) {
+      // Show all pages if total is less than or equal to maxButtons
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    // Always show first page
+    pages.push(1);
+
+    // Calculate range around current page
+    let startPage = Math.max(2, currentPage - 1);
+    let endPage = Math.min(totalPages - 1, currentPage + 1);
+
+    // Adjust if we're at the beginning
+    if (currentPage <= 2) {
+      endPage = Math.min(totalPages - 1, 4);
+    }
+
+    // Adjust if we're at the end
+    if (currentPage >= totalPages - 1) {
+      startPage = Math.max(2, totalPages - 3);
+    }
+
+    // Add ellipsis if needed
+    if (startPage > 2) {
+      pages.push("...");
+    }
+
+    // Add page range
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    // Add ellipsis if needed
+    if (endPage < totalPages - 1) {
+      pages.push("...");
+    }
+
+    // Always show last page
+    pages.push(totalPages);
+
+    return pages;
+  };
 
   return (
     <Layout>
@@ -152,6 +212,18 @@ export default function History() {
             </div>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div
+              role="alert"
+              aria-live="polite"
+              className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive"
+            >
+              <p className="font-medium">Error</p>
+              <p className="text-sm mt-1">{error}</p>
+            </div>
+          )}
+
           {/* Content */}
           {loading ? (
             <Card className="p-8">
@@ -197,13 +269,13 @@ export default function History() {
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="mt-8 flex items-center justify-between">
+                <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <div className="text-sm text-muted-foreground">
                     Showing {startIndex + 1} to{" "}
                     {Math.min(endIndex, filteredEntries.length)} of{" "}
                     {filteredEntries.length} results
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Button
                       variant="outline"
                       size="sm"
@@ -212,23 +284,26 @@ export default function History() {
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                        (page) => (
+                    {getPaginationNumbers().map((page, idx) => (
+                      <div key={idx}>
+                        {page === "..." ? (
+                          <span className="px-2 py-1 text-sm text-muted-foreground">
+                            ...
+                          </span>
+                        ) : (
                           <Button
-                            key={page}
                             variant={
                               currentPage === page ? "default" : "outline"
                             }
                             size="sm"
-                            onClick={() => setCurrentPage(page)}
+                            onClick={() => setCurrentPage(page as number)}
                             className="h-8 w-8 p-0"
                           >
                             {page}
                           </Button>
-                        ),
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    ))}
                     <Button
                       variant="outline"
                       size="sm"

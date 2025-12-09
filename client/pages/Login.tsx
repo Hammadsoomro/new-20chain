@@ -22,9 +22,32 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const validateForm = (): string | null => {
+    if (!email.trim()) {
+      return "Email address is required";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return "Please enter a valid email address";
+    }
+    if (!password) {
+      return "Password is required";
+    }
+    if (password.length < 8) {
+      return "Password must be at least 8 characters";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -66,8 +89,15 @@ export default function Login() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               {error && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex gap-2">
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex gap-2"
+                >
+                  <AlertCircle
+                    className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5"
+                    aria-hidden="true"
+                  />
                   <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}

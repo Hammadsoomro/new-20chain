@@ -32,17 +32,41 @@ export default function Signup() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = (): string | null => {
+    if (!formData.name.trim()) {
+      return "Full name is required";
+    }
+    if (formData.name.trim().length < 2) {
+      return "Full name must be at least 2 characters";
+    }
+    if (!formData.email.trim()) {
+      return "Email address is required";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return "Please enter a valid email address";
+    }
+    if (!formData.password) {
+      return "Password is required";
+    }
+    if (formData.password.length < 8) {
+      return "Password must be at least 8 characters long";
+    }
+    if (!formData.confirmPassword) {
+      return "Please confirm your password";
+    }
+    if (formData.password !== formData.confirmPassword) {
+      return "Passwords do not match";
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (formData.password.length < 8) {
-      setError("Password must be at least 8 characters long");
+    const validationError = validateForm();
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
@@ -87,8 +111,15 @@ export default function Signup() {
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-5">
               {error && (
-                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex gap-2">
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className="p-3 bg-destructive/10 border border-destructive/20 rounded-md flex gap-2"
+                >
+                  <AlertCircle
+                    className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5"
+                    aria-hidden="true"
+                  />
                   <p className="text-sm text-destructive">{error}</p>
                 </div>
               )}

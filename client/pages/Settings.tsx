@@ -889,7 +889,10 @@ export default function SettingsPage() {
 
   return (
     <Layout>
-      <div className="container max-w-4xl py-8">
+      <div
+        className="max-w-4xl py-8"
+        style={{ width: "auto", margin: "0 auto" }}
+      >
         <div className="space-y-6">
           {/* Header */}
           <div className="space-y-2">
